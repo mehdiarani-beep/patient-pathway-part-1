@@ -4,6 +4,7 @@ export interface QuizQuestion {
   id: string;
   text: string;
   options: string[];
+  type?: 'multiple_choice' | 'likert_scale';
 }
 
 export interface Quiz {

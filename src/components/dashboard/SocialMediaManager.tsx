@@ -38,6 +38,7 @@ interface SocialAccount {
   connected: boolean;
   permissions: any;
   last_sync_at?: string;
+  created_at: string;
 }
 
 interface SocialPost {

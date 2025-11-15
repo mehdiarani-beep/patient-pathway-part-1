@@ -4,25 +4,18 @@ import { EmbeddedChatBot } from '@/components/quiz/EmbeddedChatBot';
 import { quizzes } from '@/data/quizzes';
 import { supabase } from '@/integrations/supabase/client';
 
+import { QuizQuestion as BaseQuizQuestion } from '@/types/quiz';
+
 // Add these type definitions at the top of the file
 type QuizType = 'nose' | 'snot22' | 'tnss' | 'dhi' | 'epworth' | 'stop' | 'hhia' | string;
-
-interface QuizQuestion {
-  text: string;
-  type: 'multiple_choice' | 'likert_scale';
-  options: Array<{
-    text: string;
-    value: number;
-  }>;
-}
 
 interface QuizData {
   id: string;
   title: string;
   description: string;
-  questions: QuizQuestion[];
+  questions: BaseQuizQuestion[];
   maxScore: number;
-  scoring?: {
+  scoring?: Object | {
     mild_threshold: number;
     moderate_threshold: number;
     severe_threshold: number;

@@ -151,6 +151,7 @@ export default function UniversalQuizPage() {
         doctorId={doctorId}
         customQuiz={customQuiz}
         quizData={quizData}
+        utm_source=""
       />
     </div>
   );
