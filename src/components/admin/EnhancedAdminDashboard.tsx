@@ -3298,7 +3298,7 @@ export function EnhancedAdminDashboard() {
               <Button 
                 variant="outline" 
                 className="w-full justify-start text-red-600"
-                onClick={() => deleteSelectedDoctors()}
+                onClick={() => toast.error('Bulk delete not yet implemented')}
                 disabled={selectedDoctors.size === 0}
               >
                 <Trash2 className="w-4 h-4 mr-2" />

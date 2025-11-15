@@ -1,7 +1,26 @@
 import { supabase } from '@/integrations/supabase/client';
-import { generateWelcomeEmail, generateDoctorNotificationEmail, generateFollowUpEmail } from './emailTemplates';
-import type { EmailTemplateData } from './emailTemplates';
 import { resendService } from './resendService';
+
+export type EmailTemplateData = Record<string, any>;
+
+// Stub email template generators
+const generateWelcomeEmail = (data: EmailTemplateData) => ({
+  subject: 'Welcome to Patient Pathway',
+  html: `<p>Welcome ${data.leadName || 'User'}!</p>`,
+  text: `Welcome ${data.leadName || 'User'}!`
+});
+
+const generateDoctorNotificationEmail = (data: EmailTemplateData) => ({
+  subject: 'New Lead Notification',
+  html: `<p>You have a new lead: ${data.leadName || 'Unknown'}</p>`,
+  text: `You have a new lead: ${data.leadName || 'Unknown'}`
+});
+
+const generateFollowUpEmail = (data: EmailTemplateData) => ({
+  subject: 'Follow Up',
+  html: `<p>Following up with ${data.leadName || 'you'}</p>`,
+  text: `Following up with ${data.leadName || 'you'}`
+});
 
 export interface EmailServiceConfig {
   enabled: boolean;

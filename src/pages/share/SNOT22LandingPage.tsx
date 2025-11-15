@@ -253,7 +253,6 @@ const SNOT22LandingPage: React.FC = () => {
                 if (parsedContent.doctor_profile && !doctor.name) {
                   console.log('Setting doctor from stored profile:', parsedContent.doctor_profile);
                   // Only set doctor if we don't already have a name (prevents infinite loop)
-                  isSettingFromDatabase.current = true; // Flag to prevent infinite loop
                   const storedDoctor = {
                     id: parsedContent.doctor_profile.id || doctor.id,
                     name: parsedContent.doctor_profile.name || 'Dr. Smith',

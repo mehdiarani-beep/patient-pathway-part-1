@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
-import { PasswordResetDiagnostic } from '@/components/auth/PasswordResetDiagnostic';
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();

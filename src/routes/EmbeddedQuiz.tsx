@@ -139,6 +139,7 @@ export function EmbeddedQuiz() {
         quizType={quizType}
         quizData={quizData}
         doctorId={doctorId}
+        utm_source=""
       />
     </div>
   );
