@@ -30,7 +30,6 @@ import TeamSignupPage from './pages/TeamSignupPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import TeamMemberLandingPage from './pages/TeamMemberLandingPage';
 const queryClient = new QueryClient();
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
