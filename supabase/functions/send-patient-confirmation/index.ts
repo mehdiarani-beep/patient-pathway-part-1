@@ -24,7 +24,7 @@ const handler = async (req: Request) => {
       {
         global: {
           headers: {
-            Authorization: req.headers.get('Authorization')
+            Authorization: req.headers.get('Authorization') || ''
           }
         }
       }
@@ -106,7 +106,7 @@ const handler = async (req: Request) => {
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error sending patient confirmation:", error);
     return new Response(JSON.stringify({
       success: false,
@@ -447,7 +447,7 @@ This is an automated confirmation email. Please do not reply directly to this me
       message: 'Patient confirmation email sent successfully'
     };
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in sendPatientConfirmationEmail:', error);
     return {
       success: false,

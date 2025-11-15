@@ -88,25 +88,27 @@ serve(async (req) => {
             throw new Error(`Unsupported platform: ${platform}`)
         }
 
-        results.push({
-          platform,
-          success: true,
-          externalId: result.id,
-          url: result.url
-        })
-
-        // Update platform-specific record
-        await supabaseClient
-          .from('social_post_platforms')
-          .update({
-            status: 'published',
-            external_post_id: result.id,
-            published_at: new Date().toISOString()
+        if (result && 'id' in result) {
+          results.push({
+            platform,
+            success: true,
+            externalId: result.id,
+            url: result.url
           })
-          .eq('post_id', postId)
-          .eq('platform', platform)
 
-      } catch (error) {
+          // Update platform-specific record
+          await supabaseClient
+            .from('social_post_platforms')
+            .update({
+              status: 'published',
+              external_post_id: result.id,
+              published_at: new Date().toISOString()
+            })
+            .eq('post_id', postId)
+            .eq('platform', platform)
+        }
+
+      } catch (error: any) {
         console.error(`Error publishing to ${platform}:`, error)
         errors.push({
           platform,
@@ -165,7 +167,7 @@ serve(async (req) => {
       },
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in publish-to-social function:', error)
     return new Response(
       JSON.stringify({

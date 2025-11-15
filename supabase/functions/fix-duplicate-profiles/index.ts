@@ -34,8 +34,8 @@ const handler = async (req: Request): Promise<Response> => {
         
         // Return users with more than 1 profile
         const duplicates = Object.entries(userCounts)
-          .filter(([_, count]) => count > 1)
-          .map(([user_id, count]) => ({ user_id, count }));
+          .filter(([_, count]) => (count as number) > 1)
+          .map(([user_id, count]) => ({ user_id, count: count as number }));
         
         return { data: duplicates, error: null };
       });
@@ -82,7 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
             }
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         errors.push(`Error processing user ${duplicate.user_id}: ${error.message}`);
       }
     }

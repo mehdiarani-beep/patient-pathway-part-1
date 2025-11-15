@@ -63,7 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
         
         results.push({ platform, ...result });
-      } catch (error) {
+      } catch (error: any) {
         results.push({ 
           platform, 
           success: false, 
