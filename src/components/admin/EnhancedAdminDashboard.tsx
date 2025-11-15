@@ -1266,19 +1266,23 @@ export function EnhancedAdminDashboard() {
     try {
       setPasswordChangeLoading(true);
       
-      if (!supabaseAdmin) {
-        toast.error('Admin functionality is not available. Service role key is missing.');
-        return;
-      }
-      
-      const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
-        selectedDoctorForPassword.user_id,
-        { password: doctorNewPassword }
-      );
+      // Call the secure edge function to change password
+      const { data, error } = await supabase.functions.invoke('change-user-password', {
+        body: {
+          userId: selectedDoctorForPassword.user_id,
+          newPassword: doctorNewPassword
+        }
+      });
 
       if (error) {
         console.error('Error changing doctor password:', error);
         toast.error(`Failed to change password: ${error.message}`);
+        return;
+      }
+
+      if (data?.error) {
+        console.error('Error from edge function:', data.error);
+        toast.error(`Failed to change password: ${data.error}`);
         return;
       }
 
