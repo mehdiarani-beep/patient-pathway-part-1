@@ -34,7 +34,11 @@ export function updateOGMetaTags(tags: OGMetaTags) {
   ];
 
   // Update all meta tags
-  [...ogTags, ...twitterTags].forEach(({ property, name, content }) => {
+  [...ogTags, ...twitterTags].forEach((tag) => {
+    const property = 'property' in tag ? tag.property : undefined;
+    const name = 'name' in tag ? tag.name : undefined;
+    const content = tag.content;
+    
     const selector = property ? `meta[property="${property}"]` : `meta[name="${name}"]`;
     let metaTag = document.querySelector(selector) as HTMLMetaElement;
     

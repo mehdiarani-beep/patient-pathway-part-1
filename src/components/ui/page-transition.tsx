@@ -7,7 +7,7 @@ interface PageTransitionProps {
   className?: string;
 }
 
-const pageVariants = {
+const pageVariants: Record<string, any> = {
   hidden: { 
     opacity: 0,
     y: 20,
