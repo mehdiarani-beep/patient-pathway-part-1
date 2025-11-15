@@ -48,6 +48,7 @@ const TNSSLandingPage: React.FC = () => {
   const lastProcessedDoctorId = useRef<string | null>(null);
   const isInitialized = useRef(false);
   const isProcessingContent = useRef(false);
+  const isSettingFromDatabase = useRef(false);
 
   // Memoized function to prevent unnecessary re-renders
   const fetchDoctorData = useCallback(async (actualDoctorId: string) => {

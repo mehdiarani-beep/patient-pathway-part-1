@@ -42,6 +42,7 @@ interface PostTemplate {
   category: string;
   content: string;
   hashtags: string[];
+  usage_count?: number;
 }
 
 interface PostComposerProps {
