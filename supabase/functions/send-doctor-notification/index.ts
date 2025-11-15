@@ -384,7 +384,7 @@ Hint: Your PIN is your office zip code.
       id: result.id,
       message: 'Doctor notification email sent successfully'
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in sendDoctorNotificationEmail:', error);
     return {
       success: false,
@@ -408,12 +408,13 @@ function generateMinimalAnswersSummary(answers: any) {
     
     // Handle different answer formats
     if (typeof value === 'object' && value !== null) {
+      const answerObj = value as any;
       // If it's an object with answer, answerIndex, questionIndex
-      if (value.answer !== undefined) {
-        answerText = value.answer;
-      } else if (value.answerIndex !== undefined) {
+      if (answerObj.answer !== undefined) {
+        answerText = answerObj.answer;
+      } else if (answerObj.answerIndex !== undefined) {
         // Convert answerIndex to readable text
-        const answerIndex = value.answerIndex;
+        const answerIndex = answerObj.answerIndex;
         if (answerIndex === 0) answerText = 'None (0)';
         else if (answerIndex === 1) answerText = 'Mild (1)';
         else if (answerIndex === 2) answerText = 'Moderate (2)';
@@ -450,12 +451,13 @@ function generateMinimalTextAnswers(answers: any) {
     
     // Handle different answer formats
     if (typeof value === 'object' && value !== null) {
+      const answerObj = value as any;
       // If it's an object with answer, answerIndex, questionIndex
-      if (value.answer !== undefined) {
-        answerText = value.answer;
-      } else if (value.answerIndex !== undefined) {
+      if (answerObj.answer !== undefined) {
+        answerText = answerObj.answer;
+      } else if (answerObj.answerIndex !== undefined) {
         // Convert answerIndex to readable text
-        const answerIndex = value.answerIndex;
+        const answerIndex = answerObj.answerIndex;
         if (answerIndex === 0) answerText = 'None (0)';
         else if (answerIndex === 1) answerText = 'Mild (1)';
         else if (answerIndex === 2) answerText = 'Moderate (2)';

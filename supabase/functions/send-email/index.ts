@@ -73,7 +73,7 @@ serve(async (req) => {
         subject: subject,
         html: html,
         text: text,
-        reply_to: doctorProfile.email || undefined,
+        reply_to: undefined,
       }),
     })
 
@@ -115,7 +115,7 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in send-email function:', error)
     return new Response(
       JSON.stringify({ error: 'Internal server error', details: error.message }),

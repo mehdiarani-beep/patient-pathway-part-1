@@ -86,7 +86,7 @@ serve(async (req) => {
       },
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in initiate-oauth function:', error)
     return new Response(
       JSON.stringify({

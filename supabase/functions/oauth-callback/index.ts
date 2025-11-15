@@ -88,7 +88,6 @@ serve(async (req) => {
       doctor_id: doctor_id,
       platform: platform,
       username: userInfo.username || userInfo.name,
-      page_id: userInfo.page_id || userInfo.id,
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
       connected: true,
@@ -131,7 +130,7 @@ serve(async (req) => {
       },
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in oauth-callback function:', error)
     return new Response(
       JSON.stringify({

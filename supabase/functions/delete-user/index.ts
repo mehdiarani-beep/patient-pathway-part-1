@@ -262,7 +262,7 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in delete-user function:', error)
     return new Response(
       JSON.stringify({ 

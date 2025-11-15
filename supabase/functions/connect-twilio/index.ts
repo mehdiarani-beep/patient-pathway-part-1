@@ -8,7 +8,7 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
-functions.http('connect-twilio', async (req, res) => {
+functions.http('connect-twilio', async (req: any, res: any) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     res.set(corsHeaders);
@@ -60,7 +60,7 @@ functions.http('connect-twilio', async (req, res) => {
       message: 'Twilio connection successful'
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Function error:', error);
     res.set(corsHeaders);
     res.status(400).json({

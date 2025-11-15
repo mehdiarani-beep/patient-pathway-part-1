@@ -36,7 +36,7 @@ serve(async (req) => {
           shortUrl = isGdData.shorturl;
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       errorMessage += `is.gd failed: ${error.message}; `;
     }
 
@@ -50,7 +50,7 @@ serve(async (req) => {
             shortUrl = vGdData.shorturl;
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         errorMessage += `v.gd failed: ${error.message}; `;
       }
     }
@@ -65,7 +65,7 @@ serve(async (req) => {
             shortUrl = tinyUrl;
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         errorMessage += `TinyURL failed: ${error.message}; `;
       }
     }
@@ -87,7 +87,7 @@ serve(async (req) => {
         status: 200
       }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Function error:', error);
     return new Response(
       JSON.stringify({

@@ -137,7 +137,7 @@ serve(async (req) => {
     }
 
     throw new Error('Method not allowed');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,

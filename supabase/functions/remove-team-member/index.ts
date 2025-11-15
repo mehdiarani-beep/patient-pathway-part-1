@@ -232,7 +232,7 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in remove-team-member function:', error)
     return new Response(
       JSON.stringify({ 
