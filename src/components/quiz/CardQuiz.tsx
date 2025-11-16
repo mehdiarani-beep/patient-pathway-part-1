@@ -43,8 +43,8 @@ export function CardQuiz() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [direction, setDirection] = useState(0);
   const [leadSubmitted, setLeadSubmitted] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(true);
-  const [quizStarted, setQuizStarted] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [quizStarted, setQuizStarted] = useState(true);
   
   // Lead capture form
   const [leadData, setLeadData] = useState({
