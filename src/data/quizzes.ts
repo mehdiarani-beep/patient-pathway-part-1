@@ -1,5 +1,20 @@
 import { Quiz } from '@/types/quiz';
 
+export const NOSE_SNOT_QUIZ: Quiz = {
+  id: 'NOSE_SNOT',
+  title: 'NOSE-SNOT Assessment',
+  description: 'Personalized nasal and sinus symptom evaluation',
+  maxScore: 0,
+  scoring: {},
+  questions: [
+    {
+      id: '1',
+      text: 'Is your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?',
+      options: ['Nasal blockage/stuffiness', 'Sinus-related symptoms like facial pressure, headaches, or a reduced sense of smell']
+    }
+  ]
+};
+
 export const quizzes: Record<string, Quiz> = {
   SNOT22: {
     id: 'SNOT22',
@@ -664,5 +679,6 @@ export const quizzes: Record<string, Quiz> = {
         options: ['0 – NO Symptoms', '1 – MILD Symptoms present but easily tolerated', '2 – MODERATE Symptoms present and bothersome, but tolerable', '3 – SEVERE Symptoms present and interfere with activities of daily living and/or sleep']
       }
     ]
-  }
+  },
+  NOSE_SNOT: NOSE_SNOT_QUIZ
 };
