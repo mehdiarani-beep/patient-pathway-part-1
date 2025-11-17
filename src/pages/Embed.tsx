@@ -100,6 +100,8 @@ const Embed = () => {
       return 'Quick Sinus Evaluation';
     } else if (quizType === 'TNSS') {
       return 'Assessment of nasal congestion and rhinitis symptoms';
+    } else if (quizType === 'MIDAS') {
+      return 'Measure the impact your headaches have on your life';
     }
   }
   const quizData = getQuizData();
