@@ -1,1 +1,10 @@
 project_id = "drvitjhhggcywuepyncx"
+
+[functions.submit-lead]
+verify_jwt = false
+
+[functions.send-doctor-notification]
+verify_jwt = false
+
+[functions.send-patient-confirmation]
+verify_jwt = false
