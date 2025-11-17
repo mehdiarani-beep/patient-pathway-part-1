@@ -2,7 +2,7 @@ import { Quiz } from '@/types/quiz';
 
 export const NOSE_SNOT_QUIZ: Quiz = {
   id: 'NOSE_SNOT',
-  title: 'NOSE-SNOT Assessment',
+  title: 'Nasal Assessment',
   description: 'Personalized nasal and sinus symptom evaluation',
   maxScore: 0,
   scoring: {},

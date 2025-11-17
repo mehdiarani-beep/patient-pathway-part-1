@@ -1,81 +1,404 @@
-import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { calculateQuizScore } from '@/utils/quizScoring';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, Mail, Phone, User } from 'lucide-react';
+import { quizzes } from '@/data/quizzes';
+
+interface QuizAnswer {
+  questionIndex: number;
+  answerIndex: number;
+  answer: string;
+}
+
+interface DoctorProfile {
+  id: string;
+  clinic_name: string;
+  first_name?: string;
+  last_name?: string;
+  logo_url?: string;
+  avatar_url?: string;
+}
 
 export function NOSESNOTPage() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [selectedAnswer, setSelectedAnswer] = useState<string>('');
+  const [stage, setStage] = useState<'triage' | 'quiz' | 'results' | 'contact'>('triage');
+  const [selectedTriage, setSelectedTriage] = useState<string>('');
+  const [quizType, setQuizType] = useState<'NOSE' | 'SNOT12' | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState<QuizAnswer[]>([]);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [quizResult, setQuizResult] = useState<any>(null);
+  const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
+  const [submittingLead, setSubmittingLead] = useState(false);
+  const [leadSubmitted, setLeadSubmitted] = useState(false);
+  
+  const [leadData, setLeadData] = useState({
+    name: '',
+    email: '',
+    phone: ''
+  });
 
   const doctorId = searchParams.get('doctor');
   const key = searchParams.get('key');
 
-  const handleSubmit = () => {
-    if (!selectedAnswer) return;
+  useEffect(() => {
+    const fetchDoctorProfile = async () => {
+      if (doctorId) {
+        try {
+          const { data, error } = await supabase
+            .from('doctor_profiles')
+            .select('*')
+            .eq('id', doctorId)
+            .single();
 
-    // Build query params
-    const params = new URLSearchParams();
-    if (doctorId) params.append('doctor', doctorId);
-    if (key) params.append('key', key);
+          if (error) throw error;
+          setDoctorProfile(data);
+        } catch (error) {
+          console.error('Error fetching doctor profile:', error);
+        }
+      }
+    };
 
-    // Route based on answer
-    if (selectedAnswer === 'A') {
-      // Navigate to NOSE quiz
-      navigate(`/quiz?type=NOSE&mode=single&${params.toString()}`);
+    fetchDoctorProfile();
+  }, [doctorId]);
+
+  const handleTriageAnswer = (option: string) => {
+    setSelectedTriage(option);
+  };
+
+  const handleTriageContinue = () => {
+    if (!selectedTriage) return;
+    
+    if (selectedTriage === 'A') {
+      setQuizType('NOSE');
     } else {
-      // Navigate to SNOT-12 quiz
-      navigate(`/quiz?type=SNOT12&mode=single&${params.toString()}`);
+      setQuizType('SNOT12');
+    }
+    setStage('quiz');
+  };
+
+  const handleQuizAnswer = (answerIndex: number, answer: string) => {
+    setSelectedOption(answerIndex);
+    
+    setTimeout(() => {
+      const newAnswer: QuizAnswer = {
+        questionIndex: currentQuestion,
+        answerIndex,
+        answer
+      };
+
+      const newAnswers = [...answers, newAnswer];
+      setAnswers(newAnswers);
+
+      const quiz = quizType ? quizzes[quizType] : null;
+      if (currentQuestion < (quiz?.questions.length || 0) - 1) {
+        setCurrentQuestion(prev => prev + 1);
+        setSelectedOption(null);
+      } else {
+        // Calculate results
+        const result = calculateQuizScore(quizType!, newAnswers);
+        setQuizResult(result);
+        setStage('results');
+      }
+    }, 300);
+  };
+
+  const handleViewResults = () => {
+    setStage('contact');
+  };
+
+  const handleSubmitLead = async () => {
+    if (!leadData.name || !leadData.email) {
+      toast.error('Please provide your name and email');
+      return;
+    }
+
+    setSubmittingLead(true);
+
+    try {
+      const { error } = await supabase.from('quiz_leads').insert({
+        name: leadData.name,
+        email: leadData.email,
+        phone: leadData.phone,
+        quiz_type: quizType!,
+        score: quizResult.score,
+        answers: answers,
+        doctor_id: doctorId || '',
+        share_key: key
+      });
+
+      if (error) throw error;
+
+      setLeadSubmitted(true);
+      toast.success('Information submitted successfully!');
+    } catch (error) {
+      console.error('Error submitting lead:', error);
+      toast.error('Failed to submit information');
+    } finally {
+      setSubmittingLead(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-4">NOSE-SNOT Assessment</h1>
-          <p className="text-lg text-muted-foreground">Personalized nasal and sinus symptom evaluation</p>
-        </div>
+  const quiz = quizType ? quizzes[quizType] : null;
+  const progress = quiz ? ((currentQuestion + 1) / quiz.questions.length) * 100 : 0;
 
-        <Card className="shadow-lg">
-          <CardContent className="p-8">
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold text-foreground mb-4">
-                  Is your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?
-                </h2>
+  if (stage === 'triage') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-foreground mb-4">Nasal Assessment</h1>
+            <p className="text-lg text-muted-foreground">Personalized nasal and sinus symptom evaluation</p>
+          </div>
+
+          <Card className="shadow-lg">
+            <CardContent className="p-8">
+              <div className="space-y-6">
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-6">
+                  <p className="text-foreground leading-relaxed">
+                    Hello! Welcome to the Nasal Assessment. Personalized nasal and sinus symptom evaluation.
+                  </p>
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground mb-4">
+                    Is your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?
+                  </h2>
+                </div>
+
+                <RadioGroup value={selectedTriage} onValueChange={handleTriageAnswer}>
+                  <div className="flex items-start space-x-3 p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                    <RadioGroupItem value="A" id="option-a" />
+                    <Label htmlFor="option-a" className="flex-1 cursor-pointer text-base">
+                      <span className="font-semibold">A.</span> Nasal blockage/stuffiness
+                    </Label>
+                  </div>
+
+                  <div className="flex items-start space-x-3 p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                    <RadioGroupItem value="B" id="option-b" />
+                    <Label htmlFor="option-b" className="flex-1 cursor-pointer text-base">
+                      <span className="font-semibold">B.</span> Sinus-related symptoms like facial pressure, headaches, or a reduced sense of smell
+                    </Label>
+                  </div>
+                </RadioGroup>
+
+                <Button 
+                  onClick={handleTriageContinue} 
+                  disabled={!selectedTriage}
+                  className="w-full"
+                  size="lg"
+                >
+                  Continue to Assessment
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (stage === 'quiz' && quiz) {
+    const currentQ = quiz.questions[currentQuestion];
+    const quizName = quizType === 'NOSE' ? 'Nasal Obstruction Symptom Evaluation (NOSE)' : 'Sinonasal Outcome Test (SNOT)';
+    const maxScore = quizType === 'NOSE' ? 100 : 60;
+    const totalQuestions = quiz.questions.length;
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <Card className="shadow-lg">
+            <CardContent className="p-8">
+              <div className="mb-6">
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-6">
+                  <p className="text-foreground leading-relaxed mb-3">
+                    Based on your response, we recommend that you complete the {quizName}. 
+                    The {quizType} test is a quick {totalQuestions}-question survey that calculates your 0–{maxScore} {quizType === 'NOSE' ? 'nasal obstruction' : 'sinus'} severity score.
+                  </p>
+                </div>
+
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Question {currentQuestion + 1} of {totalQuestions}
+                  </span>
+                  <span className="text-sm font-medium text-primary">{Math.round(progress)}%</span>
+                </div>
+                <Progress value={progress} className="mb-6" />
               </div>
 
-              <RadioGroup value={selectedAnswer} onValueChange={setSelectedAnswer}>
-                <div className="flex items-start space-x-3 p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                  <RadioGroupItem value="A" id="option-a" />
-                  <Label htmlFor="option-a" className="flex-1 cursor-pointer text-base">
-                    <span className="font-semibold">A.</span> Nasal blockage/stuffiness
-                  </Label>
-                </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentQuestion}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <h2 className="text-xl font-semibold text-foreground mb-6">
+                    {quizType === 'NOSE' && currentQuestion === 0 ? 'Rate your nasal blockage or obstruction' : currentQ.text}
+                  </h2>
 
-                <div className="flex items-start space-x-3 p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                  <RadioGroupItem value="B" id="option-b" />
-                  <Label htmlFor="option-b" className="flex-1 cursor-pointer text-base">
-                    <span className="font-semibold">B.</span> Sinus-related symptoms like facial pressure, headaches, or a reduced sense of smell
-                  </Label>
-                </div>
-              </RadioGroup>
-
-              <Button 
-                onClick={handleSubmit} 
-                disabled={!selectedAnswer}
-                className="w-full"
-                size="lg"
-              >
-                Continue to Assessment
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                  <div className="space-y-3">
+                    {currentQ.options.map((option, index) => (
+                      <motion.div
+                        key={index}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <button
+                          onClick={() => handleQuizAnswer(index, option)}
+                          className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                            selectedOption === index
+                              ? 'border-primary bg-primary/10'
+                              : 'border-border hover:border-primary/50 hover:bg-accent/50'
+                          }`}
+                        >
+                          <span className="text-foreground">{option}</span>
+                        </button>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (stage === 'results') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <Card className="shadow-lg">
+            <CardContent className="p-8">
+              <div className="text-center mb-8">
+                <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+                <h2 className="text-3xl font-bold text-foreground mb-2">Assessment Complete</h2>
+                <p className="text-muted-foreground">Here are your results</p>
+              </div>
+
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-6">
+                <div className="text-center mb-4">
+                  <div className="text-5xl font-bold text-primary mb-2">{quizResult.score}</div>
+                  <div className="text-sm uppercase tracking-wide text-muted-foreground">
+                    {quizType} Score
+                  </div>
+                </div>
+                <div className="border-t border-border pt-4">
+                  <p className="text-foreground font-semibold mb-2 capitalize">{quizResult.severity}</p>
+                  <p className="text-muted-foreground">{quizResult.interpretation}</p>
+                </div>
+              </div>
+
+              <Button onClick={handleViewResults} className="w-full" size="lg">
+                Continue
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (stage === 'contact') {
+    if (leadSubmitted) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-12 px-4">
+          <div className="max-w-2xl mx-auto">
+            <Card className="shadow-lg">
+              <CardContent className="p-8 text-center">
+                <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+                <h2 className="text-3xl font-bold text-foreground mb-4">Thank You!</h2>
+                <p className="text-muted-foreground mb-6">
+                  Your results have been sent. {doctorProfile?.clinic_name || 'Our team'} will contact you soon to discuss your assessment.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <Card className="shadow-lg">
+            <CardContent className="p-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-foreground mb-2">Get Your Detailed Results</h2>
+                <p className="text-muted-foreground">
+                  Enter your information to receive your complete assessment results and recommendations
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name" className="flex items-center gap-2 mb-2">
+                    <User className="w-4 h-4" />
+                    Full Name *
+                  </Label>
+                  <Input
+                    id="name"
+                    value={leadData.name}
+                    onChange={(e) => setLeadData({ ...leadData, name: e.target.value })}
+                    placeholder="Enter your full name"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="email" className="flex items-center gap-2 mb-2">
+                    <Mail className="w-4 h-4" />
+                    Email *
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={leadData.email}
+                    onChange={(e) => setLeadData({ ...leadData, email: e.target.value })}
+                    placeholder="Enter your email"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="phone" className="flex items-center gap-2 mb-2">
+                    <Phone className="w-4 h-4" />
+                    Phone Number
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={leadData.phone}
+                    onChange={(e) => setLeadData({ ...leadData, phone: e.target.value })}
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+
+                <Button 
+                  onClick={handleSubmitLead}
+                  disabled={submittingLead || !leadData.name || !leadData.email}
+                  className="w-full"
+                  size="lg"
+                >
+                  {submittingLead ? 'Submitting...' : 'Submit Information'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
