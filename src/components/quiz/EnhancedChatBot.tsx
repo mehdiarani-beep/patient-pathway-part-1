@@ -391,6 +391,46 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
     // Set answering state to prevent rapid clicks
     setIsAnswering(true);
 
+    // Handle NOSE_SNOT triage stage
+    if (isTriageStage && quizType === 'NOSE_SNOT') {
+      setMessages(prev => [...prev, {
+        role: 'user',
+        content: answerText
+      }]);
+
+      // Determine which sub-quiz to use based on the answer
+      const subQuizType = answerIndex === 0 ? 'NOSE' : 'SNOT12';
+      setSelectedSubQuiz(subQuizType);
+      setActiveQuizType(subQuizType);
+      setIsTriageStage(false);
+      
+      // Show transition message
+      setShowTyping(true);
+      setTimeout(() => {
+        setShowTyping(false);
+        const transitionMessage = answerIndex === 0 
+          ? "Great! Based on your symptoms, I'll guide you through the NOSE (Nasal Obstruction Symptom Evaluation) questionnaire. This will help us understand the severity of your nasal blockage.\n\nLet's begin:"
+          : "Great! Based on your symptoms, I'll guide you through the SNOT-12 (Sino-Nasal Outcome Test) questionnaire. This will help us evaluate your sinus-related symptoms.\n\nLet's begin:";
+        
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: transitionMessage
+        }]);
+        
+        // Reset for the new sub-quiz
+        setCurrentQuestionIndex(0);
+        setAnswers([]);
+        setIsAnswering(false);
+        
+        // Start the sub-quiz after a brief delay
+        setTimeout(() => {
+          askNextQuestion(0);
+        }, 800);
+      }, 700);
+      
+      return;
+    }
+
     const newAnswer: QuizAnswer = {
       questionIndex: currentQuestionIndex,
       answer: answerText,
