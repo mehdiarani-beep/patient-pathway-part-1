@@ -110,7 +110,7 @@ export default function UniversalQuizPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
+      <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-orange-50 to-teal-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-lg text-gray-600">Loading assessment...</p>
@@ -121,7 +121,7 @@ export default function UniversalQuizPage() {
 
   if (notFound || !quizData) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
+      <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-orange-50 to-teal-50">
         <div className="text-center max-w-md mx-auto p-6">
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Assessment Not Found</h2>
@@ -144,7 +144,7 @@ export default function UniversalQuizPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
+    <div className="h-full w-full bg-gradient-to-br from-orange-50 to-teal-50">
       <EmbeddedChatBot
         quizType={quizType || ''}
         shareKey={shareKey}
