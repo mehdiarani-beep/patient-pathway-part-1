@@ -113,7 +113,7 @@ export default function UniversalQuizPage() {
       <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-orange-50 to-teal-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading assessment...</p>
+          <p className="text-sm sm:text-base md:text-lg text-gray-600">Loading assessment...</p>
         </div>
       </div>
     );
@@ -124,8 +124,8 @@ export default function UniversalQuizPage() {
       <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-orange-50 to-teal-50">
         <div className="text-center max-w-md mx-auto p-6">
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Assessment Not Found</h2>
-            <p className="text-gray-600 mb-6">{error || `The requested assessment "${quizType}" could not be found.`}</p>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-4">Assessment Not Found</h2>
+            <p className="text-sm sm:text-base text-gray-600 mb-6">{error || `The requested assessment "${quizType}" could not be found.`}</p>
             <p className="text-sm text-gray-500 mb-4">Quiz Type: {quizType}</p>
             <div className="flex gap-4 justify-center">
               <Button onClick={() => navigate('/')} className="bg-orange-500 hover:bg-orange-600">
