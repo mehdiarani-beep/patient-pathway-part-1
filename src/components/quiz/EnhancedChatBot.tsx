@@ -113,30 +113,33 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
     return phoneRegex.test(phone);
   };
 
-  const askNextQuestion = (questionIndex: number) => {
-    if (questionIndex < quizData.questions.length) {
+  const askNextQuestion = (questionIndex: number, overrideQuizType?: QuizType) => {
+    const effectiveQuizType = overrideQuizType || activeQuizType;
+    const effectiveQuizData = customQuiz || (overrideQuizType ? quizzes[overrideQuizType] : quizData);
+    
+    if (questionIndex < effectiveQuizData.questions.length) {
       setShowTyping(true);
       setTimeout(() => {
         setShowTyping(false);
-        const question = quizData.questions[questionIndex];
+        const question = effectiveQuizData.questions[questionIndex];
         
         // For NOSE, SNOT12, and TNSS quizzes, include the first question in the initial message
-        if ((activeQuizType === 'NOSE' || activeQuizType === 'SNOT12' || activeQuizType === 'TNSS') && questionIndex === 0) {
-          const firstQuestion = quizData.questions[0];
+        if ((effectiveQuizType === 'NOSE' || effectiveQuizType === 'SNOT12' || effectiveQuizType === 'TNSS') && questionIndex === 0) {
+          const firstQuestion = effectiveQuizData.questions[0];
           let consolidatedMessage = '';
           let optionsText = '';
           
-          if (activeQuizType === 'NOSE') {
+          if (effectiveQuizType === 'NOSE') {
             optionsText = firstQuestion.options.map((option, index) => {
               const score = option.match(/\((\d+)\)/)?.[1] || index;
               const label = option.replace(/\s*\(\d+\)$/, '');
               return `${score} – ${label}`;
             }).join('\n• ');
             
-            consolidatedMessage = selectedSubQuiz 
+            consolidatedMessage = overrideQuizType 
               ? `Question 1 of 5:\nRate your nasal blockage or obstruction.`
               : `Start your Nasal Obstruction Symptom Evaluation (NOSE) to get your 0–100 nasal obstruction score.\n\nQuestion 1 of 5:\n${firstQuestion.text}\n`;
-          } else if (activeQuizType === 'SNOT12') {
+          } else if (effectiveQuizType === 'SNOT12') {
             optionsText = firstQuestion.options.map((option, index) => {
               const letter = String.fromCharCode(65 + index); // A, B, C, etc.
               const score = option.match(/\((\d+)\)/)?.[1] || index;
@@ -144,10 +147,10 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
               return `${letter} – ${label} (${score})`;
             }).join('\n• ');
             
-            consolidatedMessage = selectedSubQuiz
+            consolidatedMessage = overrideQuizType
               ? `Question 1 of 12:\nRate your Need to blow nose.`
               : `Start your SNOT-12 assessment to get your 0–60 sinus severity score. \n\nQuestion 1 of 12:\n\n${firstQuestion.text}\n`;
-          } else if (activeQuizType === 'TNSS') {
+          } else if (effectiveQuizType === 'TNSS') {
             optionsText = firstQuestion.options.map((option, index) => {
               const score = option.match(/\((\d+)\)/)?.[1] || index;
               const label = option.replace(/\s*\(\d+\)$/, '');
@@ -167,7 +170,7 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
         } else {
           setMessages(prev => [...prev, {
             role: 'assistant',
-            content: `Question ${questionIndex + 1} of ${quizData.questions.length}:\n\n${question.text}`,
+            content: `Question ${questionIndex + 1} of ${effectiveQuizData.questions.length}:\n\n${question.text}`,
             isQuestion: true,
             questionIndex,
             options: question.options
@@ -422,9 +425,9 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
         setAnswers([]);
         setIsAnswering(false);
         
-        // Start the sub-quiz after a brief delay
+        // Start the sub-quiz after a brief delay, passing the quiz type explicitly
         setTimeout(() => {
-          askNextQuestion(0);
+          askNextQuestion(0, subQuizType);
         }, 800);
       }, 700);
       
