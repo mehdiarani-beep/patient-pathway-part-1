@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
@@ -189,21 +188,43 @@ export function NOSESNOTPage() {
                   </h2>
                 </div>
 
-                <RadioGroup value={selectedTriage} onValueChange={handleTriageAnswer}>
-                  <div className="flex items-start space-x-3 p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                    <RadioGroupItem value="A" id="option-a" />
-                    <Label htmlFor="option-a" className="flex-1 cursor-pointer text-base">
-                      <span className="font-semibold">A.</span> Nasal blockage/stuffiness
-                    </Label>
-                  </div>
+                <div className="space-y-3">
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <button
+                      onClick={() => handleTriageAnswer('A')}
+                      className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                        selectedTriage === 'A'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border hover:border-primary/50 hover:bg-accent/50'
+                      }`}
+                    >
+                      <span className="text-foreground">
+                        <span className="font-semibold">A.</span> Nasal blockage/stuffiness
+                      </span>
+                    </button>
+                  </motion.div>
 
-                  <div className="flex items-start space-x-3 p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors">
-                    <RadioGroupItem value="B" id="option-b" />
-                    <Label htmlFor="option-b" className="flex-1 cursor-pointer text-base">
-                      <span className="font-semibold">B.</span> Sinus-related symptoms like facial pressure, headaches, or a reduced sense of smell
-                    </Label>
-                  </div>
-                </RadioGroup>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <button
+                      onClick={() => handleTriageAnswer('B')}
+                      className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                        selectedTriage === 'B'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border hover:border-primary/50 hover:bg-accent/50'
+                      }`}
+                    >
+                      <span className="text-foreground">
+                        <span className="font-semibold">B.</span> Sinus-related symptoms like facial pressure, headaches, or a reduced sense of smell
+                      </span>
+                    </button>
+                  </motion.div>
+                </div>
               </div>
             </CardContent>
           </Card>
