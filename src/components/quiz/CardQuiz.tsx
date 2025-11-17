@@ -204,8 +204,8 @@ export function CardQuiz() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-950 flex items-center justify-center">
-        <motion.div 
+      <div className="min-h-full w-full bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-950 flex items-center justify-center p-3 sm:p-4">
+        <motion.div
           className="text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -232,8 +232,8 @@ export function CardQuiz() {
 
   if (!quiz) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-950 flex items-center justify-center">
-        <motion.div 
+      <div className="min-h-full w-full bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-950 flex items-center justify-center p-3 sm:p-4">
+        <motion.div
           className="text-center p-8 bg-white dark:bg-gray-900 rounded-xl shadow-xl"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -275,8 +275,8 @@ export function CardQuiz() {
     }
   }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950 dark:via-indigo-950 dark:to-purple-950 flex flex-col items-center justify-center p-2 sm:p-4 overflow-hidden">
-      <motion.div 
+    <div className="min-h-full w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950 dark:via-indigo-950 dark:to-purple-950 flex flex-col items-center justify-center p-2 sm:p-4 overflow-hidden">
+      <motion.div
         className="w-full max-w-5xl space-y-4 sm:space-y-6 lg:space-y-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

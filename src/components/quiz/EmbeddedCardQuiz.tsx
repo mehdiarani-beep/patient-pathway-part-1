@@ -283,7 +283,7 @@ export function EmbeddedCardQuiz({ quizType, doctorId, utm_source, compact = fal
       >
         {/* Quiz Card */}
         <Card className="w-full bg-white/95 backdrop-blur-sm border-0 shadow-xl rounded-2xl overflow-hidden">
-          <CardContent className={compact ? "p-3" : "p-4 sm:p-6"}>
+          <CardContent className={compact ? "p-3 sm:p-4" : "p-4 sm:p-6 md:p-8"}>
             <AnimatePresence mode="wait">
               {showWelcome ? (
                 <motion.div 

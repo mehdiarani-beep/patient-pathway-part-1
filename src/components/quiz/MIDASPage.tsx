@@ -153,19 +153,19 @@ export function MIDASPage() {
     const isLastQuestion = currentQuestion === quiz.questions.length - 1;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-4">
+      <div className="min-h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
+        <div className="max-w-2xl mx-auto w-full">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 sm:mb-4">
               Migraine Disability Assessment Test (MIDAS)
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-base sm:text-lg text-muted-foreground">
               Measure the impact your headaches have on your life
             </p>
           </div>
 
           <Card className="shadow-lg">
-            <CardContent className="p-8">
+            <CardContent className="p-4 sm:p-6 md:p-8">
               <div className="mb-6">
                 {currentQuestion < 5 && (
                   <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
@@ -228,10 +228,10 @@ export function MIDASPage() {
   if (stage === 'results') {
     if (leadSubmitted) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-12 px-4">
-          <div className="max-w-2xl mx-auto">
+        <div className="min-h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
+          <div className="max-w-2xl mx-auto w-full">
             <Card className="shadow-lg">
-              <CardContent className="p-8 text-center">
+              <CardContent className="p-4 sm:p-6 md:p-8 text-center">
                 <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
                 <h2 className="text-3xl font-bold text-foreground mb-4">Thank You!</h2>
                 <p className="text-muted-foreground mb-6">
@@ -245,10 +245,10 @@ export function MIDASPage() {
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-12 px-4">
-        <div className="max-w-2xl mx-auto">
+      <div className="min-h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
+        <div className="max-w-2xl mx-auto w-full">
           <Card className="shadow-lg">
-            <CardContent className="p-8">
+            <CardContent className="p-4 sm:p-6 md:p-8">
               <div className="text-center mb-8">
                 <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
                 <h2 className="text-3xl font-bold text-foreground mb-2">Assessment Complete</h2>

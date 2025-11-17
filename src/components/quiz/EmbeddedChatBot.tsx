@@ -899,8 +899,8 @@ const renderAnswerOption = (option: any, index: number, handleAnswer: Function, 
 // Remove any references to primary-light, primary-dark etc
 // Use the simplified theme object above
   return (
-    <div className="flex flex-col h-full max-h-full" style={{ background: colors.background	 }}>
-      <div className="flex-1 overflow-hidden flex flex-col max-w-4xl mx-auto w-full rounded-2xl shadow-lg" style={{ minHeight: 400 }}>
+    <div className="flex flex-col h-full w-full" style={{ background: colors.background }}>
+      <div className="flex-1 overflow-hidden flex flex-col w-full rounded-2xl shadow-lg" style={{ minHeight: 0 }}>
       <div className="flex-1 overflow-y-auto p-6 space-y-4" style={{ maxHeight: '100%', minHeight: 0 }}>
       <AnimatePresence initial={false}>
             {messages.map((message, index) => (
