@@ -142,10 +142,7 @@ export function NOSESNOTPage() {
 
       // Use the Supabase edge function to submit the lead (triggers email notifications)
       const { data, error } = await supabase.functions.invoke('submit-lead', {
-        body: leadDataToSubmit,
-        headers: {
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        }
+        body: leadDataToSubmit
       });
 
       if (error) {
