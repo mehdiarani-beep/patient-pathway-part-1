@@ -283,43 +283,6 @@ export function CardQuiz() {
         transition={{ duration: 0.3 }}
       >
         
-        {/* Doctor Header */}
-        <motion.div 
-          className="text-center space-y-3 sm:space-y-4"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          <div className="text-center space-y-2 px-2">
-              <motion.div 
-                className="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-xl ring-4 ring-blue-100 dark:ring-blue-900/30"
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.3, delay: 0.2 }}
-              >
-                <span className="text-white text-lg sm:text-xl font-bold">Dr</span>
-              </motion.div>
-              <motion.h1 
-                className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3, delay: 0.3 }}
-              >
-                Medical Assessment
-              </motion.h1>
-              {doctorId && (
-                <motion.p 
-                  className="text-xs sm:text-sm text-gray-500 dark:text-gray-400"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.4 }}
-                >
-                  Doctor ID: {doctorId}
-                </motion.p>
-              )}
-            </div>
-        </motion.div>
-
         {/* Quiz Card */}
         <Card className="w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden ring-1 ring-white/20 dark:ring-gray-700/20">
           <CardContent className="p-4 sm:p-6 md:p-8 lg:p-12 w-full">
