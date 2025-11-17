@@ -236,6 +236,41 @@ export function calculateQuizScore(quizType: QuizType, answers: QuizAnswer[] | n
         summary: `SNOT-12 Score: ${snot12Score}/60 - ${snot12Severity} symptoms`
       };
 
+    case 'MIDAS':
+      // MIDAS scoring: Sum of first 5 questions only (questions 1-5)
+      // Questions A and B are informational and not included in the score
+      // Convert range selections to midpoint values for scoring
+      const midasAnswers = answerIndices.slice(0, 5).map(idx => {
+        // Map answer indices to approximate day values
+        // 0: 0 days, 1: 1-5 days (3), 2: 6-10 days (8), 3: 11-20 days (15.5), 4: 21-30 days (25.5), 5: 31+ days (40)
+        const dayValues = [0, 3, 8, 15.5, 25.5, 40];
+        return dayValues[idx] || 0;
+      });
+      
+      const midasScore = Math.round(midasAnswers.reduce((sum, val) => sum + val, 0));
+      let midasSeverity: 'normal' | 'mild' | 'moderate' | 'severe' = 'normal';
+      let midasInterpretation = '';
+
+      if (midasScore >= 21) {
+        midasSeverity = 'severe';
+        midasInterpretation = 'Grade IV: Severe Disability - Your headaches are causing significant disability. Please discuss treatment options with your healthcare provider.';
+      } else if (midasScore >= 11) {
+        midasSeverity = 'moderate';
+        midasInterpretation = 'Grade III: Moderate Disability - Your headaches are causing moderate disability. Medical consultation is recommended to explore treatment options.';
+      } else if (midasScore >= 6) {
+        midasSeverity = 'mild';
+        midasInterpretation = 'Grade II: Mild Disability - Your headaches are causing mild disability. Consider discussing this with your healthcare provider.';
+      } else {
+        midasInterpretation = 'Grade I: Little or No Disability - Your headaches are causing minimal impact on your daily activities.';
+      }
+
+      return {
+        score: midasScore,
+        severity: midasSeverity,
+        interpretation: midasInterpretation,
+        summary: `MIDAS Score: ${midasScore} - Grade ${midasScore >= 21 ? 'IV' : midasScore >= 11 ? 'III' : midasScore >= 6 ? 'II' : 'I'}`
+      };
+
     default:
       return {
         score: 0,

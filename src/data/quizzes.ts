@@ -15,6 +15,63 @@ export const NOSE_SNOT_QUIZ: Quiz = {
   ]
 };
 
+export const MIDAS_QUIZ: Quiz = {
+  id: 'MIDAS',
+  title: 'Migraine Disability Assessment Test',
+  description: 'Measure the impact your headaches have on your life',
+  maxScore: 270,
+  scoring: {
+    normal: 'Grade I (0-5): Little or No Disability',
+    mild: 'Grade II (6-10): Mild Disability',
+    moderate: 'Grade III (11-20): Moderate Disability',
+    severe: 'Grade IV (21+): Severe Disability'
+  },
+  questions: [
+    {
+      id: '1',
+      text: 'On how many days in the last 3 months did you miss work or school because of your headaches?',
+      options: ['0 days', '1-5 days', '6-10 days', '11-20 days', '21-30 days', '31 or more days'],
+      type: 'multiple_choice'
+    },
+    {
+      id: '2',
+      text: 'How many days in the last 3 months was your productivity at work or school reduced by half or more because of your headaches? (Do not include days you counted in question 1 where you missed work or school.)',
+      options: ['0 days', '1-5 days', '6-10 days', '11-20 days', '21-30 days', '31 or more days'],
+      type: 'multiple_choice'
+    },
+    {
+      id: '3',
+      text: 'On how many days in the last 3 months did you not do household work (such as housework, home repairs and maintenance, shopping, caring for children and relatives) because of your headaches?',
+      options: ['0 days', '1-5 days', '6-10 days', '11-20 days', '21-30 days', '31 or more days'],
+      type: 'multiple_choice'
+    },
+    {
+      id: '4',
+      text: 'How many days in the last 3 months was your productivity in household work reduced by half or more because of your headaches? (Do not include days you counted in question 3 where you did not do household work.)',
+      options: ['0 days', '1-5 days', '6-10 days', '11-20 days', '21-30 days', '31 or more days'],
+      type: 'multiple_choice'
+    },
+    {
+      id: '5',
+      text: 'On how many days in the last 3 months did you miss family, social or leisure activities because of your headaches?',
+      options: ['0 days', '1-5 days', '6-10 days', '11-20 days', '21-30 days', '31 or more days'],
+      type: 'multiple_choice'
+    },
+    {
+      id: 'A',
+      text: 'On how many days in the last 3 months did you have a headache? (If a headache lasted more than 1 day, count each day.)',
+      options: ['0 days', '1-10 days', '11-20 days', '21-30 days', '31-60 days', 'More than 60 days'],
+      type: 'multiple_choice'
+    },
+    {
+      id: 'B',
+      text: 'On a scale of 0 - 10, on average how painful were these headaches? (where 0=no pain at all, and 10= pain as bad as it can be.)',
+      options: ['0 - No pain', '1-2 - Minimal pain', '3-4 - Mild pain', '5-6 - Moderate pain', '7-8 - Severe pain', '9-10 - Worst pain'],
+      type: 'multiple_choice'
+    }
+  ]
+};
+
 export const quizzes: Record<string, Quiz> = {
   SNOT22: {
     id: 'SNOT22',
@@ -680,5 +737,6 @@ export const quizzes: Record<string, Quiz> = {
       }
     ]
   },
-  NOSE_SNOT: NOSE_SNOT_QUIZ
+  NOSE_SNOT: NOSE_SNOT_QUIZ,
+  MIDAS: MIDAS_QUIZ
 };
