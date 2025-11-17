@@ -164,13 +164,10 @@ export function NOSESNOTPage() {
             <CardContent className="p-8">
               <div className="space-y-6">
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-6">
-                  <p className="text-foreground leading-relaxed">
-                    Hello! Welcome to the Nasal Assessment. Personalized nasal and sinus symptom evaluation.
+                  <p className="text-foreground leading-relaxed mb-4">
+                    Hello! Welcome to the Nasal Assessment. Your personalized nasal and sinus symptom evaluation.
                   </p>
-                </div>
-
-                <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-4">
+                  <h2 className="text-xl font-semibold text-foreground">
                     Is your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?
                   </h2>
                 </div>
