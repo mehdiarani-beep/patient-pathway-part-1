@@ -19,8 +19,8 @@ export default function TNSSPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 text-center">
+    <div className="min-h-full w-full bg-slate-50 py-6 sm:py-8 md:py-12 px-3 sm:px-4">
+      <div className="max-w-4xl mx-auto w-full text-center">
         <h1 className="text-4xl font-bold text-yellow-600 mb-6">
           TNSS Assessment
         </h1>

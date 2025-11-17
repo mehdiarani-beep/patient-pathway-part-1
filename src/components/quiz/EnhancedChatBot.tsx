@@ -730,7 +730,7 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
   };
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: chatbotColors.background, width: dimensions.width, height: dimensions.height }}>
+    <div className="flex flex-col h-full" style={{ background: chatbotColors.background, width: '100%', height: '100%' }}>
       <div className="flex-1 flex flex-col w-full rounded-2xl shadow-lg" style={{ minHeight: 0 }}>
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           <AnimatePresence initial={false}>

@@ -30,8 +30,8 @@ export function NOSEPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 text-center">
+    <div className="min-h-full w-full bg-gradient-to-br from-green-50 to-blue-50 py-6 sm:py-8 md:py-12 px-3 sm:px-4">
+      <div className="max-w-4xl mx-auto w-full text-center">
         <div className="mb-8">
           <div className="w-20 h-20 bg-gradient-to-br from-[#0E7C9D] to-[#FD904B] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
             <img 
