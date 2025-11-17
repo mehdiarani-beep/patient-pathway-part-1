@@ -237,38 +237,31 @@ export function calculateQuizScore(quizType: QuizType, answers: QuizAnswer[] | n
       };
 
     case 'MIDAS':
-      // MIDAS scoring: Sum of first 5 questions only (questions 1-5)
-      // Questions A and B are informational and not included in the score
-      // Convert range selections to midpoint values for scoring
-      const midasAnswers = answerIndices.slice(0, 5).map(idx => {
-        // Map answer indices to approximate day values
-        // 0: 0 days, 1: 1-5 days (3), 2: 6-10 days (8), 3: 11-20 days (15.5), 4: 21-30 days (25.5), 5: 31+ days (40)
-        const dayValues = [0, 3, 8, 15.5, 25.5, 40];
-        return dayValues[idx] || 0;
-      });
+      // MSQ scoring: All 7 questions count (0-4 points each, max 28)
+      // Extract numeric values from answer options like "Never (0)", "Rarely (1)", etc.
+      const msqScore = answerIndices.reduce((sum, idx) => sum + idx, 0);
       
-      const midasScore = Math.round(midasAnswers.reduce((sum, val) => sum + val, 0));
-      let midasSeverity: 'normal' | 'mild' | 'moderate' | 'severe' = 'normal';
-      let midasInterpretation = '';
+      let msqSeverity: 'normal' | 'mild' | 'moderate' | 'severe' = 'normal';
+      let msqInterpretation = '';
 
-      if (midasScore >= 21) {
-        midasSeverity = 'severe';
-        midasInterpretation = 'Grade IV: Severe Disability - Your headaches are causing significant disability. Please discuss treatment options with your healthcare provider.';
-      } else if (midasScore >= 11) {
-        midasSeverity = 'moderate';
-        midasInterpretation = 'Grade III: Moderate Disability - Your headaches are causing moderate disability. Medical consultation is recommended to explore treatment options.';
-      } else if (midasScore >= 6) {
-        midasSeverity = 'mild';
-        midasInterpretation = 'Grade II: Mild Disability - Your headaches are causing mild disability. Consider discussing this with your healthcare provider.';
+      if (msqScore >= 20) {
+        msqSeverity = 'severe';
+        msqInterpretation = 'Severe impact - Your migraines have a severe impact on your quality of life and daily functioning. Please discuss treatment options with your healthcare provider.';
+      } else if (msqScore >= 13) {
+        msqSeverity = 'moderate';
+        msqInterpretation = 'Moderate impact - Your migraines have a moderate impact on your daily functioning and well-being. Medical consultation is recommended.';
+      } else if (msqScore >= 6) {
+        msqSeverity = 'mild';
+        msqInterpretation = 'Mild impact - Your migraines have a mild impact on your daily activities and quality of life. Consider discussing this with your healthcare provider.';
       } else {
-        midasInterpretation = 'Grade I: Little or No Disability - Your headaches are causing minimal impact on your daily activities.';
+        msqInterpretation = 'Minimal impact - Your migraines have minimal impact on your daily life.';
       }
 
       return {
-        score: midasScore,
-        severity: midasSeverity,
-        interpretation: midasInterpretation,
-        summary: `MIDAS Score: ${midasScore} - Grade ${midasScore >= 21 ? 'IV' : midasScore >= 11 ? 'III' : midasScore >= 6 ? 'II' : 'I'}`
+        score: msqScore,
+        severity: msqSeverity,
+        interpretation: msqInterpretation,
+        summary: `MSQ Score: ${msqScore}/28 - ${msqInterpretation}`
       };
 
     default:
