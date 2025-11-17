@@ -168,19 +168,23 @@ export function NOSESNOTPage() {
     return (
       <div className="min-h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
         <div className="max-w-2xl mx-auto w-full">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-4">Nasal Assessment</h1>
-            <p className="text-lg text-muted-foreground">Personalized nasal and sinus symptom evaluation</p>
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 sm:mb-4">
+              Nasal Assessment
+            </h1>
+            <p className="text-base sm:text-lg text-muted-foreground">
+              Personalized nasal and sinus symptom evaluation
+            </p>
           </div>
 
           <Card className="shadow-lg">
-            <CardContent className="p-8">
+            <CardContent className="p-4 sm:p-6 md:p-8">
               <div className="space-y-6">
-                <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-6">
-                  <p className="text-foreground leading-relaxed mb-4">
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 sm:p-6 mb-6">
+                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
                     Hello! Welcome to the Nasal Assessment. Your personalized nasal and sinus symptom evaluation.
                   </p>
-                  <h2 className="text-xl font-semibold text-foreground">
+                  <h2 className="text-lg sm:text-xl font-semibold text-foreground">
                     Is your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?
                   </h2>
                 </div>
@@ -217,11 +221,20 @@ export function NOSESNOTPage() {
     return (
       <div className="min-h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
         <div className="max-w-2xl mx-auto w-full">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 sm:mb-4">
+              {quizName}
+            </h1>
+            <p className="text-base sm:text-lg text-muted-foreground">
+              Measure your {quizType === 'NOSE' ? 'nasal obstruction' : 'sinus'} symptoms
+            </p>
+          </div>
+
           <Card className="shadow-lg">
             <CardContent className="p-4 sm:p-6 md:p-8">
               <div className="mb-6">
-                <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-6">
-                  <p className="text-foreground leading-relaxed mb-3">
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-muted-foreground">
                     Based on your response, we recommend that you complete the {quizName}. 
                     The {quizType} test is a quick {totalQuestions}-question survey that calculates your 0–{maxScore} {quizType === 'NOSE' ? 'nasal obstruction' : 'sinus'} severity score.
                   </p>
