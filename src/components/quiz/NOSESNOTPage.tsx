@@ -169,7 +169,7 @@ export function NOSESNOTPage() {
         <div className="max-w-4xl mx-auto">
           <Card className="bg-white shadow-xl border-0">
             <CardContent className="p-8">
-              <h3 className="text-2xl font-bold text-center text-slate-800 mb-8">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-center text-slate-800 mb-6 sm:mb-8">
                 Is your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?
               </h3>
 
@@ -180,7 +180,7 @@ export function NOSESNOTPage() {
                   >
                     <button
                       onClick={() => handleTriageAnswer('A')}
-                      className={`w-full p-5 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-blue-400 hover:bg-blue-50 ${
+                      className={`w-full p-4 sm:p-5 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-blue-400 hover:bg-blue-50 text-sm sm:text-base ${
                         selectedTriage === 'A'
                           ? 'border-blue-500 bg-blue-50'
                           : 'border-slate-200 bg-white'
@@ -196,7 +196,7 @@ export function NOSESNOTPage() {
                   >
                     <button
                       onClick={() => handleTriageAnswer('B')}
-                      className={`w-full p-5 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-blue-400 hover:bg-blue-50 ${
+                      className={`w-full p-4 sm:p-5 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-blue-400 hover:bg-blue-50 text-sm sm:text-base ${
                         selectedTriage === 'B'
                           ? 'border-blue-500 bg-blue-50'
                           : 'border-slate-200 bg-white'
@@ -231,7 +231,7 @@ export function NOSESNOTPage() {
         <div className="max-w-4xl mx-auto">
           <Card className="bg-white shadow-xl border-0">
             <CardContent className="p-8">
-              <h3 className="text-2xl font-bold text-center text-slate-800 mb-8">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-center text-slate-800 mb-6 sm:mb-8">
                 Question {currentQuestion + 1}: {quizType === 'NOSE' && currentQuestion === 0 ? 'Rate your nasal blockage or obstruction' : currentQ.text}
               </h3>
 
@@ -252,7 +252,7 @@ export function NOSESNOTPage() {
                       >
                         <button
                           onClick={() => handleQuizAnswer(index, option)}
-                          className={`w-full p-5 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-blue-400 hover:bg-blue-50 ${
+                          className={`w-full p-4 sm:p-5 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-blue-400 hover:bg-blue-50 text-sm sm:text-base ${
                             selectedOption === index
                               ? 'border-blue-500 bg-blue-50'
                               : 'border-slate-200 bg-white'
@@ -290,7 +290,7 @@ export function NOSESNOTPage() {
             <Card className="shadow-lg">
               <CardContent className="p-4 sm:p-6 md:p-8 text-center">
                 <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h2 className="text-3xl font-bold text-foreground mb-4">Thank You!</h2>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-4">Thank You!</h2>
                 <p className="text-muted-foreground mb-6">
                   Your results have been sent. {doctorProfile?.clinic_name || 'Our team'} will contact you soon to discuss your assessment.
                 </p>
@@ -308,13 +308,13 @@ export function NOSESNOTPage() {
             <CardContent className="p-4 sm:p-6 md:p-8">
               <div className="text-center mb-8">
                 <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h2 className="text-3xl font-bold text-foreground mb-2">Assessment Complete</h2>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">Assessment Complete</h2>
                 <p className="text-muted-foreground">Here are your results</p>
               </div>
 
               <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-8">
                 <div className="text-center mb-4">
-                  <div className="text-5xl font-bold text-primary mb-2">{quizResult.score}</div>
+                  <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-2">{quizResult.score}</div>
                   <div className="text-sm uppercase tracking-wide text-muted-foreground">
                     {quizType} Score
                   </div>
@@ -327,7 +327,7 @@ export function NOSESNOTPage() {
 
               <div className="border-t border-border pt-8">
                 <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-foreground mb-2">Get Your Detailed Results</h3>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2">Get Your Detailed Results</h3>
                   <p className="text-muted-foreground">
                     Enter your information to receive your complete assessment results and recommendations. We may contact you if you qualify for an in office procedure that may give your symptoms relief.
                   </p>
