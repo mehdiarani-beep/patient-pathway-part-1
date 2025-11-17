@@ -134,7 +134,7 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
             }).join('\n• ');
             
             consolidatedMessage = selectedSubQuiz 
-              ? `Based on your response, we recommend that you complete the Nasal Obstruction Symptom Evaluation (NOSE). The NOSE test is a quick 5-question survey that calculates your 0–100 nasal obstruction severity score.\n\nQuestion 1 of 5:\nRate your nasal blockage or obstruction\n`
+              ? `Question 1 of 5:\nRate your nasal blockage or obstruction.`
               : `Start your Nasal Obstruction Symptom Evaluation (NOSE) to get your 0–100 nasal obstruction score.\n\nQuestion 1 of 5:\n${firstQuestion.text}\n`;
           } else if (activeQuizType === 'SNOT12') {
             optionsText = firstQuestion.options.map((option, index) => {
@@ -145,7 +145,7 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
             }).join('\n• ');
             
             consolidatedMessage = selectedSubQuiz
-              ? `Based on your response, we recommend that you complete the Sinonasal Outcome Test (SNOT). The SNOT test is a quick 12-question survey that calculates your 0–60 sinus severity score.\n\nQuestion 1 of 12:\nRate your Need to blow nose.\n`
+              ? `Question 1 of 12:\nRate your Need to blow nose.`
               : `Start your SNOT-12 assessment to get your 0–60 sinus severity score. \n\nQuestion 1 of 12:\n\n${firstQuestion.text}\n`;
           } else if (activeQuizType === 'TNSS') {
             optionsText = firstQuestion.options.map((option, index) => {
@@ -409,8 +409,8 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
       setTimeout(() => {
         setShowTyping(false);
         const transitionMessage = answerIndex === 0 
-          ? "Great! Based on your symptoms, I'll guide you through the NOSE (Nasal Obstruction Symptom Evaluation) questionnaire. This will help us understand the severity of your nasal blockage.\n\nLet's begin:"
-          : "Great! Based on your symptoms, I'll guide you through the SNOT-12 (Sino-Nasal Outcome Test) questionnaire. This will help us evaluate your sinus-related symptoms.\n\nLet's begin:";
+          ? "Great! Based on your response, we recommend that you complete the Nasal Obstruction Symptom Evaluation (NOSE). The NOSE test is a quick 5-question survey that calculates your 0–100 nasal obstruction severity score.\n\nLet's begin"
+          : "Great! Based on your response, we recommend that you complete the Sinonasal Outcome Test (SNOT). The SNOT test is a quick 12-question survey that calculates your 0–60 sinus severity score.\n\nLet's begin";
         
         setMessages(prev => [...prev, {
           role: 'assistant',
