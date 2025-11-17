@@ -73,17 +73,16 @@ export function NOSESNOTPage() {
 
   const handleTriageAnswer = (option: string) => {
     setSelectedTriage(option);
-  };
-
-  const handleTriageContinue = () => {
-    if (!selectedTriage) return;
     
-    if (selectedTriage === 'A') {
-      setQuizType('NOSE');
-    } else {
-      setQuizType('SNOT12');
-    }
-    setStage('quiz');
+    // Auto-progress to quiz after brief delay
+    setTimeout(() => {
+      if (option === 'A') {
+        setQuizType('NOSE');
+      } else {
+        setQuizType('SNOT12');
+      }
+      setStage('quiz');
+    }, 300);
   };
 
   const handleQuizAnswer = (answerIndex: number, answer: string) => {
@@ -187,15 +186,6 @@ export function NOSESNOTPage() {
                     </Label>
                   </div>
                 </RadioGroup>
-
-                <Button 
-                  onClick={handleTriageContinue} 
-                  disabled={!selectedTriage}
-                  className="w-full"
-                  size="lg"
-                >
-                  Continue to Assessment
-                </Button>
               </div>
             </CardContent>
           </Card>
