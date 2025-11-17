@@ -270,7 +270,7 @@ async function sendDoctorNotificationEmail(lead: any, doctorProfile: any) {
         <table class="info-table">
           <tr>
             <td class="info-label">Quiz Type</td>
-            <td class="info-value">${lead.quiz_type}</td>
+            <td class="info-value">${getQuizTypeLabel(lead.quiz_type)}</td>
           </tr>
           <tr>
             <td class="info-label">Doctor</td>
@@ -318,7 +318,7 @@ async function sendDoctorNotificationEmail(lead: any, doctorProfile: any) {
   const text = `
 New Quiz Submission
 
-Quiz: ${lead.quiz_type} - ${doctorName}
+Quiz: ${getQuizTypeLabel(lead.quiz_type)} - ${doctorName}
 Status: Qualified Lead
 Total Score: ${lead.score}
 Submitted: ${new Date(lead.submitted_at).toLocaleString()}
@@ -392,6 +392,23 @@ Hint: Your PIN is your office zip code.
       message: 'Failed to send doctor notification email'
     };
   }
+}
+
+function getQuizTypeLabel(quizType: string): string {
+  const quizLabels: Record<string, string> = {
+    'MIDAS': 'Migraine-Specific Quality of Life Questionnaire',
+    'NOSE_SNOT': 'Nasal Assessment',
+    'SNOT22': 'SNOT-22 Assessment',
+    'SNOT12': 'SNOT-12 Assessment',
+    'NOSE': 'NOSE Assessment',
+    'TNSS': 'TNSS Assessment',
+    'EPWORTH': 'Epworth Sleepiness Scale',
+    'STOP': 'STOP-BANG Assessment',
+    'HHIA': 'HHIA Assessment',
+    'DHI': 'Dizziness Handicap Inventory',
+    'SYMPTOM_CHECKER': 'Symptom Checker'
+  };
+  return quizLabels[quizType] || quizType;
 }
 
 function generateMinimalAnswersSummary(answers: any) {

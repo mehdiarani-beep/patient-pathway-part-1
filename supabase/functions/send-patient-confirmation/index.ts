@@ -121,6 +121,23 @@ const handler = async (req: Request) => {
   }
 };
 
+function getQuizTypeLabel(quizType: string): string {
+  const quizLabels: Record<string, string> = {
+    'MIDAS': 'Migraine-Specific Quality of Life Questionnaire',
+    'NOSE_SNOT': 'Nasal Assessment',
+    'SNOT22': 'SNOT-22 Assessment',
+    'SNOT12': 'SNOT-12 Assessment',
+    'NOSE': 'NOSE Assessment',
+    'TNSS': 'TNSS Assessment',
+    'EPWORTH': 'Epworth Sleepiness Scale',
+    'STOP': 'STOP-BANG Assessment',
+    'HHIA': 'HHIA Assessment',
+    'DHI': 'Dizziness Handicap Inventory',
+    'SYMPTOM_CHECKER': 'Symptom Checker'
+  };
+  return quizLabels[quizType] || quizType;
+}
+
 async function sendPatientConfirmationEmail(lead: any, doctorProfile: any) {
   console.log('=== SENDING PATIENT CONFIRMATION EMAIL ===');
   
@@ -286,7 +303,7 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any) {
       <div class="greeting">Dear ${lead.name},</div>
 
       <div class="content">
-        Thank you for taking the time to complete your ${lead.quiz_type} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.
+        Thank you for taking the time to complete your ${getQuizTypeLabel(lead.quiz_type)} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.
       </div>
 
       <div class="highlight-box">
@@ -297,7 +314,7 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any) {
       <div class="assessment-details">
         <div class="detail-row">
           <span class="detail-label">Assessment Type:</span>
-          <span class="detail-value">${lead.quiz_type}</span>
+          <span class="detail-value">${getQuizTypeLabel(lead.quiz_type)}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Completed:</span>
