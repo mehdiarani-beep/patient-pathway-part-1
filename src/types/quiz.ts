@@ -1,4 +1,4 @@
-export type QuizType = 'SNOT22' | 'NOSE' | 'HHIA' | 'EPWORTH' | 'DHI' | 'STOP' | 'TNSS' | 'SNOT12' | 'SYMPTOM_CHECKER';
+export type QuizType = 'SNOT22' | 'NOSE' | 'HHIA' | 'EPWORTH' | 'DHI' | 'STOP' | 'TNSS' | 'SNOT12' | 'SYMPTOM_CHECKER' | 'NOSE_SNOT';
 
 export interface QuizQuestion {
   id: string;
