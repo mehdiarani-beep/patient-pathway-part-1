@@ -290,53 +290,7 @@ export function CardQuiz() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          {doctorProfile ? (
-            <>
-              {/* Doctor Avatar */}
-              <div className="flex flex-col items-center space-y-2 sm:space-y-3">
-                {doctorProfile.avatar_url ? (
-                  <motion.img 
-                    src={doctorProfile.avatar_url} 
-                    alt={doctorProfile.doctor_name}
-                    className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 mx-auto object-cover rounded-full border-4 border-white shadow-xl ring-4 ring-blue-100 dark:ring-blue-900/30"
-                    initial={{ scale: 0.8 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
-                  />
-                ) : (
-                  <motion.img 
-                    src={Profileimage} 
-                    alt={doctorProfile.doctor_name}
-                    className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 mx-auto object-cover rounded-full border-4 border-white shadow-xl ring-4 ring-blue-100 dark:ring-blue-900/30"
-                    initial={{ scale: 0.8 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
-                  />
-                )}
-                
-                {/* Doctor Name and Clinic */}
-                <div className="text-center px-2">
-                  <motion.h1 
-                    className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white leading-tight"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3, delay: 0.3 }}
-                  >
-                    Dr. {doctorProfile.first_name} {doctorProfile.last_name}
-                  </motion.h1>
-                  <motion.p 
-                    className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-300 mt-1"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3, delay: 0.4 }}
-                  >
-                    {doctorProfile.clinic_name}
-                  </motion.p>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="text-center space-y-2 px-2">
+          <div className="text-center space-y-2 px-2">
               <motion.div 
                 className="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-xl ring-4 ring-blue-100 dark:ring-blue-900/30"
                 initial={{ scale: 0.8 }}
@@ -364,7 +318,6 @@ export function CardQuiz() {
                 </motion.p>
               )}
             </div>
-          )}
         </motion.div>
 
         {/* Quiz Card */}

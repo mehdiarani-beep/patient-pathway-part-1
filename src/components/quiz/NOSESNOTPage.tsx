@@ -167,25 +167,6 @@ export function NOSESNOTPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          {doctorProfile && (
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3 shadow-lg">
-                {doctorProfile.avatar_url || doctorProfile.logo_url ? (
-                  <img 
-                    src={doctorProfile.avatar_url || doctorProfile.logo_url} 
-                    alt="Doctor" 
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <span>Dr</span>
-                )}
-              </div>
-              <h2 className="text-xl font-semibold text-slate-800">
-                Dr. {doctorProfile.first_name} {doctorProfile.last_name}
-              </h2>
-            </div>
-          )}
-
           <Card className="bg-white shadow-xl border-0">
             <CardContent className="p-8">
               <h3 className="text-2xl font-bold text-center text-slate-800 mb-8">
@@ -248,25 +229,6 @@ export function NOSESNOTPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          {doctorProfile && (
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3 shadow-lg">
-                {doctorProfile.avatar_url || doctorProfile.logo_url ? (
-                  <img 
-                    src={doctorProfile.avatar_url || doctorProfile.logo_url} 
-                    alt="Doctor" 
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <span>Dr</span>
-                )}
-              </div>
-              <h2 className="text-xl font-semibold text-slate-800">
-                Dr. {doctorProfile.first_name} {doctorProfile.last_name}
-              </h2>
-            </div>
-          )}
-
           <Card className="bg-white shadow-xl border-0">
             <CardContent className="p-8">
               <h3 className="text-2xl font-bold text-center text-slate-800 mb-8">
