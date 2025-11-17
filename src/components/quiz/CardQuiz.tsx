@@ -239,7 +239,7 @@ export function CardQuiz() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Quiz Not Found</h2>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-4">Quiz Not Found</h2>
           <p className="text-gray-600 dark:text-gray-400">The requested quiz could not be found.</p>
         </motion.div>
       </div>
