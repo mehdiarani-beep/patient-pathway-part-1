@@ -69,7 +69,8 @@ export function QuizManagementPage() {
   const predefinedQuizzes = Object.values(quizzes).filter(quiz => quiz && quiz.id);
   const categorizedQuizzes = {
     Nasal: ['NOSE', 'TNSS','SNOT12', 'NOSE_SNOT'],
-    Sleep: ['EPWORTH', 'STOP']
+    Sleep: ['EPWORTH', 'STOP'],
+    'Headache/Migraine': ['MIDAS']
   };
   const categorizedPredefined = Object.entries(categorizedQuizzes).map(([category, ids]) => ({
     category,
