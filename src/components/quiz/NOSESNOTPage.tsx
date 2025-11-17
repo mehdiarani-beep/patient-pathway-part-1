@@ -165,45 +165,47 @@ export function NOSESNOTPage() {
 
   if (stage === 'triage') {
     return (
-      <div className="min-h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
-        <div className="max-w-2xl mx-auto w-full">
-          <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 sm:mb-4">
-              Nasal Assessment
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground">
-              Personalized nasal and sinus symptom evaluation
-            </p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          {doctorProfile && (
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3 shadow-lg">
+                {doctorProfile.avatar_url || doctorProfile.logo_url ? (
+                  <img 
+                    src={doctorProfile.avatar_url || doctorProfile.logo_url} 
+                    alt="Doctor" 
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <span>Dr</span>
+                )}
+              </div>
+              <h2 className="text-xl font-semibold text-slate-800">
+                Dr. {doctorProfile.first_name} {doctorProfile.last_name}
+              </h2>
+            </div>
+          )}
 
-          <Card className="shadow-lg">
-            <CardContent className="p-4 sm:p-6 md:p-8">
-              <div className="space-y-6">
-                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                    Hello! Welcome to the Nasal Assessment. Your personalized nasal and sinus symptom evaluation.
-                  </p>
-                  <h2 className="text-xl font-semibold text-foreground mb-6">
-                    Is your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?
-                  </h2>
-                </div>
+          <Card className="bg-white shadow-xl border-0">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-center text-slate-800 mb-8">
+                Is your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?
+              </h3>
 
-                <div className="space-y-3">
+              <div className="space-y-3">
                   <motion.div
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <button
                       onClick={() => handleTriageAnswer('A')}
-                      className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                      className={`w-full p-5 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-blue-400 hover:bg-blue-50 ${
                         selectedTriage === 'A'
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border hover:border-primary/50 hover:bg-accent/50'
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-slate-200 bg-white'
                       }`}
                     >
-                      <span className="text-foreground">
-                        <span className="font-semibold">A.</span> Nasal blockage/stuffiness
-                      </span>
+                      <span className="font-semibold">A.</span> Nasal blockage/stuffiness
                     </button>
                   </motion.div>
 
@@ -213,17 +215,21 @@ export function NOSESNOTPage() {
                   >
                     <button
                       onClick={() => handleTriageAnswer('B')}
-                      className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                      className={`w-full p-5 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-blue-400 hover:bg-blue-50 ${
                         selectedTriage === 'B'
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border hover:border-primary/50 hover:bg-accent/50'
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-slate-200 bg-white'
                       }`}
                     >
-                      <span className="text-foreground">
-                        <span className="font-semibold">B.</span> Sinus-related symptoms like facial pressure, headaches, or a reduced sense of smell
-                      </span>
+                      <span className="font-semibold">B.</span> Sinus-related symptoms like facial pressure, headaches, or a reduced sense of smell
                     </button>
                   </motion.div>
+                </div>
+
+              <div className="mt-8 pt-6 border-t border-slate-200">
+                <div className="flex justify-between items-center text-sm text-slate-600">
+                  <span>Progress</span>
+                  <span>0%</span>
                 </div>
               </div>
             </CardContent>
@@ -240,35 +246,32 @@ export function NOSESNOTPage() {
     const totalQuestions = quiz.questions.length;
 
     return (
-      <div className="min-h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
-        <div className="max-w-2xl mx-auto w-full">
-          <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 sm:mb-4">
-              {quizName}
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground">
-              Measure your {quizType === 'NOSE' ? 'nasal obstruction' : 'sinus'} symptoms
-            </p>
-          </div>
-
-          <Card className="shadow-lg">
-            <CardContent className="p-4 sm:p-6 md:p-8">
-              <div className="mb-6">
-                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-muted-foreground">
-                    Based on your response, we recommend that you complete the {quizName}. 
-                    The {quizType} test is a quick {totalQuestions}-question survey that calculates your 0–{maxScore} {quizType === 'NOSE' ? 'nasal obstruction' : 'sinus'} severity score.
-                  </p>
-                </div>
-
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    Question {currentQuestion + 1} of {totalQuestions}
-                  </span>
-                  <span className="text-sm font-medium text-primary">{Math.round(progress)}%</span>
-                </div>
-                <Progress value={progress} className="mb-6" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          {doctorProfile && (
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3 shadow-lg">
+                {doctorProfile.avatar_url || doctorProfile.logo_url ? (
+                  <img 
+                    src={doctorProfile.avatar_url || doctorProfile.logo_url} 
+                    alt="Doctor" 
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <span>Dr</span>
+                )}
               </div>
+              <h2 className="text-xl font-semibold text-slate-800">
+                Dr. {doctorProfile.first_name} {doctorProfile.last_name}
+              </h2>
+            </div>
+          )}
+
+          <Card className="bg-white shadow-xl border-0">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-center text-slate-800 mb-8">
+                Question {currentQuestion + 1}: {quizType === 'NOSE' && currentQuestion === 0 ? 'Rate your nasal blockage or obstruction' : currentQ.text}
+              </h3>
 
               <AnimatePresence mode="wait">
                 <motion.div
@@ -278,10 +281,6 @@ export function NOSESNOTPage() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <h2 className="text-xl font-semibold text-foreground mb-6">
-                    {quizType === 'NOSE' && currentQuestion === 0 ? 'Rate your nasal blockage or obstruction' : currentQ.text}
-                  </h2>
-
                   <div className="space-y-3">
                     {currentQ.options.map((option, index) => (
                       <motion.div
@@ -291,19 +290,29 @@ export function NOSESNOTPage() {
                       >
                         <button
                           onClick={() => handleQuizAnswer(index, option)}
-                          className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                          className={`w-full p-5 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-blue-400 hover:bg-blue-50 ${
                             selectedOption === index
-                              ? 'border-primary bg-primary/10'
-                              : 'border-border hover:border-primary/50 hover:bg-accent/50'
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-slate-200 bg-white'
                           }`}
                         >
-                          <span className="text-foreground">{option}</span>
+                          {option}
                         </button>
                       </motion.div>
                     ))}
                   </div>
                 </motion.div>
               </AnimatePresence>
+
+              <div className="mt-8 pt-6 border-t border-slate-200">
+                <div className="flex justify-between items-center text-sm text-slate-600 mb-2">
+                  <span>Progress</span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <div className="text-center text-sm text-slate-600">
+                  Question {currentQuestion + 1} of {totalQuestions}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
