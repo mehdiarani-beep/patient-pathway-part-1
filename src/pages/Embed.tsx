@@ -1,5 +1,5 @@
 import { EnhancedChatBot } from "@/components/quiz/EnhancedChatBot";
-import { useParams, useSearchParams, Navigate } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { QuizType } from "@/types/quiz";
 import { quizzes } from "@/data/quizzes";
 import { useState, useEffect } from "react";
@@ -13,12 +13,6 @@ const Embed = () => {
   const [error, setError] = useState<string | null>(null);
 
   const doctorId = searchParams.get('doctor');
-
-  // Redirect NOSE_SNOT to the card-based page
-  if (quizId?.toLowerCase() === 'nose_snot') {
-    const redirectUrl = `/share/nose_snot${doctorId ? `?doctor=${doctorId}` : ''}`;
-    return <Navigate to={redirectUrl} replace />;
-  }
 
   useEffect(() => {
     const fetchQuizData = async () => {

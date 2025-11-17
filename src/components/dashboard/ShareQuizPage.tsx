@@ -232,9 +232,12 @@ export function ShareQuizPage() {
   }, [customQuizId, quizId, doctorProfile, webSource, baseUrl]);
 
   const getStandardFormatUrl = useCallback((source?: string) => {
+    // For NOSE_SNOT, use the special /share route instead of /quiz
     const baseQuizUrl = customQuizId
       ? `${baseUrl}/quiz/custom/${customQuizId}`
-      : `${baseUrl}/quiz/${quizId?.toLowerCase()}`;
+      : quizId?.toLowerCase() === 'nose_snot'
+        ? `${baseUrl}/share/nose_snot`
+        : `${baseUrl}/quiz/${quizId?.toLowerCase()}`;
     
     const trackingParams = new URLSearchParams();
     
