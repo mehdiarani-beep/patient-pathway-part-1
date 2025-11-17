@@ -306,7 +306,7 @@ export function NOSESNOTPage() {
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-foreground mb-2">Get Your Detailed Results</h3>
                   <p className="text-muted-foreground">
-                    Enter your information to receive your complete assessment results and recommendations
+                    Enter your information to receive your complete assessment results and recommendations. We may contact you if you qualify for an in office procedure that may give your symptoms relief.
                   </p>
                 </div>
 
