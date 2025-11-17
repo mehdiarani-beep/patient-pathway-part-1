@@ -52,7 +52,6 @@ function App() {
               <Route path="/share/snot22/:doctorId?" element={<Snot22LandingPage/>}/>
               <Route path="/share/tnss/:doctorId?" element={<TNSSLandingPage/>}/>
               <Route path="/share/nose_snot/:doctorId?" element={<NOSESNOTLandingPage/>}/>
-              <Route path="/portal/share/nose_snot" element={<NOSESNOTLandingPage />} />
               <Route path="/share/:quizType/:doctorId?" element={<ShareQuizPage />} />
               <Route path="/portal/*" element={<PortalPage />} />
               <Route path="/portal/share/:quizId" element={<ShareQuizPage />} />
