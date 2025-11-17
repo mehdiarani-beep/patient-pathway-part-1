@@ -69,6 +69,11 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
   const [doctorProfile, setDoctorProfile] = useState<any>(null);
   const [chatbotColors, setChatbotColors] = useState(defaultChatbotColors);
   const [dimensions, setDimensions] = useState({ width: '100%', height: '100%' });
+  
+  // Add states for NOSE_SNOT branching
+  const [isTriageStage, setIsTriageStage] = useState(false);
+  const [selectedSubQuiz, setSelectedSubQuiz] = useState<'NOSE' | 'SNOT12' | null>(null);
+  const [activeQuizType, setActiveQuizType] = useState<QuizType>(quizType);
 
   useEffect(() => {
     const primary = searchParams.get('primary');
@@ -96,7 +101,7 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
 
   }, [searchParams]);
 
-  const quizData = quizzes[quizType];
+  const quizData = customQuiz || (selectedSubQuiz ? quizzes[selectedSubQuiz] : quizzes[activeQuizType]);
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -116,20 +121,22 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
         const question = quizData.questions[questionIndex];
         
         // For NOSE, SNOT12, and TNSS quizzes, include the first question in the initial message
-        if ((quizType === 'NOSE' || quizType === 'SNOT12' || quizType === 'TNSS') && questionIndex === 0) {
+        if ((activeQuizType === 'NOSE' || activeQuizType === 'SNOT12' || activeQuizType === 'TNSS') && questionIndex === 0) {
           const firstQuestion = quizData.questions[0];
           let consolidatedMessage = '';
           let optionsText = '';
           
-          if (quizType === 'NOSE') {
+          if (activeQuizType === 'NOSE') {
             optionsText = firstQuestion.options.map((option, index) => {
               const score = option.match(/\((\d+)\)/)?.[1] || index;
               const label = option.replace(/\s*\(\d+\)$/, '');
               return `${score} – ${label}`;
             }).join('\n• ');
             
-            consolidatedMessage = `Start your Nasal Obstruction Symptom Evaluation (NOSE) to get your 0–100 nasal obstruction score.\n\nQuestion 1 of 5:\n${firstQuestion.text}\n`;
-          } else if (quizType === 'SNOT12') {
+            consolidatedMessage = selectedSubQuiz 
+              ? `Based on your response, we recommend that you complete the Nasal Obstruction Symptom Evaluation (NOSE). The NOSE test is a quick 5-question survey that calculates your 0–100 nasal obstruction severity score.\n\nQuestion 1 of 5:\nRate your nasal blockage or obstruction\n`
+              : `Start your Nasal Obstruction Symptom Evaluation (NOSE) to get your 0–100 nasal obstruction score.\n\nQuestion 1 of 5:\n${firstQuestion.text}\n`;
+          } else if (activeQuizType === 'SNOT12') {
             optionsText = firstQuestion.options.map((option, index) => {
               const letter = String.fromCharCode(65 + index); // A, B, C, etc.
               const score = option.match(/\((\d+)\)/)?.[1] || index;
@@ -137,8 +144,10 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
               return `${letter} – ${label} (${score})`;
             }).join('\n• ');
             
-            consolidatedMessage = `Start your SNOT-12 assessment to get your 0–60 sinus severity score. \n\nQuestion 1 of 12:\n\n${firstQuestion.text}\n`;
-          } else if (quizType === 'TNSS') {
+            consolidatedMessage = selectedSubQuiz
+              ? `Based on your response, we recommend that you complete the Sinonasal Outcome Test (SNOT). The SNOT test is a quick 12-question survey that calculates your 0–60 sinus severity score.\n\nQuestion 1 of 12:\nRate your Need to blow nose.\n`
+              : `Start your SNOT-12 assessment to get your 0–60 sinus severity score. \n\nQuestion 1 of 12:\n\n${firstQuestion.text}\n`;
+          } else if (activeQuizType === 'TNSS') {
             optionsText = firstQuestion.options.map((option, index) => {
               const score = option.match(/\((\d+)\)/)?.[1] || index;
               const label = option.replace(/\s*\(\d+\)$/, '');
@@ -175,8 +184,24 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
     if (quizData && !quizStarted) {
       setLoading(false);
       
+      // Handle NOSE_SNOT triage question
+      if (quizType === 'NOSE_SNOT' && !selectedSubQuiz) {
+        setIsTriageStage(true);
+        setMessages([
+          {
+            role: 'assistant',
+            content: `Hello! Welcome to the Nasal Assessment. Your personalized nasal and sinus symptom evaluation.\n\nIs your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?`,
+            isQuestion: true,
+            questionIndex: 0,
+            options: ['A. Nasal blockage/stuffiness', 'B. Sinus-related symptoms like facial pressure, headaches, or a reduced sense of smell']
+          }
+        ]);
+        setQuizStarted(true);
+        return;
+      }
+      
       // For NOSE, SNOT12, and TNSS quizzes, show consolidated message and start immediately
-      if (quizType === 'NOSE' || quizType === 'SNOT12' || quizType === 'TNSS') {
+      if (activeQuizType === 'NOSE' || activeQuizType === 'SNOT12' || activeQuizType === 'TNSS') {
         setQuizStarted(true);
         askNextQuestion(0);
       } else {
@@ -191,7 +216,7 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
         askNextQuestion(0);
       }
     }
-  }, [quizData, quizStarted]);
+  }, [quizData, quizStarted, selectedSubQuiz]);
 
   useEffect(() => {
     const urlDoctorId = searchParams.get('doctor');
@@ -401,7 +426,8 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
   const completeQuiz = (finalAnswers: QuizAnswer[]) => {
     setQuizCompleted(true);
     
-    const quizResult = calculateQuizScore(quizType, finalAnswers);
+    const effectiveQuizType = selectedSubQuiz || activeQuizType;
+    const quizResult = calculateQuizScore(effectiveQuizType, finalAnswers);
     setResult(quizResult);
 
     // Show results first
@@ -491,11 +517,12 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
     setIsSubmittingLead(true);
     
     try {
+      const effectiveQuizType = selectedSubQuiz || activeQuizType;
       const leadData = {
         name: userInfo.name,
         email: userInfo.email,
         phone: userInfo.phone,
-        quiz_type: quizType,
+        quiz_type: effectiveQuizType,
         score: result.score,
         answers: answers,
         lead_source: searchParams.get('utm_source') || (shareKey ? 'shared_link' : 'chatbot_page'),
@@ -567,9 +594,30 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: En
     setInfoStep(0);
     setLeadSubmitted(false);
     setInput('');
+    setIsTriageStage(false);
+    setSelectedSubQuiz(null);
+    setActiveQuizType(quizType);
+    
+    // Handle NOSE_SNOT triage restart
+    if (quizType === 'NOSE_SNOT') {
+      setTimeout(() => {
+        setIsTriageStage(true);
+        setMessages([
+          {
+            role: 'assistant',
+            content: `Hello! Welcome to the Nasal Assessment. Your personalized nasal and sinus symptom evaluation.\n\nIs your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?`,
+            isQuestion: true,
+            questionIndex: 0,
+            options: ['A. Nasal blockage/stuffiness', 'B. Sinus-related symptoms like facial pressure, headaches, or a reduced sense of smell']
+          }
+        ]);
+        setQuizStarted(true);
+      }, 100);
+      return;
+    }
     
     // For NOSE, SNOT12, and TNSS quizzes, show consolidated message and start immediately
-    if (quizType === 'NOSE' || quizType === 'SNOT12' || quizType === 'TNSS') {
+    if (activeQuizType === 'NOSE' || activeQuizType === 'SNOT12' || activeQuizType === 'TNSS') {
       setTimeout(() => {
         setQuizStarted(true);
         askNextQuestion(0);
