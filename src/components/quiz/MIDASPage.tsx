@@ -101,22 +101,43 @@ export function MIDASPage() {
       return;
     }
 
+    if (!doctorId) {
+      toast.error('Invalid quiz link');
+      return;
+    }
+
     setSubmittingLead(true);
 
     try {
-      const { error } = await supabase.from('quiz_leads').insert({
+      const leadDataToSubmit = {
         name: leadData.name,
         email: leadData.email,
-        phone: leadData.phone,
+        phone: leadData.phone || '',
         quiz_type: 'MIDAS',
         score: quizResult.score,
         answers: answers,
-        doctor_id: doctorId || '',
-        share_key: key
+        lead_status: 'NEW',
+        doctor_id: doctorId,
+        share_key: key || null,
+        submitted_at: new Date().toISOString()
+      };
+
+      console.log('Submitting MIDAS lead via edge function:', leadDataToSubmit);
+
+      // Use the Supabase edge function to submit the lead (triggers email notifications)
+      const { data, error } = await supabase.functions.invoke('submit-lead', {
+        body: leadDataToSubmit,
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
 
+      console.log('Lead submitted successfully:', data);
       setLeadSubmitted(true);
       toast.success('Information submitted successfully!');
     } catch (error) {
