@@ -165,7 +165,7 @@ export function NOSESNOTPage() {
 
   if (stage === 'triage') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 py-8 px-4">
+      <div className="h-full w-full bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 py-8 px-4 overflow-y-auto">
         <div className="max-w-4xl mx-auto">
           <Card className="bg-white shadow-xl border-0">
             <CardContent className="p-8">
@@ -227,7 +227,7 @@ export function NOSESNOTPage() {
     const totalQuestions = quiz.questions.length;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 py-8 px-4">
+      <div className="h-full w-full bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 py-8 px-4 overflow-y-auto">
         <div className="max-w-4xl mx-auto">
           <Card className="bg-white shadow-xl border-0">
             <CardContent className="p-8">

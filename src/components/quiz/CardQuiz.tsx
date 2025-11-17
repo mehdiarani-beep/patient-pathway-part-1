@@ -275,7 +275,7 @@ export function CardQuiz() {
     }
   }
   return (
-    <div className="min-h-full w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950 dark:via-indigo-950 dark:to-purple-950 flex flex-col items-center justify-center p-2 sm:p-4 overflow-hidden">
+    <div className="h-full w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950 dark:via-indigo-950 dark:to-purple-950 flex flex-col items-center justify-start p-2 sm:p-4 overflow-y-auto">
       <motion.div
         className="w-full max-w-5xl space-y-4 sm:space-y-6 lg:space-y-8"
         initial={{ opacity: 0, y: 20 }}

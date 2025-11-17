@@ -104,7 +104,7 @@ export function EmbeddedQuiz() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center">
+      <div className="h-full w-full bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading assessment...</p>
@@ -115,7 +115,7 @@ export function EmbeddedQuiz() {
 
   if (error || !quizData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center">
+      <div className="h-full w-full bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center">
         <div className="max-w-md mx-auto p-6">
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Assessment Not Found</h2>
@@ -127,7 +127,7 @@ export function EmbeddedQuiz() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50">
+    <div className="h-full w-full bg-gradient-to-br from-blue-50 to-teal-50">
       <EmbeddedChatBot 
         quizType={quizType}
         quizData={quizData}
