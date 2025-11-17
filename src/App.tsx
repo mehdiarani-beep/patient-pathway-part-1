@@ -25,6 +25,7 @@ import Embed from './pages/Embed';
 import Snot12LandingPage from './pages/SNOT12LandingPage';
 import Snot22LandingPage from './pages/share/SNOT22LandingPage';
 import TNSSLandingPage from './pages/share/TNSSLandingPage';
+import NOSESNOTLandingPage from './pages/share/NOSESNOTLandingPage';
 import AdminPortal from './pages/AdminPortal';
 import TeamSignupPage from './pages/TeamSignupPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
@@ -50,6 +51,8 @@ function App() {
               <Route path="/share/snot12/:doctorId?" element={<SNOTLandingPage/>}/>
               <Route path="/share/snot22/:doctorId?" element={<Snot22LandingPage/>}/>
               <Route path="/share/tnss/:doctorId?" element={<TNSSLandingPage/>}/>
+              <Route path="/share/nose_snot/:doctorId?" element={<NOSESNOTLandingPage/>}/>
+              <Route path="/portal/share/nose_snot" element={<NOSESNOTLandingPage />} />
               <Route path="/share/:quizType/:doctorId?" element={<ShareQuizPage />} />
               <Route path="/portal/*" element={<PortalPage />} />
               <Route path="/portal/share/:quizId" element={<ShareQuizPage />} />
