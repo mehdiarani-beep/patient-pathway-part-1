@@ -111,10 +111,6 @@ export function NOSESNOTPage() {
     }, 300);
   };
 
-  const handleViewResults = () => {
-    setStage('contact');
-  };
-
   const handleSubmitLead = async () => {
     if (!leadData.name || !leadData.email) {
       toast.error('Please provide your name and email');
@@ -264,41 +260,6 @@ export function NOSESNOTPage() {
   }
 
   if (stage === 'results') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          <Card className="shadow-lg">
-            <CardContent className="p-8">
-              <div className="text-center mb-8">
-                <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h2 className="text-3xl font-bold text-foreground mb-2">Assessment Complete</h2>
-                <p className="text-muted-foreground">Here are your results</p>
-              </div>
-
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-6">
-                <div className="text-center mb-4">
-                  <div className="text-5xl font-bold text-primary mb-2">{quizResult.score}</div>
-                  <div className="text-sm uppercase tracking-wide text-muted-foreground">
-                    {quizType} Score
-                  </div>
-                </div>
-                <div className="border-t border-border pt-4">
-                  <p className="text-foreground font-semibold mb-2 capitalize">{quizResult.severity}</p>
-                  <p className="text-muted-foreground">{quizResult.interpretation}</p>
-                </div>
-              </div>
-
-              <Button onClick={handleViewResults} className="w-full" size="lg">
-                Continue
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  if (stage === 'contact') {
     if (leadSubmitted) {
       return (
         <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-12 px-4">
@@ -323,62 +284,83 @@ export function NOSESNOTPage() {
           <Card className="shadow-lg">
             <CardContent className="p-8">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-foreground mb-2">Get Your Detailed Results</h2>
-                <p className="text-muted-foreground">
-                  Enter your information to receive your complete assessment results and recommendations
-                </p>
+                <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+                <h2 className="text-3xl font-bold text-foreground mb-2">Assessment Complete</h2>
+                <p className="text-muted-foreground">Here are your results</p>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name" className="flex items-center gap-2 mb-2">
-                    <User className="w-4 h-4" />
-                    Full Name *
-                  </Label>
-                  <Input
-                    id="name"
-                    value={leadData.name}
-                    onChange={(e) => setLeadData({ ...leadData, name: e.target.value })}
-                    placeholder="Enter your full name"
-                  />
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-8">
+                <div className="text-center mb-4">
+                  <div className="text-5xl font-bold text-primary mb-2">{quizResult.score}</div>
+                  <div className="text-sm uppercase tracking-wide text-muted-foreground">
+                    {quizType} Score
+                  </div>
+                </div>
+                <div className="border-t border-border pt-4">
+                  <p className="text-foreground font-semibold mb-2 capitalize">{quizResult.severity}</p>
+                  <p className="text-muted-foreground">{quizResult.interpretation}</p>
+                </div>
+              </div>
+
+              <div className="border-t border-border pt-8">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Get Your Detailed Results</h3>
+                  <p className="text-muted-foreground">
+                    Enter your information to receive your complete assessment results and recommendations
+                  </p>
                 </div>
 
-                <div>
-                  <Label htmlFor="email" className="flex items-center gap-2 mb-2">
-                    <Mail className="w-4 h-4" />
-                    Email *
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={leadData.email}
-                    onChange={(e) => setLeadData({ ...leadData, email: e.target.value })}
-                    placeholder="Enter your email"
-                  />
-                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="name" className="flex items-center gap-2 mb-2">
+                      <User className="w-4 h-4" />
+                      Full Name *
+                    </Label>
+                    <Input
+                      id="name"
+                      value={leadData.name}
+                      onChange={(e) => setLeadData({ ...leadData, name: e.target.value })}
+                      placeholder="Enter your full name"
+                    />
+                  </div>
 
-                <div>
-                  <Label htmlFor="phone" className="flex items-center gap-2 mb-2">
-                    <Phone className="w-4 h-4" />
-                    Phone Number
-                  </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={leadData.phone}
-                    onChange={(e) => setLeadData({ ...leadData, phone: e.target.value })}
-                    placeholder="Enter your phone number"
-                  />
-                </div>
+                  <div>
+                    <Label htmlFor="email" className="flex items-center gap-2 mb-2">
+                      <Mail className="w-4 h-4" />
+                      Email *
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={leadData.email}
+                      onChange={(e) => setLeadData({ ...leadData, email: e.target.value })}
+                      placeholder="Enter your email"
+                    />
+                  </div>
 
-                <Button 
-                  onClick={handleSubmitLead}
-                  disabled={submittingLead || !leadData.name || !leadData.email}
-                  className="w-full"
-                  size="lg"
-                >
-                  {submittingLead ? 'Submitting...' : 'Submit Information'}
-                </Button>
+                  <div>
+                    <Label htmlFor="phone" className="flex items-center gap-2 mb-2">
+                      <Phone className="w-4 h-4" />
+                      Phone Number
+                    </Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={leadData.phone}
+                      onChange={(e) => setLeadData({ ...leadData, phone: e.target.value })}
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={handleSubmitLead}
+                    disabled={submittingLead || !leadData.name || !leadData.email}
+                    className="w-full"
+                    size="lg"
+                  >
+                    {submittingLead ? 'Submitting...' : 'Submit Information'}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -386,6 +368,7 @@ export function NOSESNOTPage() {
       </div>
     );
   }
+
 
   return null;
 }
