@@ -374,7 +374,7 @@ export function EmbeddedChatBot({ quizType, doctorId, customQuiz, quizData, doct
     );
   }
 
-  const handleAnswer = (answerText: string, answerIndex: number, questionIndex?: number) => {
+  const handleAnswer = async (answerText: string, answerIndex: number, questionIndex?: number) => {
     // Prevent rapid clicks and answering previous questions
     if (isAnswering) {
       console.log('Already answering - please wait');
@@ -388,6 +388,22 @@ export function EmbeddedChatBot({ quizType, doctorId, customQuiz, quizData, doct
 
     // Set answering state to prevent rapid clicks
     setIsAnswering(true);
+    
+    // Capture partial submission on first answer
+    if (currentQuestionIndex === 0 && answers.length === 0) {
+      try {
+        await supabase.from('quiz_leads').insert({
+          doctor_id: doctorId,
+          quiz_type: quizType,
+          name: 'Partial Submission',
+          score: 0,
+          is_partial: true,
+          submitted_at: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error capturing partial submission:', error);
+      }
+    }
 
     const newAnswer: QuizAnswer = {
       questionIndex: currentQuestionIndex,

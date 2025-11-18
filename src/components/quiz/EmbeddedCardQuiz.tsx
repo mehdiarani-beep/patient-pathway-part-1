@@ -89,13 +89,29 @@ export function EmbeddedCardQuiz({ quizType, doctorId, utm_source, compact = fal
     }
   }, [showWelcome, quizStarted]);
 
-  const handleAnswer = (answerIndex: number, answer: string) => {
+  const handleAnswer = async (answerIndex: number, answer: string) => {
     // Guard against calling when quiz is not active
     if (!quizStarted || quizCompleted || leadSubmitted) {
       return;
     }
     
     setSelectedOption(answerIndex);
+    
+    // Capture partial submission on first answer
+    if (currentQuestion === 0 && answers.length === 0) {
+      try {
+        await supabase.from('quiz_leads').insert({
+          doctor_id: doctorId,
+          quiz_type: quizType,
+          name: 'Partial Submission',
+          score: 0,
+          is_partial: true,
+          submitted_at: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error capturing partial submission:', error);
+      }
+    }
     
     // Delay to show the selection before moving to next question
     setTimeout(() => {

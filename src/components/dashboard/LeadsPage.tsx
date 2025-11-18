@@ -180,7 +180,10 @@ export function LeadsPage() {
     const matchesStatus = statusFilter === 'all' || lead.lead_status === statusFilter;
     const matchesQuizType = quizTypeFilter === 'all' || lead.quiz_type === quizTypeFilter;
 
-    return matchesSearch && matchesStatus && matchesQuizType;
+    // Exclude partial leads from main table
+    const isNotPartial = !lead.is_partial;
+    
+    return matchesSearch && matchesStatus && matchesQuizType && isNotPartial;
   });
 
   const filteredAndSortedLeads = [...filteredLeads].sort((a, b) => {
@@ -215,9 +218,10 @@ export function LeadsPage() {
 
   const stats = {
     total: leads.length,
-    new: leads.filter(l => l.lead_status === 'NEW').length,
+    new: leads.filter(l => l.lead_status === 'NEW' && !l.is_partial).length,
     contacted: leads.filter(l => l.lead_status === 'CONTACTED').length,
-    scheduled: leads.filter(l => l.lead_status === 'SCHEDULED').length
+    scheduled: leads.filter(l => l.lead_status === 'SCHEDULED').length,
+    partial: leads.filter(l => l.is_partial).length
   };
 
   const uniqueQuizTypes = [...new Set(leads.map(l => l.quiz_type))];
@@ -267,13 +271,12 @@ export function LeadsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Leads Dashboard</h1>
-          <p className="text-gray-600 mt-2">Manage and track your assessment leads with source attribution</p>
+          <h1 className="text-3xl font-bold text-gray-900">Master Dashboard</h1>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-blue-700">Total Leads</CardTitle>
@@ -315,6 +318,17 @@ export function LeadsPage() {
           <CardContent>
             <div className="text-2xl font-bold text-purple-800">{stats.scheduled}</div>
             <p className="text-xs text-purple-600">Appointments booked</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-orange-700">Partial Leads</CardTitle>
+            <Clock className="h-4 w-4 text-orange-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-800">{stats.partial}</div>
+            <p className="text-xs text-orange-600">Started assessments</p>
           </CardContent>
         </Card>
       </div>
