@@ -1180,6 +1180,7 @@ export type Database = {
           email: string | null
           id: string
           incident_source: string | null
+          is_partial: boolean | null
           lead_source: string | null
           lead_status: string | null
           location_id: string | null
@@ -1200,6 +1201,7 @@ export type Database = {
           email?: string | null
           id?: string
           incident_source?: string | null
+          is_partial?: boolean | null
           lead_source?: string | null
           lead_status?: string | null
           location_id?: string | null
@@ -1220,6 +1222,7 @@ export type Database = {
           email?: string | null
           id?: string
           incident_source?: string | null
+          is_partial?: boolean | null
           lead_source?: string | null
           lead_status?: string | null
           location_id?: string | null
