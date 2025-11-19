@@ -166,16 +166,23 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
 
   const doctorName = `${doctorProfile.first_name} ${doctorProfile.last_name}`;
   const doctorTitle = doctorProfile.title || 'Dr.';
-  const clinicName = doctorProfile.clinic_name || 'Our Medical Practice';
+  const clinicName = doctorProfile.clinic_name || 'Exhale Sinus';
+  const logoUrl = doctorProfile.logo_url || '';
   
-  // Determine sender email - use doctor's email alias if set, otherwise use office email
-  const senderEmail = doctorProfile.email_alias || 'office@patientpathway.ai';
-  const senderName = doctorProfile.email_alias ? `${doctorTitle} ${doctorProfile.first_name} ${doctorProfile.last_name}` : 'PatientPathway.ai';
+  // Use config values or defaults
+  const fromAlias = emailConfig?.patient_from_alias || 'Dr. Vaughn at Exhale Sinus';
+  const replyTo = emailConfig?.patient_reply_to || 'niki@exhalesinus.com';
+  const subject = emailConfig?.patient_subject || `Your ${getQuizTypeLabel(lead.quiz_type)} Results from Exhale Sinus`;
+  const preheader = emailConfig?.patient_preheader || 'Your medical assessment results is not a diagnosis.';
+  const bodyContent = emailConfig?.patient_body || `Thank you for taking the time to complete your ${getQuizTypeLabel(lead.quiz_type)} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.`;
+  const signature = emailConfig?.patient_signature || `Dr. Ryan Vaughn\nExhale Sinus`;
+  const footer = emailConfig?.patient_footer || `© 2025 Exhale Sinus. All rights reserved.`;
   
   console.log('Email sender configuration:', {
-    senderEmail,
-    senderName,
-    hasEmailAlias: !!doctorProfile.email_alias
+    fromAlias,
+    replyTo,
+    subject,
+    hasEmailConfig: !!emailConfig
   });
 
   const html = `
@@ -183,7 +190,9 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Assessment Confirmation - ${doctorName}</title>
+    <meta name="x-apple-disable-message-reformatting">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${subject}</title>
     <style>
       body {
         background-color: #f8fafc;
@@ -193,30 +202,29 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
         padding: 0;
         line-height: 1.6;
       }
+      .email-wrapper {
+        background-color: #f8fafc;
+        padding: 20px 0;
+      }
       .email-container {
         max-width: 600px;
-        margin: 40px auto;
+        margin: 0 auto;
         background: #ffffff;
-        padding: 40px 30px;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
-      .header {
+      .logo-header {
         text-align: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #e2e8f0;
+        padding: 30px 20px;
+        background: #ffffff;
       }
-      .doctor-name {
-        font-size: 24px;
-        font-weight: 700;
-        color: #1e40af;
-        margin-bottom: 5px;
+      .logo-header img {
+        max-width: 200px;
+        height: auto;
       }
-      .clinic-name {
-        font-size: 16px;
-        color: #64748b;
-        font-weight: 500;
+      .content-body {
+        padding: 30px 40px;
       }
       .greeting {
         font-size: 18px;
@@ -224,165 +232,60 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
         margin-bottom: 20px;
         font-weight: 500;
       }
-      .content {
+      .body-text {
         font-size: 16px;
         color: #475569;
-        margin-bottom: 25px;
-      }
-      .highlight-box {
-        background-color: #f1f5f9;
-        border-left: 4px solid #3b82f6;
-        padding: 20px;
-        margin: 25px 0;
-        border-radius: 0 8px 8px 0;
-      }
-      .assessment-details {
-        background-color: #f8fafc;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 20px 0;
-      }
-      .detail-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 8px;
-        font-size: 14px;
-      }
-      .detail-label {
-        font-weight: 600;
-        color: #64748b;
-      }
-      .detail-value {
-        color: #1e293b;
-        font-weight: 500;
-      }
-      .next-steps {
-        background-color: #ecfdf5;
-        border: 1px solid #bbf7d0;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 25px 0;
-      }
-      .next-steps h3 {
-        color: #059669;
-        margin-top: 0;
-        font-size: 16px;
-        font-weight: 600;
-      }
-      .contact-info {
-        background-color: #fef3c7;
-        border: 1px solid #fcd34d;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 25px 0;
-        text-align: center;
-      }
-      .contact-info h3 {
-        color: #92400e;
-        margin-top: 0;
-        font-size: 16px;
-        font-weight: 600;
+        margin-bottom: 20px;
+        white-space: pre-line;
       }
       .signature {
         margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid #e2e8f0;
-      }
-      .signature-name {
-        font-weight: 600;
-        color: #1e40af;
         font-size: 16px;
-      }
-      .signature-title {
-        color: #64748b;
-        font-size: 14px;
-        margin-top: 2px;
+        color: #1e293b;
+        white-space: pre-line;
       }
       .footer {
-        font-size: 12px;
-        color: #94a3b8;
-        margin-top: 40px;
-        text-align: center;
-        padding-top: 20px;
-        border-top: 1px solid #e2e8f0;
+        background-color: #0b5d82;
+        color: #ffffff;
+        padding: 30px 40px;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+      .footer-text {
+        color: #ffffff;
+        margin: 5px 0;
+        white-space: pre-line;
+      }
+      @media only screen and (max-width: 600px) {
+        .content-body {
+          padding: 20px;
+        }
+        .footer {
+          padding: 20px;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="email-container">
-      <div class="header">
-        <div class="doctor-name">${doctorTitle} ${doctorProfile.first_name} ${doctorProfile.last_name}</div>
-        <div class="clinic-name">${clinicName}</div>
-      </div>
-
-      <div class="greeting">Dear ${lead.name},</div>
-
-      <div class="content">
-        Thank you for taking the time to complete your ${getQuizTypeLabel(lead.quiz_type)} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.
-      </div>
-
-      <div class="highlight-box">
-        <strong>What happens next?</strong><br>
-        Our medical team will carefully review your assessment results and prepare personalized recommendations based on your responses. You can expect to hear from us within 24-48 hours with next steps for your care.
-      </div>
-
-      <div class="assessment-details">
-        <div class="detail-row">
-          <span class="detail-label">Assessment Type:</span>
-          <span class="detail-value">${getQuizTypeLabel(lead.quiz_type)}</span>
+    <div class="email-wrapper">
+      <div class="email-container">
+        ${logoUrl ? `
+        <div class="logo-header">
+          <img src="${logoUrl}" alt="${clinicName}" />
         </div>
-        <div class="detail-row">
-          <span class="detail-label">Completed:</span>
-          <span class="detail-value">${new Date(lead.submitted_at).toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}</span>
+        ` : ''}
+        
+        <div class="content-body">
+          <div class="greeting">Dear ${lead.name},</div>
+          
+          <div class="body-text">${bodyContent}</div>
+          
+          <div class="signature">${signature}</div>
         </div>
-        <div class="detail-row">
-          <span class="detail-label">Time:</span>
-          <span class="detail-value">${new Date(lead.submitted_at).toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          })}</span>
+        
+        <div class="footer">
+          <div class="footer-text">${footer}</div>
         </div>
-      </div>
-
-      <div class="next-steps">
-        <h3>Next Steps</h3>
-        <ul style="margin: 10px 0; padding-left: 20px;">
-          <li>Our team will review your assessment results</li>
-          <li>We'll prepare personalized recommendations</li>
-          <li>You'll receive a follow-up communication within 24-48 hours</li>
-          <li>If urgent, please don't hesitate to contact us directly</li>
-        </ul>
-      </div>
-
-      <div class="contact-info">
-        <h3>Need Immediate Assistance?</h3>
-        <p style="margin: 10px 0;">
-          If you have any urgent concerns or questions, please don't wait for our follow-up. 
-          Contact our office directly at your earliest convenience.
-        </p>
-      </div>
-
-      <div class="content">
-        We appreciate your trust in our care and look forward to helping you on your health journey.
-      </div>
-
-      <div class="signature">
-        <div class="signature-name">${doctorTitle} ${doctorProfile.first_name} ${doctorProfile.last_name}</div>
-        <div class="signature-title">${doctorProfile.specialty || 'Medical Professional'}</div>
-        <div class="signature-title">${clinicName}</div>
-      </div>
-
-      <div class="footer">
-        <p>This email was sent regarding your recent assessment submission.</p>
-        <p>© 2025 ${clinicName}. All rights reserved.</p>
-        <p style="margin-top: 10px; font-size: 11px; color: #cbd5e1;">
-          This is an automated confirmation email. Please do not reply directly to this message.
-        </p>
       </div>
     </div>
   </body>
@@ -392,43 +295,12 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
   const text = `
 Dear ${lead.name},
 
-Thank you for taking the time to complete your ${lead.quiz_type} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.
+${bodyContent}
 
-ASSESSMENT DETAILS:
-- Assessment Type: ${lead.quiz_type}
-- Completed: ${new Date(lead.submitted_at).toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  })}
-- Time: ${new Date(lead.submitted_at).toLocaleTimeString('en-US', { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  })}
-
-WHAT HAPPENS NEXT:
-Our medical team will carefully review your assessment results and prepare personalized recommendations based on your responses. You can expect to hear from us within 24-48 hours with next steps for your care.
-
-NEXT STEPS:
-• Our team will review your assessment results
-• We'll prepare personalized recommendations  
-• You'll receive a follow-up communication within 24-48 hours
-• If urgent, please don't hesitate to contact us directly
-
-NEED IMMEDIATE ASSISTANCE?
-If you have any urgent concerns or questions, please don't wait for our follow-up. Contact our office directly at your earliest convenience.
-
-We appreciate your trust in our care and look forward to helping you on your health journey.
-
-Best regards,
-${doctorTitle} ${doctorProfile.first_name} ${doctorProfile.last_name}
-${doctorProfile.specialty || 'Medical Professional'}
-${clinicName}
+${signature}
 
 ---
-This email was sent regarding your recent assessment submission.
-© 2025 ${clinicName}. All rights reserved.
+${footer}
 
 This is an automated confirmation email. Please do not reply directly to this message.
   `;
@@ -436,12 +308,12 @@ This is an automated confirmation email. Please do not reply directly to this me
   try {
     console.log('Preparing email data...');
     const emailData = {
-      from: `${senderName} <${senderEmail}>`,
+      from: `${fromAlias} <office@patientpathway.ai>`,
       to: lead.email,
-      subject: `Thank you for completing your assessment - ${doctorName}`,
+      subject: subject,
       html: html,
       text: text,
-      reply_to: doctorProfile.email
+      reply_to: replyTo
     };
 
     console.log('Email data prepared:', {
