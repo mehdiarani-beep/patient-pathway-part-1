@@ -931,6 +931,93 @@ export type Database = {
           },
         ]
       }
+      email_notification_configs: {
+        Row: {
+          created_at: string | null
+          doctor_id: string
+          education_body: string | null
+          education_enabled: boolean | null
+          education_subject: string | null
+          id: string
+          internal_body: string | null
+          internal_enabled: boolean | null
+          internal_from: string | null
+          internal_subject: string | null
+          internal_to_emails: string[] | null
+          patient_body: string | null
+          patient_enabled: boolean | null
+          patient_footer: string | null
+          patient_from_alias: string | null
+          patient_preheader: string | null
+          patient_reply_to: string | null
+          patient_signature: string | null
+          patient_subject: string | null
+          quiz_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          doctor_id: string
+          education_body?: string | null
+          education_enabled?: boolean | null
+          education_subject?: string | null
+          id?: string
+          internal_body?: string | null
+          internal_enabled?: boolean | null
+          internal_from?: string | null
+          internal_subject?: string | null
+          internal_to_emails?: string[] | null
+          patient_body?: string | null
+          patient_enabled?: boolean | null
+          patient_footer?: string | null
+          patient_from_alias?: string | null
+          patient_preheader?: string | null
+          patient_reply_to?: string | null
+          patient_signature?: string | null
+          patient_subject?: string | null
+          quiz_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          doctor_id?: string
+          education_body?: string | null
+          education_enabled?: boolean | null
+          education_subject?: string | null
+          id?: string
+          internal_body?: string | null
+          internal_enabled?: boolean | null
+          internal_from?: string | null
+          internal_subject?: string | null
+          internal_to_emails?: string[] | null
+          patient_body?: string | null
+          patient_enabled?: boolean | null
+          patient_footer?: string | null
+          patient_from_alias?: string | null
+          patient_preheader?: string | null
+          patient_reply_to?: string | null
+          patient_signature?: string | null
+          patient_subject?: string | null
+          quiz_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_notification_configs_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_notification_configs_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "team_member_access"
+            referencedColumns: ["doctor_profile_id"]
+          },
+        ]
+      }
       email_templates: {
         Row: {
           created_at: string
