@@ -42,12 +42,17 @@ import { QRCodeSVG } from 'qrcode.react';
 import { EmbedPreview } from './EmbedPreview';
 import { getDeviceType, getDeviceSize } from '@/utils/device';
 import { generateAssessmentEmailTemplate } from '@/lib/emailTemplates';
+import { EmailNotificationConfig } from './EmailNotificationConfig';
 
 export function ShareQuizPage() {
   const { quizId, customQuizId } = useParams<{ quizId?: string; customQuizId?: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  
+  // Get the quiz from the quizzes data
+  const quiz = quizId ? quizzes[quizId.toUpperCase()] : null;
+  
   const [customQuiz, setCustomQuiz] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>('full-page');
@@ -1369,105 +1374,12 @@ const mailHtmlTNSS = useMemo(() => {
                     </CardContent>
                   </Card>
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-xl text-center">Mail Preview</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="w-full aspect-[4/3] bg-white border rounded-lg overflow-hidden">
-                        <iframe
-                          src={mailiframSrc}
-                          className="w-full h-full"
-                          title={`Mail Preview`}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Send className="w-4 h-4" />
-                        Send Assessment Email
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {doctorProfile?.email_alias_created && doctorProfile?.email_alias ? (
-                        <>
-                          <div className="space-y-3">
-                            <div>
-                              <label className="text-sm font-medium">Patient Name</label>
-                              <Input
-                                value={recipientName}
-                                onChange={(e) => setRecipientName(e.target.value)}
-                                placeholder="John Doe"
-                                className="mt-1"
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="text-sm font-medium">Patient Email</label>
-                              <Input
-                                type="email"
-                                value={recipientEmail}
-                                onChange={(e) => setRecipientEmail(e.target.value)}
-                                placeholder="patient@example.com"
-                                className="mt-1"
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="text-sm font-medium">Email Subject (Optional)</label>
-                              <Input
-                                value={emailSubject}
-                                onChange={(e) => setEmailSubject(e.target.value)}
-                                placeholder="Leave empty to use default subject"
-                                className="mt-1"
-                              />
-                            </div>
-                          </div>
-                          
-                          <Button
-                            onClick={sendEmail}
-                            disabled={sendingEmail || !recipientEmail.trim() || !recipientName.trim()}
-                            className="w-full"
-                          >
-                            {sendingEmail ? 'Sending...' : 'Send Assessment Email'}
-                          </Button>
-                          
-                          <div className="text-xs text-gray-500 space-y-1">
-                            <div className="flex items-center gap-2">
-                              <Mail className="w-3 h-3" />
-                              <span>From: {doctorProfile.email_alias}@patientpathway.ai</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <UserRound className="w-3 h-3" />
-                              <span>Doctor: Dr. {doctorProfile.first_name} {doctorProfile.last_name}</span>
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-center py-4">
-                          <div className="text-amber-600 mb-2">
-                            <Mail className="w-8 h-8 mx-auto mb-2" />
-                            <p className="font-medium">Email Alias Required</p>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-3">
-                            You need to set up an email alias to send assessment emails.
-                          </p>
-                          <Button 
-                            variant="outline" 
-                            onClick={() => navigate('/dashboard/email-configuration')}
-                            className="text-sm"
-                          >
-                            Set Up Email Alias
-                          </Button>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
+                {/* Email Notifications Configuration */}
+                <EmailNotificationConfig 
+                  doctorProfile={doctorProfile}
+                  quizId={quizId || ''}
+                  quizTitle={quiz?.title || 'Assessment'}
+                />
               </CardContent>
             </Card>
           </TabsContent>
