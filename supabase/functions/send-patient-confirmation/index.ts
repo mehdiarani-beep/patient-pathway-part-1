@@ -199,9 +199,15 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="x-apple-disable-message-reformatting">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${subject}</title>
+    <!--[if mso]>
+    <style type="text/css">
+      body, table, td {font-family: Arial, Helvetica, sans-serif !important;}
+    </style>
+    <![endif]-->
     <style>
       body {
         background-color: #f8fafc;
@@ -225,12 +231,13 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
       }
       .logo-header {
         text-align: center;
-        padding: 30px 20px;
+        padding: 40px 20px 30px 20px;
         background: #ffffff;
       }
       .logo-header img {
-        max-width: 200px;
+        max-width: 220px;
         height: auto;
+        display: inline-block;
       }
       .content-body {
         padding: 30px 40px;
@@ -252,6 +259,7 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
         font-size: 16px;
         color: #1e293b;
         white-space: pre-line;
+        font-weight: 500;
       }
       .footer {
         background-color: #0b5d82;
@@ -309,6 +317,9 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
         }
         .footer {
           padding: 20px;
+        }
+        .footer-grid {
+          grid-template-columns: 1fr;
         }
       }
     </style>
