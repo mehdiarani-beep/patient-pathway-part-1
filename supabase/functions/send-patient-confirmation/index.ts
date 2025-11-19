@@ -248,12 +248,50 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
         background-color: #0b5d82;
         color: #ffffff;
         padding: 30px 40px;
-        font-size: 14px;
-        line-height: 1.8;
+        font-size: 12px;
+        line-height: 1.6;
       }
-      .footer-text {
-        color: #ffffff;
+      .footer-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .footer-column h3 {
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+      .footer-column p {
         margin: 5px 0;
+        font-size: 11px;
+      }
+      .footer-logo {
+        max-width: 120px;
+        height: auto;
+        margin-bottom: 15px;
+      }
+      .social-icons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .appointment-btn {
+        background-color: #ffffff;
+        color: #0b5d82;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+        font-weight: bold;
+        font-size: 11px;
+        margin-top: 10px;
+      }
+      .footer-copyright {
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        padding-top: 20px;
+        text-align: center;
+        font-size: 11px;
         white-space: pre-line;
       }
       @media only screen and (max-width: 600px) {
@@ -284,7 +322,43 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
         </div>
         
         <div class="footer">
-          <div class="footer-text">${footer}</div>
+          <div class="footer-grid">
+            <div class="footer-column">
+              ${logoUrl ? `<img src="${logoUrl}" alt="${clinicName}" class="footer-logo" />` : ''}
+              <p>814 E Woodfield</p>
+              <p>Schaumburg, IL 60173</p>
+              <p style="margin-top: 10px;">735 N. Perryville Rd. Suite 4</p>
+              <p>Rockford, IL 61107</p>
+              <div class="social-icons">
+                <span style="font-size: 18px;">📘</span>
+                <span style="font-size: 18px;">🐦</span>
+                <span style="font-size: 18px;">📷</span>
+                <span style="font-size: 18px;">▶️</span>
+              </div>
+            </div>
+            
+            <div class="footer-column">
+              <h3>Hours of Operation</h3>
+              <p>Monday - Thursday 8:00 am - 5:00 pm</p>
+              <p>Friday - 9:00 am - 5:00 pm</p>
+              <p style="margin-top: 10px;">📞 224-529-4697</p>
+              <p>📞 815-977-5715</p>
+              <p>📞 815-281-5803</p>
+              <a href="#" class="appointment-btn">Request an appointment ▶</a>
+            </div>
+            
+            <div class="footer-column">
+              <h3>Quick Links</h3>
+              <p>Sinus Pain</p>
+              <p>Sinus Headaches</p>
+              <p>Sinus Quiz</p>
+              <p>Nasal & Sinus Procedures</p>
+              <p>Privacy Policy</p>
+              <p>Accessibility Statement</p>
+            </div>
+          </div>
+          
+          <div class="footer-copyright">${footer}</div>
         </div>
       </div>
     </div>
