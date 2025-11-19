@@ -153,7 +153,7 @@ function getQuizTypeLabel(quizType: string): string {
   return quizLabels[quizType] || quizType;
 }
 
-async function sendPatientConfirmationEmail(lead: any, doctorProfile: any) {
+async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, emailConfig?: any) {
   console.log('=== SENDING PATIENT CONFIRMATION EMAIL ===');
   
   const resendApiKey = Deno.env.get('RESEND_API_KEY');
