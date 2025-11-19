@@ -49,9 +49,16 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
     patient_reply_to: 'niki@exhalesinus.com',
     patient_subject: `Your ${quizTitle} Results from Exhale Sinus`,
     patient_preheader: 'Your medical assessment results is not a diagnosis.',
-    patient_body: `Thank you for completing the ${quizTitle} assessment. Your results have been submitted and our team will review them shortly. We will contact you to discuss your results and potential next steps.`,
+    patient_body: `Thank you for taking the time to complete your ${quizTitle} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.`,
     patient_signature: 'Dr. Ryan Vaughn\nExhale Sinus',
     patient_footer: '© 2025 Exhale Sinus. All rights reserved.',
+    footer_address_1: '814 E Woodfield, Schaumburg, IL 60173',
+    footer_address_2: '735 N. Perryville Rd. Suite 4, Rockford, IL 61107',
+    footer_hours: 'Monday - Thursday 8:00 am - 5:00 pm\nFriday - 9:00 am - 5:00 pm',
+    footer_phone_numbers: ['224-529-4697', '815-977-5715', '815-281-5803'],
+    footer_quick_links: ['Sinus Pain', 'Sinus Headaches', 'Sinus Quiz', 'Nasal & Sinus Procedures', 'Privacy Policy', 'Accessibility Statement'],
+    footer_appointment_button_text: 'Request an appointment',
+    footer_appointment_button_url: '#',
     patient_enabled: true,
     internal_to_emails: ['Mehdiarani@gmail.com', 'niki@exhalesinus.com'],
     internal_from: 'PatientPathway.ai <office@patientpathway.ai>',
@@ -170,7 +177,7 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="patient">
-              Patient Notification
+              Patient Confirmation
               {config.patient_enabled && <Badge className="ml-2 bg-green-500">Enabled</Badge>}
             </TabsTrigger>
             <TabsTrigger value="internal">
@@ -183,11 +190,11 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
             </TabsTrigger>
           </TabsList>
 
-          {/* Patient Notification Email */}
+          {/* Patient Confirmation Email */}
           <TabsContent value="patient" className="space-y-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="font-semibold">Patient Notification Email</h3>
+                <h3 className="font-semibold">Patient Confirmation Email</h3>
                 <p className="text-sm text-muted-foreground">Sent to the lead when they submit the assessment</p>
               </div>
               <Switch
