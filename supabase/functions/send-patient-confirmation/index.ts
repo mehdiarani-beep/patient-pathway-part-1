@@ -18,14 +18,14 @@ const handler = async (req: Request) => {
     console.log('Request method:', req.method);
     console.log('Request headers:', Object.fromEntries(req.headers.entries()));
 
+    // Use service role key to bypass RLS for reading email configs
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '', 
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '', 
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '', 
       {
-        global: {
-          headers: {
-            Authorization: req.headers.get('Authorization') || ''
-          }
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
         }
       }
     );
@@ -52,6 +52,8 @@ const handler = async (req: Request) => {
       email: lead.email,
       phone: lead.phone,
       quiz_type: lead.quiz_type,
+      quiz_type_type: typeof lead.quiz_type,
+      quiz_type_length: lead.quiz_type?.length,
       score: lead.score
     });
 
@@ -76,19 +78,75 @@ const handler = async (req: Request) => {
     });
 
     // Get email notification configuration
-    console.log('Fetching email notification config for quiz type:', lead.quiz_type);
-    const { data: emailConfig, error: configError } = await supabaseClient
+    // Ignore quiz_type matching - just get any config for this doctor
+    // Use quiz_type from lead for display purposes in the email content
+    console.log('Fetching email notification config (ignoring quiz_type filter):', {
+      doctor_id: doctorId,
+      lead_quiz_type: lead.quiz_type,
+      has_service_role_key: !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    });
+    
+    // First, try to get config matching the lead's quiz_type (if it exists)
+    const { data: emailConfigByQuizType } = await supabaseClient
       .from('email_notification_configs')
       .select('*')
       .eq('doctor_id', doctorId)
       .eq('quiz_type', lead.quiz_type)
-      .single();
-
-    if (configError && configError.code !== 'PGRST116') {
-      console.error('Error fetching email config:', configError);
+      .maybeSingle();
+    
+    let emailConfig = emailConfigByQuizType;
+    
+    // If not found by quiz_type, get any config for this doctor
+    if (!emailConfig) {
+      console.log('No config found for specific quiz_type, fetching any config for this doctor...');
+      const { data: emailConfigAny, error: errorAny } = await supabaseClient
+        .from('email_notification_configs')
+        .select('*')
+        .eq('doctor_id', doctorId)
+        .limit(1)
+        .maybeSingle();
+      
+      if (emailConfigAny) {
+        emailConfig = emailConfigAny;
+        console.log('✓ Found email config (using first available for this doctor, quiz_type:', emailConfig.quiz_type, ')');
+      } else if (errorAny) {
+        console.error('Error fetching email config:', errorAny);
+      } else {
+        console.log('No email config found for this doctor');
+      }
+    } else {
+      console.log('✓ Found email config matching quiz_type:', lead.quiz_type);
     }
 
     console.log('Email config found:', emailConfig ? 'Yes' : 'No (using defaults)');
+    if (emailConfig) {
+      console.log('Email config loaded successfully:', {
+        id: emailConfig.id,
+        doctor_id: emailConfig.doctor_id,
+        quiz_type: emailConfig.quiz_type,
+        patient_from_alias: emailConfig.patient_from_alias,
+        patient_reply_to: emailConfig.patient_reply_to,
+        patient_subject: emailConfig.patient_subject,
+        patient_preheader: emailConfig.patient_preheader,
+        patient_body: emailConfig.patient_body ? 'Set' : 'Using default',
+        patient_signature: emailConfig.patient_signature,
+        patient_footer: emailConfig.patient_footer,
+        footer_address_1: emailConfig.footer_address_1,
+        footer_address_2: emailConfig.footer_address_2,
+        footer_hours: emailConfig.footer_hours,
+        footer_phone_numbers: emailConfig.footer_phone_numbers,
+      });
+    } else {
+      console.log('No email config found. Will use default values.');
+      
+      // Debug: Check what configs exist for this doctor
+      const { data: allConfigs } = await supabaseClient
+        .from('email_notification_configs')
+        .select('id, quiz_type, doctor_id')
+        .eq('doctor_id', doctorId);
+      
+      console.log('Available email configs for this doctor:', allConfigs || []);
+    }
 
     // Send patient confirmation email
     console.log('Sending patient confirmation email...');
@@ -153,6 +211,16 @@ function getQuizTypeLabel(quizType: string): string {
   return quizLabels[quizType] || quizType;
 }
 
+/**
+ * Sends patient confirmation email using data from Supabase
+ * 
+ * Data Sources:
+ * - lead: From quiz_leads table (name, email, quiz_type, score, submitted_at)
+ * - doctorProfile: From doctor_profiles table (avatar_url, logo_url, clinic_name, first_name, last_name)
+ * - emailConfig: From email_notification_configs table (all email configuration fields)
+ * 
+ * All email content comes from emailConfig if available, otherwise uses hardcoded defaults
+ */
 async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, emailConfig?: any) {
   console.log('=== SENDING PATIENT CONFIRMATION EMAIL ===');
   
@@ -164,34 +232,71 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
     throw new Error('RESEND_API_KEY not configured');
   }
 
+  // Data from doctor_profiles table (Supabase)
   const doctorName = `${doctorProfile.first_name} ${doctorProfile.last_name}`;
   const doctorTitle = doctorProfile.title || 'Dr.';
   const clinicName = doctorProfile.clinic_name || 'Exhale Sinus';
-  const logoUrl = doctorProfile.logo_url || '';
+  // Prioritize avatar_url as that's what's being used for the logo
+  const logoUrl = doctorProfile.avatar_url || doctorProfile.logo_url || '';
   
-  // Use config values or defaults
+  // Data from email_notification_configs table (Supabase) - all editable fields
   const fromAlias = emailConfig?.patient_from_alias || 'Dr. Vaughn at Exhale Sinus';
   const replyTo = emailConfig?.patient_reply_to || 'niki@exhalesinus.com';
-  const subject = emailConfig?.patient_subject || `Your ${getQuizTypeLabel(lead.quiz_type)} Results from Exhale Sinus`;
+  
+  // Data from quiz_leads table (Supabase)
+  const assessmentName = getQuizTypeLabel(lead.quiz_type);
+  
+  // Email content from email_notification_configs (Supabase) or defaults
+  const subject = emailConfig?.patient_subject || `Your ${assessmentName} Results from Exhale Sinus.`;
   const preheader = emailConfig?.patient_preheader || 'Your medical assessment results is not a diagnosis.';
-  const bodyContent = emailConfig?.patient_body || `Thank you for taking the time to complete your ${getQuizTypeLabel(lead.quiz_type)} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.`;
+  const bodyContent = emailConfig?.patient_body || `Thank you for taking the time to complete your ${assessmentName} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.`;
+  
+  // Non-editable sections (always use defaults from edge function)
+  const highlightBoxTitle = emailConfig?.patient_highlight_box_title || 'What happens next?';
+  const highlightBoxContent = emailConfig?.patient_highlight_box_content || 'Our medical team will carefully review your assessment results and prepare personalized recommendations based on your responses. You can expect to hear from us within 24-48 hours with next steps for your care.';
+  const nextStepsTitle = emailConfig?.patient_next_steps_title || 'Next Steps';
+  const nextStepsItems = emailConfig?.patient_next_steps_items || [
+    'Our team will review your assessment results',
+    'We\'ll prepare personalized recommendations',
+    'You\'ll receive a follow-up communication within 24-48 hours',
+    'If urgent, please don\'t hesitate to contact us directly'
+  ];
+  const contactInfoTitle = emailConfig?.patient_contact_info_title || 'Need Immediate Assistance?';
+  const contactInfoContent = emailConfig?.patient_contact_info_content || 'If you have any urgent concerns or questions, please don\'t wait for our follow-up. Contact our office directly at your earliest convenience.';
+  const closingContent = emailConfig?.patient_closing_content || 'We appreciate your trust in our care and look forward to helping you on your health journey.';
+  
+  // Signature and footer from email_notification_configs (Supabase)
   const signature = emailConfig?.patient_signature || `Dr. Ryan Vaughn\nExhale Sinus`;
   const footerCopyright = emailConfig?.patient_footer || `© 2025 Exhale Sinus. All rights reserved.`;
   
-  // Footer content
+  // Footer content from email_notification_configs (Supabase)
   const footerAddress1 = emailConfig?.footer_address_1 || '814 E Woodfield, Schaumburg, IL 60173';
   const footerAddress2 = emailConfig?.footer_address_2 || '735 N. Perryville Rd. Suite 4, Rockford, IL 61107';
   const footerHours = emailConfig?.footer_hours || 'Monday - Thursday 8:00 am - 5:00 pm\nFriday - 9:00 am - 5:00 pm';
   const footerPhones = emailConfig?.footer_phone_numbers || ['224-529-4697', '815-977-5715', '815-281-5803'];
-  const footerQuickLinks = emailConfig?.footer_quick_links || ['Sinus Pain', 'Sinus Headaches', 'Sinus Quiz', 'Nasal & Sinus Procedures', 'Privacy Policy', 'Accessibility Statement'];
-  const footerButtonText = emailConfig?.footer_appointment_button_text || 'Request an appointment';
-  const footerButtonUrl = emailConfig?.footer_appointment_button_url || '#';
+  
+  // Format date and time from lead submission (data from quiz_leads table - Supabase)
+  const submissionDate = lead.submitted_at ? new Date(lead.submitted_at) : new Date();
+  const formattedDate = submissionDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const formattedTime = submissionDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   
   console.log('Email sender configuration:', {
     fromAlias,
     replyTo,
     subject,
-    hasEmailConfig: !!emailConfig
+    preheader,
+    hasEmailConfig: !!emailConfig,
+    usingConfigFromAlias: !!emailConfig?.patient_from_alias,
+    usingConfigReplyTo: !!emailConfig?.patient_reply_to,
+    usingConfigSubject: !!emailConfig?.patient_subject,
+    usingConfigPreheader: !!emailConfig?.patient_preheader,
+    usingConfigBody: !!emailConfig?.patient_body,
+    usingConfigSignature: !!emailConfig?.patient_signature,
+    usingConfigFooter: !!emailConfig?.patient_footer,
+    usingConfigFooterAddress1: !!emailConfig?.footer_address_1,
+    usingConfigFooterAddress2: !!emailConfig?.footer_address_2,
+    usingConfigFooterHours: !!emailConfig?.footer_hours,
+    usingConfigFooterPhones: !!emailConfig?.footer_phone_numbers,
   });
 
   const html = `
@@ -235,7 +340,7 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
         background: #ffffff;
       }
       .logo-header img {
-        max-width: 220px;
+        max-width: 140px;
         height: auto;
         display: inline-block;
       }
@@ -254,6 +359,87 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
         margin-bottom: 20px;
         white-space: pre-line;
       }
+      .highlight-box {
+        background-color: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        padding: 16px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+      .highlight-box strong {
+        display: block;
+        font-size: 16px;
+        color: #1e293b;
+        margin-bottom: 8px;
+      }
+      .highlight-box div {
+        font-size: 14px;
+        color: #475569;
+        white-space: pre-line;
+        line-height: 1.6;
+      }
+      .assessment-details {
+        background-color: #f8fafc;
+        padding: 16px;
+        margin: 20px 0;
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+      }
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+      .detail-label {
+        font-weight: 500;
+        color: #1e293b;
+      }
+      .detail-value {
+        color: #475569;
+      }
+      .next-steps {
+        margin: 20px 0;
+      }
+      .next-steps h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 12px;
+      }
+      .next-steps ul {
+        margin: 10px 0;
+        padding-left: 20px;
+      }
+      .next-steps li {
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #475569;
+        line-height: 1.6;
+      }
+      .contact-info {
+        margin: 20px 0;
+      }
+      .contact-info h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 8px;
+      }
+      .contact-info p {
+        font-size: 14px;
+        color: #475569;
+        white-space: pre-line;
+        line-height: 1.6;
+        margin: 10px 0;
+      }
+      .closing-content {
+        font-size: 16px;
+        color: #475569;
+        margin: 20px 0;
+        white-space: pre-line;
+        line-height: 1.6;
+      }
       .signature {
         margin-top: 30px;
         font-size: 16px;
@@ -270,8 +456,8 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
       }
       .footer-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
         margin-bottom: 20px;
       }
       .footer-column h3 {
@@ -287,22 +473,6 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
         max-width: 120px;
         height: auto;
         margin-bottom: 15px;
-      }
-      .social-icons {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-      }
-      .appointment-btn {
-        background-color: #ffffff;
-        color: #0b5d82;
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-decoration: none;
-        display: inline-block;
-        font-weight: bold;
-        font-size: 11px;
-        margin-top: 10px;
       }
       .footer-copyright {
         border-top: 1px solid rgba(255, 255, 255, 0.2);
@@ -321,10 +491,17 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
         .footer-grid {
           grid-template-columns: 1fr;
         }
+        .footer-column {
+          margin-bottom: 20px;
+        }
       }
     </style>
   </head>
   <body>
+    <!-- Pre-header text (hidden but shown in email preview) -->
+    <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+      ${preheader}
+    </div>
     <div class="email-wrapper">
       <div class="email-container">
         ${logoUrl ? `
@@ -334,41 +511,93 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
         ` : ''}
         
         <div class="content-body">
-          <div class="greeting">Dear ${lead.name},</div>
+          <!-- Lead name from quiz_leads table (Supabase) -->
+          <div class="greeting">Dear ${lead.name || 'Patient'},</div>
           
+          <!-- Email body from email_notification_configs table (Supabase) -->
           <div class="body-text">${bodyContent}</div>
           
+          <!-- Highlight box (non-editable, uses defaults) -->
+          ${highlightBoxTitle || highlightBoxContent ? `
+          <div class="highlight-box">
+            <strong>${highlightBoxTitle}</strong>
+            <div>${highlightBoxContent}</div>
+          </div>
+          ` : ''}
+          
+          <!-- Assessment details from quiz_leads table (Supabase) -->
+          <div class="assessment-details">
+            <div class="detail-row">
+              <span class="detail-label">Assessment Type:</span>
+              <span class="detail-value">${assessmentName}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">${assessmentName} Score:</span>
+              <span class="detail-value" style="font-weight: 600;">${lead.score || 0}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Completed:</span>
+              <span class="detail-value">${formattedDate}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Time:</span>
+              <span class="detail-value">${formattedTime}</span>
+            </div>
+          </div>
+          
+          ${nextStepsTitle && nextStepsItems.length > 0 ? `
+          <div class="next-steps">
+            <h3>${nextStepsTitle}</h3>
+            <ul>
+              ${nextStepsItems.map((item: string) => `<li>${item}</li>`).join('')}
+            </ul>
+          </div>
+          ` : ''}
+          
+          ${contactInfoTitle || contactInfoContent ? `
+          <div class="contact-info">
+            <h3>${contactInfoTitle}</h3>
+            <p>${contactInfoContent}</p>
+          </div>
+          ` : ''}
+          
+          <!-- Closing content (non-editable, uses defaults) -->
+          ${closingContent ? `
+          <div class="closing-content">${closingContent}</div>
+          ` : ''}
+          
+          <!-- Signature from email_notification_configs table (Supabase) -->
           <div class="signature">${signature}</div>
         </div>
         
+        <!-- Footer content from email_notification_configs table (Supabase) -->
         <div class="footer">
           <div class="footer-grid">
             <div class="footer-column">
+              <!-- Logo from doctor_profiles table (Supabase) -->
               ${logoUrl ? `<img src="${logoUrl}" alt="${clinicName}" class="footer-logo" />` : ''}
+              <!-- Addresses from email_notification_configs table (Supabase) -->
               <p>${footerAddress1}</p>
               <p style="margin-top: 10px;">${footerAddress2}</p>
-              <div class="social-icons">
-                <span style="font-size: 18px;">📘</span>
-                <span style="font-size: 18px;">🐦</span>
-                <span style="font-size: 18px;">📷</span>
-                <span style="font-size: 18px;">▶️</span>
-              </div>
             </div>
             
             <div class="footer-column">
               <h3>Hours of Operation</h3>
+              <!-- Hours from email_notification_configs table (Supabase) -->
               <p style="white-space: pre-line;">${footerHours}</p>
-              ${footerPhones.map((phone: string) => `<p style="margin-top: 5px;">📞 ${phone}</p>`).join('')}
-              <a href="${footerButtonUrl}" class="appointment-btn">${footerButtonText} ▶</a>
-            </div>
-            
-            <div class="footer-column">
-              <h3>Quick Links</h3>
-              ${footerQuickLinks.map((link: string) => `<p>${link}</p>`).join('')}
+              <!-- Phone numbers from email_notification_configs table (Supabase) -->
+              ${footerPhones && footerPhones.length > 0 ? footerPhones.map((phone: string) => `<p style="margin-top: 5px;">📞 ${phone}</p>`).join('') : ''}
             </div>
           </div>
           
+          <!-- Copyright from email_notification_configs table (Supabase) -->
           <div class="footer-copyright">${footerCopyright}</div>
+          <p style="margin-top: 15px; font-size: 11px; color: rgba(255, 255, 255, 0.8); text-align: center;">
+            This email was sent regarding your recent assessment submission.
+          </p>
+          <p style="margin-top: 8px; font-size: 11px; color: rgba(255, 255, 255, 0.6); text-align: center;">
+            This is an automated confirmation email. Please do not reply directly to this message.
+          </p>
         </div>
       </div>
     </div>
@@ -381,11 +610,26 @@ Dear ${lead.name},
 
 ${bodyContent}
 
+${highlightBoxTitle || highlightBoxContent ? `${highlightBoxTitle}\n${highlightBoxContent}\n` : ''}
+
+Assessment Details:
+- Assessment Type: ${assessmentName}
+- ${assessmentName} Score: ${lead.score || 0}
+- Completed: ${formattedDate}
+- Time: ${formattedTime}
+
+${nextStepsTitle && nextStepsItems.length > 0 ? `${nextStepsTitle}:\n${nextStepsItems.map((item: string) => `- ${item}`).join('\n')}\n` : ''}
+
+${contactInfoTitle || contactInfoContent ? `${contactInfoTitle}\n${contactInfoContent}\n` : ''}
+
+${closingContent ? `${closingContent}\n` : ''}
+
 ${signature}
 
 ---
 ${footerCopyright}
 
+This email was sent regarding your recent assessment submission.
 This is an automated confirmation email. Please do not reply directly to this message.
   `;
 

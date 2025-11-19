@@ -23,6 +23,13 @@ interface EmailConfig {
   patient_subject: string;
   patient_preheader: string;
   patient_body: string;
+  patient_highlight_box_title?: string;
+  patient_highlight_box_content?: string;
+  patient_next_steps_title?: string;
+  patient_next_steps_items?: string[];
+  patient_contact_info_title?: string;
+  patient_contact_info_content?: string;
+  patient_closing_content?: string;
   patient_signature: string;
   patient_footer: string;
   footer_address_1?: string;
@@ -47,9 +54,21 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
   const [config, setConfig] = useState<EmailConfig>({
     patient_from_alias: 'Dr. Vaughn at Exhale Sinus',
     patient_reply_to: 'niki@exhalesinus.com',
-    patient_subject: `Your ${quizTitle} Results from Exhale Sinus`,
+    patient_subject: `Your ${quizTitle} Results from Exhale Sinus.`,
     patient_preheader: 'Your medical assessment results is not a diagnosis.',
     patient_body: `Thank you for taking the time to complete your ${quizTitle} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.`,
+    patient_highlight_box_title: 'What happens next?',
+    patient_highlight_box_content: 'Our medical team will carefully review your assessment results and prepare personalized recommendations based on your responses. You can expect to hear from us within 24-48 hours with next steps for your care.',
+    patient_next_steps_title: 'Next Steps',
+    patient_next_steps_items: [
+      'Our team will review your assessment results',
+      'We\'ll prepare personalized recommendations',
+      'You\'ll receive a follow-up communication within 24-48 hours',
+      'If urgent, please don\'t hesitate to contact us directly'
+    ],
+    patient_contact_info_title: 'Need Immediate Assistance?',
+    patient_contact_info_content: 'If you have any urgent concerns or questions, please don\'t wait for our follow-up. Contact our office directly at your earliest convenience.',
+    patient_closing_content: 'We appreciate your trust in our care and look forward to helping you on your health journey.',
     patient_signature: 'Dr. Ryan Vaughn\nExhale Sinus',
     patient_footer: '© 2025 Exhale Sinus. All rights reserved.',
     footer_address_1: '814 E Woodfield, Schaumburg, IL 60173',
@@ -74,27 +93,59 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('patient');
   const [showPreview, setShowPreview] = useState(false);
+  const [internalEmailsInput, setInternalEmailsInput] = useState('');
 
   useEffect(() => {
     loadConfig();
   }, [doctorProfile?.id, quizId]);
 
   const loadConfig = async () => {
-    if (!doctorProfile?.id) return;
+    if (!doctorProfile?.id || !quizId) return;
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Normalize quiz_type to uppercase to match database format
+      const normalizedQuizType = quizId.toUpperCase();
+      
+      console.log('Loading email config:', {
+        doctor_id: doctorProfile.id,
+        quiz_type: normalizedQuizType,
+        original_quiz_id: quizId
+      });
+
+      // Try with normalized (uppercase) first
+      let { data, error } = await supabase
         .from('email_notification_configs')
         .select('*')
         .eq('doctor_id', doctorProfile.id)
-        .eq('quiz_type', quizId)
-        .single();
+        .eq('quiz_type', normalizedQuizType)
+        .maybeSingle();
+
+      // If not found with normalized, try original format
+      if (!data && quizId !== normalizedQuizType) {
+        console.log('Trying with original quiz_type format...');
+        const retryResult = await supabase
+          .from('email_notification_configs')
+          .select('*')
+          .eq('doctor_id', doctorProfile.id)
+          .eq('quiz_type', quizId)
+          .maybeSingle();
+        
+        if (retryResult.data) {
+          data = retryResult.data;
+          error = null;
+        } else if (retryResult.error) {
+          error = retryResult.error;
+        }
+      }
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error loading email config:', error);
         return;
       }
+
+      console.log('Email config loaded:', data ? 'Found' : 'Not found (using defaults)');
 
       if (data) {
         setConfig({
@@ -103,8 +154,22 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
           patient_subject: data.patient_subject || config.patient_subject,
           patient_preheader: data.patient_preheader || config.patient_preheader,
           patient_body: data.patient_body || config.patient_body,
+          patient_highlight_box_title: data.patient_highlight_box_title || config.patient_highlight_box_title,
+          patient_highlight_box_content: data.patient_highlight_box_content || config.patient_highlight_box_content,
+          patient_next_steps_title: data.patient_next_steps_title || config.patient_next_steps_title,
+          patient_next_steps_items: data.patient_next_steps_items || config.patient_next_steps_items,
+          patient_contact_info_title: data.patient_contact_info_title || config.patient_contact_info_title,
+          patient_contact_info_content: data.patient_contact_info_content || config.patient_contact_info_content,
+          patient_closing_content: data.patient_closing_content || config.patient_closing_content,
           patient_signature: data.patient_signature || config.patient_signature,
           patient_footer: data.patient_footer || config.patient_footer,
+          footer_address_1: data.footer_address_1 || config.footer_address_1,
+          footer_address_2: data.footer_address_2 || config.footer_address_2,
+          footer_hours: data.footer_hours || config.footer_hours,
+          footer_phone_numbers: data.footer_phone_numbers || config.footer_phone_numbers,
+          footer_quick_links: data.footer_quick_links || config.footer_quick_links,
+          footer_appointment_button_text: data.footer_appointment_button_text || config.footer_appointment_button_text,
+          footer_appointment_button_url: data.footer_appointment_button_url || config.footer_appointment_button_url,
           patient_enabled: data.patient_enabled ?? config.patient_enabled,
           internal_to_emails: data.internal_to_emails || config.internal_to_emails,
           internal_from: data.internal_from || config.internal_from,
@@ -115,6 +180,10 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
           education_subject: data.education_subject || config.education_subject,
           education_body: data.education_body || config.education_body,
         });
+        // Set the raw input value for the textarea
+        if (data.internal_to_emails && Array.isArray(data.internal_to_emails)) {
+          setInternalEmailsInput(data.internal_to_emails.join(', '));
+        }
       }
     } catch (error) {
       console.error('Error loading email config:', error);
@@ -129,33 +198,94 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
       return;
     }
 
+    if (!quizId) {
+      toast.error('Quiz ID not found');
+      return;
+    }
+
     try {
       setSaving(true);
 
-      const { error } = await supabase
+      // Normalize quiz_type to uppercase to match database format
+      const normalizedQuizType = quizId.toUpperCase();
+
+      // Remove non-editable fields from save (they will always use defaults)
+      const { 
+        patient_highlight_box_title, 
+        patient_highlight_box_content,
+        patient_next_steps_title, 
+        patient_next_steps_items, 
+        patient_contact_info_title, 
+        patient_contact_info_content, 
+        patient_closing_content, 
+        ...configToSave 
+      } = config;
+
+      console.log('Saving email config:', {
+        doctor_id: doctorProfile.id,
+        quiz_type: normalizedQuizType,
+        original_quiz_id: quizId
+      });
+
+      // Clean up internal_to_emails - filter out any invalid entries before saving
+      const cleanedConfig = {
+        ...configToSave,
+        internal_to_emails: Array.isArray(configToSave.internal_to_emails) 
+          ? configToSave.internal_to_emails.filter((email: string) => email && email.trim().length > 0 && email.includes('@'))
+          : []
+      };
+
+      const { data, error } = await supabase
         .from('email_notification_configs')
         .upsert({
           doctor_id: doctorProfile.id,
-          quiz_type: quizId,
-          ...config,
+          quiz_type: normalizedQuizType,
+          ...cleanedConfig,
+          // Explicitly set non-editable fields to null so they use defaults
+          patient_highlight_box_title: null,
+          patient_highlight_box_content: null,
+          patient_next_steps_title: null,
+          patient_next_steps_items: null,
+          patient_contact_info_title: null,
+          patient_contact_info_content: null,
+          patient_closing_content: null,
         }, {
           onConflict: 'doctor_id,quiz_type'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error saving email config:', error);
+        throw error;
+      }
 
+      console.log('Email config saved successfully:', data);
       toast.success('Email configuration saved successfully');
     } catch (error: any) {
       console.error('Error saving email config:', error);
-      toast.error('Failed to save email configuration');
+      toast.error(`Failed to save email configuration: ${error.message || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
   };
 
   const handleToEmailsChange = (value: string) => {
-    const emails = value.split(',').map(e => e.trim()).filter(e => e);
+    // Store the raw input value (preserves commas and allows free typing)
+    setInternalEmailsInput(value);
+    
+    // Parse emails for display/validation, but keep the raw value in state
+    if (!value || value.trim() === '') {
+      setConfig({ ...config, internal_to_emails: [] });
+      return;
+    }
+    
+    // Split by comma and trim, filter out empty strings
+    const emails = value
+      .split(',')
+      .map(e => e.trim())
+      .filter(e => e && e.length > 0);
+    
     setConfig({ ...config, internal_to_emails: emails });
+    console.log('Updated internal_to_emails:', emails);
   };
 
   if (loading) {
@@ -227,7 +357,7 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
               <div className="space-y-2">
                 <Label>Subject Line</Label>
                 <Input
-                  placeholder={`Your ${quizTitle} Results from Exhale Sinus`}
+                  placeholder={`Your ${quizTitle} Results from Exhale Sinus.`}
                   value={config.patient_subject}
                   onChange={(e) => setConfig({ ...config, patient_subject: e.target.value })}
                 />
@@ -245,7 +375,7 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
               <div className="space-y-2">
                 <Label>Email Body</Label>
                 <Textarea
-                  rows={6}
+                  rows={4}
                   placeholder="Enter the main email content..."
                   value={config.patient_body}
                   onChange={(e) => setConfig({ ...config, patient_body: e.target.value })}
@@ -256,7 +386,7 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
                 </p>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 border-t pt-4">
                 <Label>Signature</Label>
                 <Textarea
                   rows={3}
@@ -311,36 +441,6 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Appointment Button Text</Label>
-                    <Input
-                      placeholder="Request an appointment"
-                      value={config.footer_appointment_button_text || ''}
-                      onChange={(e) => setConfig({ ...config, footer_appointment_button_text: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Appointment Button URL</Label>
-                    <Input
-                      placeholder="#"
-                      value={config.footer_appointment_button_url || ''}
-                      onChange={(e) => setConfig({ ...config, footer_appointment_button_url: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Quick Links (one per line)</Label>
-                  <Textarea
-                    rows={6}
-                    placeholder="Sinus Pain&#10;Sinus Headaches&#10;Sinus Quiz&#10;Nasal & Sinus Procedures&#10;Privacy Policy&#10;Accessibility Statement"
-                    value={Array.isArray(config.footer_quick_links) ? config.footer_quick_links.join('\n') : ''}
-                    onChange={(e) => setConfig({ ...config, footer_quick_links: e.target.value.split('\n').filter(l => l.trim()) })}
-                    className="font-sans"
-                  />
-                </div>
-
                 <div className="space-y-2">
                   <Label>Copyright Text</Label>
                   <Textarea
@@ -371,15 +471,21 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>To Email(s)</Label>
-                <Input
-                  type="text"
+                <Textarea
+                  rows={2}
                   placeholder="email1@example.com, email2@example.com"
-                  value={config.internal_to_emails.join(', ')}
+                  value={internalEmailsInput}
                   onChange={(e) => handleToEmailsChange(e.target.value)}
+                  className="font-sans"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Separate multiple emails with commas
+                  Separate multiple emails with commas. Saved to: <code className="text-xs bg-gray-100 px-1 rounded">email_notification_configs.internal_to_emails</code>
                 </p>
+                {config.internal_to_emails.length > 0 && (
+                  <div className="text-xs text-muted-foreground">
+                    <strong>Emails ({config.internal_to_emails.length}):</strong> {config.internal_to_emails.join(', ')}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -387,8 +493,7 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
                 <Input
                   value={config.internal_from}
                   onChange={(e) => setConfig({ ...config, internal_from: e.target.value })}
-                  disabled
-                  className="bg-gray-50"
+                  placeholder="PatientPathway.ai <office@patientpathway.ai>"
                 />
               </div>
 
@@ -457,72 +562,143 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
         {showPreview && activeTab === 'patient' && (
           <div className="mt-6 p-4 border rounded-lg bg-gray-50">
             <h4 className="font-semibold mb-4">Email Preview</h4>
-            <div className="bg-white rounded shadow-sm max-w-[600px] mx-auto">
-              {doctorProfile?.logo_url && (
-                <div className="text-center py-8 bg-white">
+            <div className="bg-white rounded shadow-sm max-w-[600px] mx-auto overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
+              {/* Pre-header (hidden but shown in email preview) */}
+              <div style={{ display: 'none', fontSize: '1px', color: '#fefefe', lineHeight: '1px', maxHeight: '0px', maxWidth: '0px', opacity: 0, overflow: 'hidden' }}>
+                {config.patient_preheader || 'Your medical assessment results is not a diagnosis.'}
+              </div>
+              
+              {/* Logo Header */}
+              {(doctorProfile?.avatar_url || doctorProfile?.logo_url) && (
+                <div className="text-center py-10 px-5 bg-white">
                   <img 
-                    src={doctorProfile.logo_url} 
+                    src={doctorProfile.avatar_url || doctorProfile.logo_url} 
                     alt={doctorProfile.clinic_name || 'Logo'} 
-                    className="max-w-[200px] h-auto mx-auto"
+                    className="max-w-[100px] h-auto mx-auto inline-block"
+                    onError={(e) => {
+                      console.error('Logo image failed to load:', doctorProfile.avatar_url || doctorProfile.logo_url);
+                      e.currentTarget.style.display = 'none';
+                    }}
                   />
                 </div>
               )}
               
-              <div className="p-8">
-                <p className="text-lg font-medium mb-4">Dear [Patient Name],</p>
-                <div className="text-gray-700 mb-6 whitespace-pre-line">
-                  {config.patient_body || `Thank you for completing the ${quizTitle} assessment. Your results have been submitted and our team will review them shortly.`}
+              {/* Content Body */}
+              <div className="px-10 py-8 bg-white">
+                <p className="text-lg font-medium mb-5 text-[#1e293b]">Dear [Patient Name],</p>
+                
+                <div className="text-base text-[#475569] mb-5 whitespace-pre-line leading-relaxed">
+                  {config.patient_body || `Thank you for taking the time to complete your ${quizTitle} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.`}
                 </div>
-                <div className="mt-6 text-gray-900 whitespace-pre-line">
+                
+                {/* Highlight Box */}
+                {(config.patient_highlight_box_title || config.patient_highlight_box_content) && (
+                  <div className="bg-blue-50 border-l-4 border-blue-500 p-4 my-5 rounded">
+                    <strong className="text-base text-[#1e293b] block mb-2">
+                      {config.patient_highlight_box_title || 'What happens next?'}
+                    </strong>
+                    <div className="text-sm text-[#475569] whitespace-pre-line leading-relaxed">
+                      {config.patient_highlight_box_content || 'Our medical team will carefully review your assessment results and prepare personalized recommendations based on your responses. You can expect to hear from us within 24-48 hours with next steps for your care.'}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Assessment Details */}
+                <div className="bg-gray-50 p-4 my-5 rounded border">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="font-medium text-[#1e293b]">Assessment Type:</span>
+                      <span className="text-[#475569]">{quizTitle}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-[#1e293b]">{quizTitle} Score:</span>
+                      <span className="text-[#475569] font-semibold">[Score will be displayed here]</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-[#1e293b]">Completed:</span>
+                      <span className="text-[#475569]">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-[#1e293b]">Time:</span>
+                      <span className="text-[#475569]">{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Next Steps */}
+                {config.patient_next_steps_title && (config.patient_next_steps_items?.length || 0) > 0 && (
+                  <div className="my-5">
+                    <h3 className="text-base font-semibold text-[#1e293b] mb-3">{config.patient_next_steps_title}</h3>
+                    <ul className="list-disc pl-5 space-y-2 text-sm text-[#475569]">
+                      {(config.patient_next_steps_items || []).map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {/* Contact Info */}
+                {(config.patient_contact_info_title || config.patient_contact_info_content) && (
+                  <div className="my-5">
+                    <h3 className="text-base font-semibold text-[#1e293b] mb-2">{config.patient_contact_info_title || 'Need Immediate Assistance?'}</h3>
+                    <p className="text-sm text-[#475569] whitespace-pre-line leading-relaxed">
+                      {config.patient_contact_info_content || 'If you have any urgent concerns or questions, please don\'t wait for our follow-up. Contact our office directly at your earliest convenience.'}
+                    </p>
+                  </div>
+                )}
+                
+                {/* Closing Content */}
+                {config.patient_closing_content && (
+                  <div className="text-base text-[#475569] my-5 whitespace-pre-line leading-relaxed">
+                    {config.patient_closing_content}
+                  </div>
+                )}
+                
+                {/* Signature */}
+                <div className="mt-8 text-base text-[#1e293b] whitespace-pre-line font-medium">
                   {config.patient_signature || `Dr. Ryan Vaughn\nExhale Sinus`}
                 </div>
               </div>
               
-              <div className="bg-[#0b5d82] text-white p-6 text-sm">
-                <div className="grid grid-cols-3 gap-6">
-                  {/* Left Column - Logo and Contact */}
+              {/* Footer */}
+              <div className="bg-[#0b5d82] text-white px-10 py-8 text-xs">
+                <div className="grid grid-cols-2 gap-8 mb-5">
+                  {/* Left Column - Logo and Addresses */}
                   <div>
-                    {doctorProfile?.logo_url && (
+                    {(doctorProfile?.avatar_url || doctorProfile?.logo_url) && (
                       <img 
-                        src={doctorProfile.logo_url} 
-                        alt="Exhale Sinus" 
+                        src={doctorProfile.avatar_url || doctorProfile.logo_url} 
+                        alt={doctorProfile.clinic_name || 'Logo'} 
                         className="max-w-[120px] h-auto mb-4"
+                        onError={(e) => {
+                          console.error('Footer logo image failed to load:', doctorProfile.avatar_url || doctorProfile.logo_url);
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     )}
-                    <p className="mb-1 text-xs">{config.footer_address_1 || '814 E Woodfield, Schaumburg, IL 60173'}</p>
-                    <p className="mb-4 text-xs">{config.footer_address_2 || '735 N. Perryville Rd. Suite 4, Rockford, IL 61107'}</p>
-                    <div className="flex gap-3">
-                      <span className="text-xl">📘</span>
-                      <span className="text-xl">🐦</span>
-                      <span className="text-xl">📷</span>
-                      <span className="text-xl">▶️</span>
-                    </div>
+                    <p className="mb-1 text-[11px] leading-relaxed">{config.footer_address_1 || '814 E Woodfield, Schaumburg, IL 60173'}</p>
+                    <p className="mb-4 text-[11px] leading-relaxed mt-2.5">{config.footer_address_2 || '735 N. Perryville Rd. Suite 4, Rockford, IL 61107'}</p>
                   </div>
                   
-                  {/* Middle Column - Hours */}
+                  {/* Right Column - Hours and Phone Numbers */}
                   <div>
-                    <h3 className="font-bold mb-2">Hours of Operation</h3>
-                    <p className="mb-3 text-xs whitespace-pre-line">{config.footer_hours || 'Monday - Thursday 8:00 am - 5:00 pm\nFriday - 9:00 am - 5:00 pm'}</p>
+                    <h3 className="font-bold mb-2.5 text-sm">Hours of Operation</h3>
+                    <p className="mb-3 text-[11px] leading-relaxed whitespace-pre-line">{config.footer_hours || 'Monday - Thursday 8:00 am - 5:00 pm\nFriday - 9:00 am - 5:00 pm'}</p>
                     {(config.footer_phone_numbers || ['224-529-4697', '815-977-5715', '815-281-5803']).map((phone, idx) => (
-                      <p key={idx} className="mb-1 text-xs">📞 {phone}</p>
-                    ))}
-                    <button className="bg-white text-[#0b5d82] px-4 py-2 rounded text-xs font-semibold mt-3">
-                      {config.footer_appointment_button_text || 'Request an appointment'} ▶
-                    </button>
-                  </div>
-                  
-                  {/* Right Column - Quick Links */}
-                  <div>
-                    <h3 className="font-bold mb-2">Quick Links</h3>
-                    {(config.footer_quick_links || ['Sinus Pain', 'Sinus Headaches', 'Sinus Quiz', 'Nasal & Sinus Procedures', 'Privacy Policy', 'Accessibility Statement']).map((link, idx) => (
-                      <p key={idx} className="mb-1 text-xs">{link}</p>
+                      <p key={idx} className="mb-1 text-[11px] leading-relaxed mt-1.5">📞 {phone}</p>
                     ))}
                   </div>
                 </div>
                 
-                <div className="mt-6 pt-4 border-t border-white/20 text-center text-xs whitespace-pre-line">
+                <div className="pt-5 mt-5 border-t border-white/20 text-center text-[11px] whitespace-pre-line leading-relaxed">
                   {config.patient_footer || '© 2025 Exhale Sinus. All rights reserved.'}
                 </div>
+                <p className="mt-3 text-[11px] text-gray-300 text-center">
+                  This email was sent regarding your recent assessment submission.
+                </p>
+                <p className="mt-2 text-[11px] text-gray-400 text-center">
+                  This is an automated confirmation email. Please do not reply directly to this message.
+                </p>
               </div>
             </div>
           </div>

@@ -21,10 +21,16 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Request method:', req.method);
     console.log('Request headers:', Object.fromEntries(req.headers.entries()));
 
+    // Use service role key to bypass RLS for reading email configs
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
     );
 
     const { leadId, doctorId }: DoctorNotificationRequest = await req.json();
@@ -58,22 +64,76 @@ const handler = async (req: Request): Promise<Response> => {
     }
     console.log('Doctor profile found:', { id: doctorProfile.id, name: `${doctorProfile.first_name} ${doctorProfile.last_name}`, email: doctorProfile.email });
 
+    // Get email notification configuration (ignore quiz_type - get any config for this doctor)
+    console.log('Fetching email notification config for internal notifications...');
+    const { data: emailConfig, error: configError } = await supabaseClient
+      .from('email_notification_configs')
+      .select('*')
+      .eq('doctor_id', doctorId)
+      .limit(1)
+      .maybeSingle();
+
+    if (configError) {
+      console.error('Error fetching email config:', configError);
+    }
+
+    console.log('Email config found:', emailConfig ? 'Yes' : 'No (using defaults)');
+    if (emailConfig) {
+      console.log('Internal notification config loaded:', {
+        id: emailConfig.id,
+        doctor_id: emailConfig.doctor_id,
+        quiz_type: emailConfig.quiz_type,
+        internal_enabled: emailConfig.internal_enabled,
+        internal_to_emails: emailConfig.internal_to_emails,
+        internal_to_emails_type: Array.isArray(emailConfig.internal_to_emails) ? 'array' : typeof emailConfig.internal_to_emails,
+        internal_to_emails_count: Array.isArray(emailConfig.internal_to_emails) ? emailConfig.internal_to_emails.length : 1,
+        internal_from: emailConfig.internal_from,
+        internal_subject: emailConfig.internal_subject,
+        internal_body: emailConfig.internal_body ? `Set (${emailConfig.internal_body.length} chars)` : 'Using default',
+      });
+    } else {
+      console.log('No email config found - will use default values');
+    }
+
+    // Check if internal notifications are enabled
+    if (emailConfig && emailConfig.internal_enabled === false) {
+      console.log('Internal notifications are disabled, skipping...');
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Internal notifications disabled',
+        skipped: true
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     // Send doctor notification email via Resend
     console.log('Sending doctor notification email...');
-    const emailResult = await sendDoctorNotificationEmail(lead, doctorProfile);
+    const emailResult = await sendDoctorNotificationEmail(lead, doctorProfile, emailConfig);
     console.log('Email result:', emailResult);
 
-    // Log the email
-    console.log('Logging email to database...');
-    await supabaseClient.from('email_logs').insert({
-      doctor_id: doctorId,
-      recipient_email: doctorProfile.email,
-      subject: `New Lead: ${lead.name} - ${lead.quiz_type} Assessment`,
-      status: emailResult.success ? 'sent' : 'failed',
-      resend_id: emailResult.id || null,
-      error_message: emailResult.error || null,
-      sent_at: new Date().toISOString()
-    });
+      // Log the email (log for each recipient)
+      if (emailResult.success) {
+        console.log('Logging emails to database...');
+        const assessmentName = getQuizTypeLabel(lead.quiz_type);
+        const subject = emailConfig?.internal_subject || `New Lead Submitted - ${assessmentName}`;
+        const toEmails = emailConfig?.internal_to_emails || ['Mehdiarani@gmail.com', 'niki@exhalesinus.com'];
+        const recipientEmails = Array.isArray(toEmails) ? toEmails : [toEmails].filter(Boolean);
+        
+        const emailLogs = recipientEmails.map((email: string) => ({
+          doctor_id: doctorId,
+          recipient_email: email,
+          subject: subject,
+          status: emailResult.success ? 'sent' : 'failed',
+          resend_id: emailResult.id || null,
+          error_message: emailResult.error || null,
+          sent_at: new Date().toISOString()
+        }));
+        
+        await supabaseClient.from('email_logs').insert(emailLogs);
+        console.log(`Logged ${emailLogs.length} email(s) to database`);
+      }
 
     console.log('=== SEND DOCTOR NOTIFICATION EDGE FUNCTION COMPLETED ===');
     return new Response(JSON.stringify({
@@ -96,17 +156,39 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-async function sendDoctorNotificationEmail(lead: any, doctorProfile: any) {
+/**
+ * Sends internal notification email using data from Supabase
+ * 
+ * Data Sources:
+ * - lead: From quiz_leads table (name, email, quiz_type, score, submitted_at, answers)
+ * - doctorProfile: From doctor_profiles table (first_name, last_name, email)
+ * - emailConfig: From email_notification_configs table (internal notification configuration)
+ */
+async function sendDoctorNotificationEmail(lead: any, doctorProfile: any, emailConfig?: any) {
   console.log('=== SENDING DOCTOR NOTIFICATION EMAIL ===');
   const resendApiKey = Deno.env.get('RESEND_API_KEY');
   console.log('Resend API Key available:', !!resendApiKey);
-  console.log('API Key length:', resendApiKey ? resendApiKey.length : 0);
-  console.log('API Key starts with re_:', resendApiKey ? resendApiKey.startsWith('re_') : false);
   
   if (!resendApiKey) {
     console.error('RESEND_API_KEY not configured');
     throw new Error('RESEND_API_KEY not configured');
   }
+
+  // Get assessment name from lead
+  const assessmentName = getQuizTypeLabel(lead.quiz_type);
+  
+  // Use config values from email_notification_configs (Supabase) or defaults
+  const toEmails = emailConfig?.internal_to_emails || ['Mehdiarani@gmail.com', 'niki@exhalesinus.com'];
+  const fromEmail = emailConfig?.internal_from || 'PatientPathway.ai <office@patientpathway.ai>';
+  const subject = emailConfig?.internal_subject || `New Lead Submitted - ${assessmentName}`;
+  const bodyContent = emailConfig?.internal_body || `A new patient has completed the ${assessmentName} assessment. Please review the submission and follow up accordingly.`;
+  
+  console.log('Using email config values:', {
+    toEmails: Array.isArray(toEmails) ? toEmails : [toEmails],
+    fromEmail,
+    subject,
+    bodyContent: bodyContent ? `${bodyContent.substring(0, 50)}...` : 'empty'
+  });
 
   const doctorName = `${doctorProfile.first_name} ${doctorProfile.last_name}`;
   const severity = getSeverityLevel(lead.score);
@@ -247,7 +329,17 @@ async function sendDoctorNotificationEmail(lead: any, doctorProfile: any) {
         class="logo"
       />
       <div class="header">PatientPathway.ai</div>
-      <div class="subheader">New Quiz Submission</div>
+      <div class="subheader">${subject}</div>
+      
+      ${bodyContent ? `
+      <div style="background-color: #f9fafb; border-left: 4px solid #007ea7; padding: 16px; margin: 20px 0; border-radius: 4px;">
+        <p style="margin: 0; font-size: 15px; color: #374151; white-space: pre-line; line-height: 1.6;">${bodyContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+      </div>
+      ` : `
+      <div style="background-color: #f9fafb; border-left: 4px solid #007ea7; padding: 16px; margin: 20px 0; border-radius: 4px;">
+        <p style="margin: 0; font-size: 15px; color: #374151; white-space: pre-line; line-height: 1.6;">A new patient has completed the ${assessmentName} assessment. Please review the submission and follow up accordingly.</p>
+      </div>
+      `}
 
       <div>
         <h3 class="section-title">Patient Contact Information</h3>
@@ -316,9 +408,11 @@ async function sendDoctorNotificationEmail(lead: any, doctorProfile: any) {
 </html>
 `;
   const text = `
-New Quiz Submission
+${subject}
 
-Quiz: ${getQuizTypeLabel(lead.quiz_type)} - ${doctorName}
+${bodyContent ? `${bodyContent}\n\n` : `A new patient has completed the ${assessmentName} assessment. Please review the submission and follow up accordingly.\n\n`}
+
+Quiz: ${assessmentName} - ${doctorName}
 Status: Qualified Lead
 Total Score: ${lead.score}
 Submitted: ${new Date(lead.submitted_at).toLocaleString()}
@@ -344,18 +438,39 @@ Hint: Your PIN is your office zip code.
 
   try {
     console.log('Preparing email data...');
-    const emailData = {
-        from: 'PatientPathway.ai <office@patientpathway.ai>', // Using verified domain
-      to: doctorProfile.email,
-      subject: `Quiz Notifications`,
+    console.log('Email configuration:', {
+      toEmails,
+      fromEmail,
+      subject,
+      hasBodyContent: !!bodyContent,
+      bodyContentLength: bodyContent?.length || 0
+    });
+    
+    // Ensure toEmails is an array
+    const recipientEmails = Array.isArray(toEmails) ? toEmails : [toEmails].filter(Boolean);
+    
+    if (recipientEmails.length === 0) {
+      throw new Error('No recipient emails configured');
+    }
+    
+    // Send to all configured emails (from email_notification_configs)
+    // Note: Resend API requires reply_to to be a valid email address format
+    // Using no-reply address or omitting it (Resend will use 'from' address by default)
+    const emailData: any = {
+      from: fromEmail,
+      to: recipientEmails, // Array of emails from config
+      subject: subject,
       html: html,
       text: text,
-      reply_to: doctorProfile.email
+      // Omit reply_to - Resend will use the 'from' address by default
+      // If you need a no-reply, use: reply_to: 'noreply@patientpathway.ai'
     };
     console.log('Email data prepared:', { 
       to: emailData.to, 
+      toCount: recipientEmails.length,
       subject: emailData.subject,
-      from: emailData.from 
+      from: emailData.from,
+      hasReplyTo: !!emailData.reply_to
     });
 
     console.log('Sending request to Resend API...');
