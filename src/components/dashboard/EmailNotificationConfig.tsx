@@ -559,148 +559,273 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
           </Button>
         </div>
 
-        {showPreview && activeTab === 'patient' && (
+        {showPreview && (
           <div className="mt-6 p-4 border rounded-lg bg-gray-50">
-            <h4 className="font-semibold mb-4">Email Preview</h4>
-            <div className="bg-white rounded shadow-sm max-w-[600px] mx-auto overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
-              {/* Pre-header (hidden but shown in email preview) */}
-              <div style={{ display: 'none', fontSize: '1px', color: '#fefefe', lineHeight: '1px', maxHeight: '0px', maxWidth: '0px', opacity: 0, overflow: 'hidden' }}>
-                {config.patient_preheader || 'Your medical assessment results is not a diagnosis.'}
-              </div>
-              
-              {/* Logo Header */}
-              {(doctorProfile?.avatar_url || doctorProfile?.logo_url) && (
-                <div className="text-center py-10 px-5 bg-white">
-                  <img 
-                    src={doctorProfile.avatar_url || doctorProfile.logo_url} 
-                    alt={doctorProfile.clinic_name || 'Logo'} 
-                    className="max-w-[100px] h-auto mx-auto inline-block"
-                    onError={(e) => {
-                      console.error('Logo image failed to load:', doctorProfile.avatar_url || doctorProfile.logo_url);
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
-              
-              {/* Content Body */}
-              <div className="px-10 py-8 bg-white">
-                <p className="text-lg font-medium mb-5 text-[#1e293b]">Dear [Patient Name],</p>
-                
-                <div className="text-base text-[#475569] mb-5 whitespace-pre-line leading-relaxed">
-                  {config.patient_body || `Thank you for taking the time to complete your ${quizTitle} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.`}
+            <h4 className="font-semibold mb-4">
+              {activeTab === 'patient' ? 'Patient Confirmation Email Preview' : 'Internal Notification Email Preview'}
+            </h4>
+            {activeTab === 'patient' ? (
+              <div className="bg-white rounded shadow-sm max-w-[600px] mx-auto overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
+                {/* Pre-header (hidden but shown in email preview) */}
+                <div style={{ display: 'none', fontSize: '1px', color: '#fefefe', lineHeight: '1px', maxHeight: '0px', maxWidth: '0px', opacity: 0, overflow: 'hidden' }}>
+                  {config.patient_preheader || 'Your medical assessment results is not a diagnosis.'}
                 </div>
                 
-                {/* Highlight Box */}
-                {(config.patient_highlight_box_title || config.patient_highlight_box_content) && (
-                  <div className="bg-blue-50 border-l-4 border-blue-500 p-4 my-5 rounded">
-                    <strong className="text-base text-[#1e293b] block mb-2">
-                      {config.patient_highlight_box_title || 'What happens next?'}
-                    </strong>
-                    <div className="text-sm text-[#475569] whitespace-pre-line leading-relaxed">
-                      {config.patient_highlight_box_content || 'Our medical team will carefully review your assessment results and prepare personalized recommendations based on your responses. You can expect to hear from us within 24-48 hours with next steps for your care.'}
-                    </div>
+                {/* Logo Header */}
+                {(doctorProfile?.avatar_url || doctorProfile?.logo_url) && (
+                  <div className="text-center py-10 px-5 bg-white">
+                    <img 
+                      src={doctorProfile.avatar_url || doctorProfile.logo_url} 
+                      alt="Logo" 
+                      className="max-w-[200px] h-auto mx-auto"
+                    />
                   </div>
                 )}
                 
-                {/* Assessment Details */}
-                <div className="bg-gray-50 p-4 my-5 rounded border">
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="font-medium text-[#1e293b]">Assessment Type:</span>
-                      <span className="text-[#475569]">{quizTitle}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-[#1e293b]">{quizTitle} Score:</span>
-                      <span className="text-[#475569] font-semibold">[Score will be displayed here]</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-[#1e293b]">Completed:</span>
-                      <span className="text-[#475569]">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-[#1e293b]">Time:</span>
-                      <span className="text-[#475569]">{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Next Steps */}
-                {config.patient_next_steps_title && (config.patient_next_steps_items?.length || 0) > 0 && (
-                  <div className="my-5">
-                    <h3 className="text-base font-semibold text-[#1e293b] mb-3">{config.patient_next_steps_title}</h3>
-                    <ul className="list-disc pl-5 space-y-2 text-sm text-[#475569]">
-                      {(config.patient_next_steps_items || []).map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                
-                {/* Contact Info */}
-                {(config.patient_contact_info_title || config.patient_contact_info_content) && (
-                  <div className="my-5">
-                    <h3 className="text-base font-semibold text-[#1e293b] mb-2">{config.patient_contact_info_title || 'Need Immediate Assistance?'}</h3>
-                    <p className="text-sm text-[#475569] whitespace-pre-line leading-relaxed">
-                      {config.patient_contact_info_content || 'If you have any urgent concerns or questions, please don\'t wait for our follow-up. Contact our office directly at your earliest convenience.'}
-                    </p>
-                  </div>
-                )}
-                
-                {/* Closing Content */}
-                {config.patient_closing_content && (
-                  <div className="text-base text-[#475569] my-5 whitespace-pre-line leading-relaxed">
-                    {config.patient_closing_content}
-                  </div>
-                )}
-                
-                {/* Signature */}
-                <div className="mt-8 text-base text-[#1e293b] whitespace-pre-line font-medium">
-                  {config.patient_signature || `Dr. Ryan Vaughn\nExhale Sinus`}
-                </div>
-              </div>
-              
-              {/* Footer */}
-              <div className="bg-[#0b5d82] text-white px-10 py-8 text-xs">
-                <div className="grid grid-cols-2 gap-8 mb-5">
-                  {/* Left Column - Logo and Addresses */}
-                  <div>
-                    {(doctorProfile?.avatar_url || doctorProfile?.logo_url) && (
-                      <img 
-                        src={doctorProfile.avatar_url || doctorProfile.logo_url} 
-                        alt={doctorProfile.clinic_name || 'Logo'} 
-                        className="max-w-[120px] h-auto mb-4"
-                        onError={(e) => {
-                          console.error('Footer logo image failed to load:', doctorProfile.avatar_url || doctorProfile.logo_url);
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    )}
-                    <p className="mb-1 text-[11px] leading-relaxed">{config.footer_address_1 || '814 E Woodfield, Schaumburg, IL 60173'}</p>
-                    <p className="mb-4 text-[11px] leading-relaxed mt-2.5">{config.footer_address_2 || '735 N. Perryville Rd. Suite 4, Rockford, IL 61107'}</p>
+                {/* Email Body */}
+                <div className="px-10 py-8">
+                  <div className="text-lg text-[#1e293b] mb-5 font-medium">
+                    Dear [Patient Name],
                   </div>
                   
-                  {/* Right Column - Hours and Phone Numbers */}
-                  <div>
-                    <h3 className="font-bold mb-2.5 text-sm">Hours of Operation</h3>
-                    <p className="mb-3 text-[11px] leading-relaxed whitespace-pre-line">{config.footer_hours || 'Monday - Thursday 8:00 am - 5:00 pm\nFriday - 9:00 am - 5:00 pm'}</p>
-                    {(config.footer_phone_numbers || ['224-529-4697', '815-977-5715', '815-281-5803']).map((phone, idx) => (
-                      <p key={idx} className="mb-1 text-[11px] leading-relaxed mt-1.5">📞 {phone}</p>
-                    ))}
+                  <div className="text-base text-[#475569] mb-5 whitespace-pre-line leading-relaxed">
+                    {config.patient_body || `Thank you for taking the time to complete your ${quizTitle} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.`}
+                  </div>
+                  
+                  {/* Highlight Box */}
+                  {config.patient_highlight_box_title && config.patient_highlight_box_content && (
+                    <div className="bg-[#e0f2fe] border-l-4 border-[#0369a1] p-4 my-5 rounded-r">
+                      <h3 className="text-base font-semibold text-[#0c4a6e] mb-2">{config.patient_highlight_box_title}</h3>
+                      <div className="text-sm text-[#475569] whitespace-pre-line leading-relaxed">
+                        {config.patient_highlight_box_content || 'Our medical team will carefully review your assessment results and prepare personalized recommendations based on your responses. You can expect to hear from us within 24-48 hours with next steps for your care.'}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Assessment Details */}
+                  <div className="bg-gray-50 p-4 my-5 rounded border">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="font-medium text-[#1e293b]">Assessment Type:</span>
+                        <span className="text-[#475569]">{quizTitle}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-[#1e293b]">{quizTitle} Score:</span>
+                        <span className="text-[#475569] font-semibold">[Score will be displayed here]</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-[#1e293b]">Completed:</span>
+                        <span className="text-[#475569]">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-[#1e293b]">Time:</span>
+                        <span className="text-[#475569]">{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Next Steps */}
+                  {config.patient_next_steps_title && (config.patient_next_steps_items?.length || 0) > 0 && (
+                    <div className="my-5">
+                      <h3 className="text-base font-semibold text-[#1e293b] mb-3">{config.patient_next_steps_title}</h3>
+                      <ul className="list-disc pl-5 space-y-2 text-sm text-[#475569]">
+                        {(config.patient_next_steps_items || []).map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {/* Contact Info */}
+                  {(config.patient_contact_info_title || config.patient_contact_info_content) && (
+                    <div className="my-5">
+                      <h3 className="text-base font-semibold text-[#1e293b] mb-2">{config.patient_contact_info_title || 'Need Immediate Assistance?'}</h3>
+                      <p className="text-sm text-[#475569] whitespace-pre-line leading-relaxed">
+                        {config.patient_contact_info_content || 'If you have any urgent concerns or questions, please don\'t wait for our follow-up. Contact our office directly at your earliest convenience.'}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Closing Content */}
+                  {config.patient_closing_content && (
+                    <div className="text-base text-[#475569] my-5 whitespace-pre-line leading-relaxed">
+                      {config.patient_closing_content}
+                    </div>
+                  )}
+                  
+                  {/* Signature */}
+                  <div className="mt-8 text-base text-[#1e293b] whitespace-pre-line font-medium">
+                    {config.patient_signature || `Dr. Ryan Vaughn\nExhale Sinus`}
                   </div>
                 </div>
                 
-                <div className="pt-5 mt-5 border-t border-white/20 text-center text-[11px] whitespace-pre-line leading-relaxed">
-                  {config.patient_footer || '© 2025 Exhale Sinus. All rights reserved.'}
+                {/* Footer */}
+                <div className="bg-[#0b5d82] text-white px-10 py-8 text-xs">
+                  <div className="grid grid-cols-2 gap-8 mb-5">
+                    {/* Left Column - Logo and Addresses */}
+                    <div>
+                      {(doctorProfile?.avatar_url || doctorProfile?.logo_url) && (
+                        <img 
+                          src={doctorProfile.avatar_url || doctorProfile.logo_url} 
+                          alt="Logo" 
+                          className="max-w-[120px] h-auto mb-4"
+                        />
+                      )}
+                      <p>{config.footer_address_1 || '814 E Woodfield, Schaumburg, IL 60173'}</p>
+                      <p className="mt-2">{config.footer_address_2 || '735 N. Perryville Rd. Suite 4, Rockford, IL 61107'}</p>
+                      <div className="flex gap-2 mt-4">
+                        <span>📘</span>
+                        <span>🐦</span>
+                        <span>📷</span>
+                        <span>▶️</span>
+                      </div>
+                    </div>
+                    
+                    {/* Middle Column - Hours and Contact */}
+                    <div>
+                      <h3 className="font-bold mb-2 text-sm">Hours of Operation</h3>
+                      <p className="whitespace-pre-line text-[11px]">{config.footer_hours || 'Monday - Thursday 8:00 am - 5:00 pm\nFriday - 9:00 am - 5:00 pm'}</p>
+                      {(config.footer_phone_numbers || ['224-529-4697', '815-977-5715', '815-281-5803']).map((phone, idx) => (
+                        <p key={idx} className="mt-1 text-[11px]">📞 {phone}</p>
+                      ))}
+                      <a href={config.footer_appointment_button_url || '#'} className="inline-block bg-white text-[#0b5d82] px-5 py-2 rounded mt-3 font-bold text-[11px]">
+                        {config.footer_appointment_button_text || 'Request an appointment'} ▶
+                      </a>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-8">
+                    {/* Quick Links Column */}
+                    <div>
+                      <h3 className="font-bold mb-2 text-sm">Quick Links</h3>
+                      {(config.footer_quick_links || ['Sinus Pain', 'Sinus Headaches', 'Sinus Quiz', 'Nasal & Sinus Procedures', 'Privacy Policy', 'Accessibility Statement']).map((link, idx) => (
+                        <p key={idx} className="text-[11px]">{link}</p>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="border-t border-white/20 pt-5 mt-5 text-center text-[11px] whitespace-pre-line">
+                    {config.patient_footer || '© 2025 Exhale Sinus. All rights reserved.'}
+                  </div>
                 </div>
-                <p className="mt-3 text-[11px] text-gray-300 text-center">
-                  This email was sent regarding your recent assessment submission.
-                </p>
-                <p className="mt-2 text-[11px] text-gray-400 text-center">
-                  This is an automated confirmation email. Please do not reply directly to this message.
-                </p>
               </div>
-            </div>
+            ) : activeTab === 'internal' ? (
+              <div className="bg-white rounded shadow-sm max-w-[700px] mx-auto overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
+                <div className="px-10 py-8">
+                  {/* Logo Header */}
+                  {(doctorProfile?.avatar_url || doctorProfile?.logo_url) && (
+                    <div className="text-center mb-6">
+                      <img 
+                        src={doctorProfile.avatar_url || doctorProfile.logo_url} 
+                        alt="Logo" 
+                        className="max-w-[100px] h-auto mx-auto rounded-lg"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Header */}
+                  <div className="text-center mb-6">
+                    <div className="text-2xl font-bold text-[#007ea7] mb-1">PatientPathway.ai</div>
+                    <div className="text-[15px] text-[#555]">{config.internal_subject || `New Lead Submitted - ${quizTitle}`}</div>
+                  </div>
+                  
+                  {/* Body Message */}
+                  {config.internal_body && (
+                    <div className="bg-[#f9fafb] border-l-4 border-[#007ea7] p-4 mb-5 rounded-r">
+                      <p className="text-[15px] text-[#374151] whitespace-pre-line leading-relaxed">
+                        {config.internal_body}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Patient Contact Information */}
+                  <div className="mb-6">
+                    <h3 className="text-base font-semibold text-[#374151] mb-2 border-b border-[#e5e7eb] pb-1">
+                      Patient Contact Information
+                    </h3>
+                    <ul className="space-y-1 text-sm">
+                      <li><span className="font-semibold mr-1.5 text-[#374151]">Name:</span>[Patient Name]</li>
+                      <li><span className="font-semibold mr-1.5 text-[#374151]">Mobile:</span>[Patient Phone]</li>
+                      <li><span className="font-semibold mr-1.5 text-[#374151]">Email:</span><a href="mailto:[patient@email.com]" className="text-[#007ea7] underline">[patient@email.com]</a></li>
+                    </ul>
+                  </div>
+                  
+                  {/* Assessment Details */}
+                  <div className="mb-6">
+                    <h3 className="text-base font-semibold text-[#374151] mb-2 border-b border-[#e5e7eb] pb-1">
+                      Assessment Details
+                    </h3>
+                    <table className="w-full text-sm">
+                      <tbody>
+                        <tr>
+                          <td className="py-1.5 text-xs font-semibold text-[#6b7280] uppercase w-[140px]">Quiz Type</td>
+                          <td className="py-1.5 text-[15px] text-[#111827]">{quizTitle}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-1.5 text-xs font-semibold text-[#6b7280] uppercase">Doctor</td>
+                          <td className="py-1.5 text-[15px] text-[#111827]">{doctorProfile?.first_name} {doctorProfile?.last_name}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-1.5 text-xs font-semibold text-[#6b7280] uppercase">Status</td>
+                          <td className="py-1.5 text-[15px] text-[#111827]">Qualified Lead</td>
+                        </tr>
+                        <tr>
+                          <td className="py-1.5 text-xs font-semibold text-[#6b7280] uppercase">Score</td>
+                          <td className="py-1.5 text-[15px] text-[#111827]">
+                            <span className="inline-block bg-[#007ea7] text-white px-3 py-1 rounded-full font-semibold text-sm">
+                              [Score]
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="py-1.5 text-xs font-semibold text-[#6b7280] uppercase">Source</td>
+                          <td className="py-1.5 text-[15px] text-[#111827]">[Lead Source]</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <p className="text-xs text-[#6b7280] mt-2">
+                      Submitted: {new Date().toLocaleString()}
+                    </p>
+                  </div>
+                  
+                  {/* Quiz Responses */}
+                  <div className="mb-6">
+                    <h3 className="text-base font-semibold text-[#374151] mb-2 border-b border-[#e5e7eb] pb-1">
+                      Quiz Responses
+                    </h3>
+                    <div className="bg-[#f9fafb] rounded p-3 text-sm">
+                      <div className="py-1.5 border-b border-[#e5e7eb]">
+                        <span className="font-medium">Question 1:</span> <span className="text-[#475569]">[Answer 1]</span>
+                      </div>
+                      <div className="py-1.5 border-b border-[#e5e7eb]">
+                        <span className="font-medium">Question 2:</span> <span className="text-[#475569]">[Answer 2]</span>
+                      </div>
+                      <div className="py-1.5">
+                        <span className="font-medium">Question 3:</span> <span className="text-[#475569]">[Answer 3]</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Dashboard Link */}
+                  <div className="text-center mt-8">
+                    <h3 className="text-base mb-3 text-[#374151]">
+                      Access Your Clinician Dashboard
+                    </h3>
+                    <a 
+                      href="#" 
+                      className="inline-block bg-[#007ea7] text-white px-6 py-3 rounded font-semibold text-[15px] hover:bg-[#006a8f]"
+                    >
+                      Open Dashboard
+                    </a>
+                  </div>
+                  
+                  {/* Footer */}
+                  <div className="text-center text-xs text-[#999] mt-10">
+                    © 2025 Patient Pathway. All rights reserved.
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
       </CardContent>

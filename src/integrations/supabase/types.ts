@@ -952,9 +952,16 @@ export type Database = {
           internal_subject: string | null
           internal_to_emails: string[] | null
           patient_body: string | null
+          patient_closing_content: string | null
+          patient_contact_info_content: string | null
+          patient_contact_info_title: string | null
           patient_enabled: boolean | null
           patient_footer: string | null
           patient_from_alias: string | null
+          patient_highlight_box_content: string | null
+          patient_highlight_box_title: string | null
+          patient_next_steps_items: string[] | null
+          patient_next_steps_title: string | null
           patient_preheader: string | null
           patient_reply_to: string | null
           patient_signature: string | null
@@ -982,9 +989,16 @@ export type Database = {
           internal_subject?: string | null
           internal_to_emails?: string[] | null
           patient_body?: string | null
+          patient_closing_content?: string | null
+          patient_contact_info_content?: string | null
+          patient_contact_info_title?: string | null
           patient_enabled?: boolean | null
           patient_footer?: string | null
           patient_from_alias?: string | null
+          patient_highlight_box_content?: string | null
+          patient_highlight_box_title?: string | null
+          patient_next_steps_items?: string[] | null
+          patient_next_steps_title?: string | null
           patient_preheader?: string | null
           patient_reply_to?: string | null
           patient_signature?: string | null
@@ -1012,9 +1026,16 @@ export type Database = {
           internal_subject?: string | null
           internal_to_emails?: string[] | null
           patient_body?: string | null
+          patient_closing_content?: string | null
+          patient_contact_info_content?: string | null
+          patient_contact_info_title?: string | null
           patient_enabled?: boolean | null
           patient_footer?: string | null
           patient_from_alias?: string | null
+          patient_highlight_box_content?: string | null
+          patient_highlight_box_title?: string | null
+          patient_next_steps_items?: string[] | null
+          patient_next_steps_title?: string | null
           patient_preheader?: string | null
           patient_reply_to?: string | null
           patient_signature?: string | null
