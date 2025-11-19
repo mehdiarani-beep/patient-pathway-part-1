@@ -364,6 +364,39 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
             {showPreview ? 'Hide Preview' : 'Preview Email'}
           </Button>
         </div>
+
+        {showPreview && activeTab === 'patient' && (
+          <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+            <h4 className="font-semibold mb-4">Email Preview</h4>
+            <div className="bg-white rounded shadow-sm max-w-[600px] mx-auto">
+              {doctorProfile?.logo_url && (
+                <div className="text-center py-8 bg-white">
+                  <img 
+                    src={doctorProfile.logo_url} 
+                    alt={doctorProfile.clinic_name || 'Logo'} 
+                    className="max-w-[200px] h-auto mx-auto"
+                  />
+                </div>
+              )}
+              
+              <div className="p-8">
+                <p className="text-lg font-medium mb-4">Dear [Patient Name],</p>
+                <div className="text-gray-700 mb-6 whitespace-pre-line">
+                  {config.patient_body || `Thank you for completing the ${quizTitle} assessment. Your results have been submitted and our team will review them shortly.`}
+                </div>
+                <div className="mt-6 text-gray-900 whitespace-pre-line">
+                  {config.patient_signature || `Dr. Ryan Vaughn\nExhale Sinus`}
+                </div>
+              </div>
+              
+              <div className="bg-[#0b5d82] text-white p-8 text-sm">
+                <div className="whitespace-pre-line">
+                  {config.patient_footer || '© 2025 Exhale Sinus. All rights reserved.'}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
