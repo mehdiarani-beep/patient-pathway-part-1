@@ -75,9 +75,24 @@ const handler = async (req: Request) => {
       email_alias: doctorProfile.email_alias
     });
 
+    // Get email notification configuration
+    console.log('Fetching email notification config for quiz type:', lead.quiz_type);
+    const { data: emailConfig, error: configError } = await supabaseClient
+      .from('email_notification_configs')
+      .select('*')
+      .eq('doctor_id', doctorId)
+      .eq('quiz_type', lead.quiz_type)
+      .single();
+
+    if (configError && configError.code !== 'PGRST116') {
+      console.error('Error fetching email config:', configError);
+    }
+
+    console.log('Email config found:', emailConfig ? 'Yes' : 'No (using defaults)');
+
     // Send patient confirmation email
     console.log('Sending patient confirmation email...');
-    const emailResult = await sendPatientConfirmationEmail(lead, doctorProfile);
+    const emailResult = await sendPatientConfirmationEmail(lead, doctorProfile, emailConfig);
     console.log('Email result:', emailResult);
 
     // Log the email
