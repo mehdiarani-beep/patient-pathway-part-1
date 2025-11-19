@@ -176,7 +176,16 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
   const preheader = emailConfig?.patient_preheader || 'Your medical assessment results is not a diagnosis.';
   const bodyContent = emailConfig?.patient_body || `Thank you for taking the time to complete your ${getQuizTypeLabel(lead.quiz_type)} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.`;
   const signature = emailConfig?.patient_signature || `Dr. Ryan Vaughn\nExhale Sinus`;
-  const footer = emailConfig?.patient_footer || `© 2025 Exhale Sinus. All rights reserved.`;
+  const footerCopyright = emailConfig?.patient_footer || `© 2025 Exhale Sinus. All rights reserved.`;
+  
+  // Footer content
+  const footerAddress1 = emailConfig?.footer_address_1 || '814 E Woodfield, Schaumburg, IL 60173';
+  const footerAddress2 = emailConfig?.footer_address_2 || '735 N. Perryville Rd. Suite 4, Rockford, IL 61107';
+  const footerHours = emailConfig?.footer_hours || 'Monday - Thursday 8:00 am - 5:00 pm\nFriday - 9:00 am - 5:00 pm';
+  const footerPhones = emailConfig?.footer_phone_numbers || ['224-529-4697', '815-977-5715', '815-281-5803'];
+  const footerQuickLinks = emailConfig?.footer_quick_links || ['Sinus Pain', 'Sinus Headaches', 'Sinus Quiz', 'Nasal & Sinus Procedures', 'Privacy Policy', 'Accessibility Statement'];
+  const footerButtonText = emailConfig?.footer_appointment_button_text || 'Request an appointment';
+  const footerButtonUrl = emailConfig?.footer_appointment_button_url || '#';
   
   console.log('Email sender configuration:', {
     fromAlias,
@@ -325,10 +334,8 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
           <div class="footer-grid">
             <div class="footer-column">
               ${logoUrl ? `<img src="${logoUrl}" alt="${clinicName}" class="footer-logo" />` : ''}
-              <p>814 E Woodfield</p>
-              <p>Schaumburg, IL 60173</p>
-              <p style="margin-top: 10px;">735 N. Perryville Rd. Suite 4</p>
-              <p>Rockford, IL 61107</p>
+              <p>${footerAddress1}</p>
+              <p style="margin-top: 10px;">${footerAddress2}</p>
               <div class="social-icons">
                 <span style="font-size: 18px;">📘</span>
                 <span style="font-size: 18px;">🐦</span>
@@ -339,26 +346,18 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
             
             <div class="footer-column">
               <h3>Hours of Operation</h3>
-              <p>Monday - Thursday 8:00 am - 5:00 pm</p>
-              <p>Friday - 9:00 am - 5:00 pm</p>
-              <p style="margin-top: 10px;">📞 224-529-4697</p>
-              <p>📞 815-977-5715</p>
-              <p>📞 815-281-5803</p>
-              <a href="#" class="appointment-btn">Request an appointment ▶</a>
+              <p style="white-space: pre-line;">${footerHours}</p>
+              ${footerPhones.map((phone: string) => `<p style="margin-top: 5px;">📞 ${phone}</p>`).join('')}
+              <a href="${footerButtonUrl}" class="appointment-btn">${footerButtonText} ▶</a>
             </div>
             
             <div class="footer-column">
               <h3>Quick Links</h3>
-              <p>Sinus Pain</p>
-              <p>Sinus Headaches</p>
-              <p>Sinus Quiz</p>
-              <p>Nasal & Sinus Procedures</p>
-              <p>Privacy Policy</p>
-              <p>Accessibility Statement</p>
+              ${footerQuickLinks.map((link: string) => `<p>${link}</p>`).join('')}
             </div>
           </div>
           
-          <div class="footer-copyright">${footer}</div>
+          <div class="footer-copyright">${footerCopyright}</div>
         </div>
       </div>
     </div>
@@ -374,7 +373,7 @@ ${bodyContent}
 ${signature}
 
 ---
-${footer}
+${footerCopyright}
 
 This is an automated confirmation email. Please do not reply directly to this message.
   `;

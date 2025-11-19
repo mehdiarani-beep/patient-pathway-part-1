@@ -25,6 +25,13 @@ interface EmailConfig {
   patient_body: string;
   patient_signature: string;
   patient_footer: string;
+  footer_address_1?: string;
+  footer_address_2?: string;
+  footer_hours?: string;
+  footer_phone_numbers?: string[];
+  footer_quick_links?: string[];
+  footer_appointment_button_text?: string;
+  footer_appointment_button_url?: string;
   patient_enabled: boolean;
   internal_to_emails: string[];
   internal_from: string;
@@ -253,15 +260,90 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Footer</Label>
-                <Textarea
-                  rows={2}
-                  placeholder="© 2025 Exhale Sinus. All rights reserved."
-                  value={config.patient_footer}
-                  onChange={(e) => setConfig({ ...config, patient_footer: e.target.value })}
-                  className="font-sans"
-                />
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">Footer Content</h4>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Address 1</Label>
+                    <Input
+                      placeholder="814 E Woodfield, Schaumburg, IL 60173"
+                      value={config.footer_address_1 || ''}
+                      onChange={(e) => setConfig({ ...config, footer_address_1: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Address 2</Label>
+                    <Input
+                      placeholder="735 N. Perryville Rd. Suite 4, Rockford, IL 61107"
+                      value={config.footer_address_2 || ''}
+                      onChange={(e) => setConfig({ ...config, footer_address_2: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Hours of Operation</Label>
+                  <Textarea
+                    rows={2}
+                    placeholder="Monday - Thursday 8:00 am - 5:00 pm&#10;Friday - 9:00 am - 5:00 pm"
+                    value={config.footer_hours || ''}
+                    onChange={(e) => setConfig({ ...config, footer_hours: e.target.value })}
+                    className="font-sans"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Phone Numbers (one per line)</Label>
+                  <Textarea
+                    rows={3}
+                    placeholder="224-529-4697&#10;815-977-5715&#10;815-281-5803"
+                    value={Array.isArray(config.footer_phone_numbers) ? config.footer_phone_numbers.join('\n') : ''}
+                    onChange={(e) => setConfig({ ...config, footer_phone_numbers: e.target.value.split('\n').filter(p => p.trim()) })}
+                    className="font-sans"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Appointment Button Text</Label>
+                    <Input
+                      placeholder="Request an appointment"
+                      value={config.footer_appointment_button_text || ''}
+                      onChange={(e) => setConfig({ ...config, footer_appointment_button_text: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Appointment Button URL</Label>
+                    <Input
+                      placeholder="#"
+                      value={config.footer_appointment_button_url || ''}
+                      onChange={(e) => setConfig({ ...config, footer_appointment_button_url: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Quick Links (one per line)</Label>
+                  <Textarea
+                    rows={6}
+                    placeholder="Sinus Pain&#10;Sinus Headaches&#10;Sinus Quiz&#10;Nasal & Sinus Procedures&#10;Privacy Policy&#10;Accessibility Statement"
+                    value={Array.isArray(config.footer_quick_links) ? config.footer_quick_links.join('\n') : ''}
+                    onChange={(e) => setConfig({ ...config, footer_quick_links: e.target.value.split('\n').filter(l => l.trim()) })}
+                    className="font-sans"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Copyright Text</Label>
+                  <Textarea
+                    rows={2}
+                    placeholder="© 2025 Exhale Sinus. All rights reserved."
+                    value={config.patient_footer || ''}
+                    onChange={(e) => setConfig({ ...config, patient_footer: e.target.value })}
+                    className="font-sans"
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -400,10 +482,8 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
                         className="max-w-[120px] h-auto mb-4"
                       />
                     )}
-                    <p className="mb-1 text-xs">814 E Woodfield</p>
-                    <p className="mb-3 text-xs">Schaumburg, IL 60173</p>
-                    <p className="mb-1 text-xs">735 N. Perryville Rd. Suite 4</p>
-                    <p className="mb-4 text-xs">Rockford, IL 61107</p>
+                    <p className="mb-1 text-xs">{config.footer_address_1 || '814 E Woodfield, Schaumburg, IL 60173'}</p>
+                    <p className="mb-4 text-xs">{config.footer_address_2 || '735 N. Perryville Rd. Suite 4, Rockford, IL 61107'}</p>
                     <div className="flex gap-3">
                       <span className="text-xl">📘</span>
                       <span className="text-xl">🐦</span>
@@ -415,25 +495,21 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
                   {/* Middle Column - Hours */}
                   <div>
                     <h3 className="font-bold mb-2">Hours of Operation</h3>
-                    <p className="mb-1 text-xs">Monday - Thursday 8:00 am - 5:00 pm</p>
-                    <p className="mb-3 text-xs">Friday - 9:00 am - 5:00 pm</p>
-                    <p className="mb-1 text-xs">📞 224-529-4697</p>
-                    <p className="mb-1 text-xs">📞 815-977-5715</p>
-                    <p className="mb-3 text-xs">📞 815-281-5803</p>
-                    <button className="bg-white text-[#0b5d82] px-4 py-2 rounded text-xs font-semibold">
-                      Request an appointment ▶
+                    <p className="mb-3 text-xs whitespace-pre-line">{config.footer_hours || 'Monday - Thursday 8:00 am - 5:00 pm\nFriday - 9:00 am - 5:00 pm'}</p>
+                    {(config.footer_phone_numbers || ['224-529-4697', '815-977-5715', '815-281-5803']).map((phone, idx) => (
+                      <p key={idx} className="mb-1 text-xs">📞 {phone}</p>
+                    ))}
+                    <button className="bg-white text-[#0b5d82] px-4 py-2 rounded text-xs font-semibold mt-3">
+                      {config.footer_appointment_button_text || 'Request an appointment'} ▶
                     </button>
                   </div>
                   
                   {/* Right Column - Quick Links */}
                   <div>
                     <h3 className="font-bold mb-2">Quick Links</h3>
-                    <p className="mb-1 text-xs">Sinus Pain</p>
-                    <p className="mb-1 text-xs">Sinus Headaches</p>
-                    <p className="mb-1 text-xs">Sinus Quiz</p>
-                    <p className="mb-1 text-xs">Nasal & Sinus Procedures</p>
-                    <p className="mb-1 text-xs">Privacy Policy</p>
-                    <p className="mb-1 text-xs">Accessibility Statement</p>
+                    {(config.footer_quick_links || ['Sinus Pain', 'Sinus Headaches', 'Sinus Quiz', 'Nasal & Sinus Procedures', 'Privacy Policy', 'Accessibility Statement']).map((link, idx) => (
+                      <p key={idx} className="mb-1 text-xs">{link}</p>
+                    ))}
                   </div>
                 </div>
                 
