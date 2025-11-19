@@ -389,8 +389,55 @@ export function EmailNotificationConfig({ doctorProfile, quizId, quizTitle }: Em
                 </div>
               </div>
               
-              <div className="bg-[#0b5d82] text-white p-8 text-sm">
-                <div className="whitespace-pre-line">
+              <div className="bg-[#0b5d82] text-white p-6 text-sm">
+                <div className="grid grid-cols-3 gap-6">
+                  {/* Left Column - Logo and Contact */}
+                  <div>
+                    {doctorProfile?.logo_url && (
+                      <img 
+                        src={doctorProfile.logo_url} 
+                        alt="Exhale Sinus" 
+                        className="max-w-[120px] h-auto mb-4"
+                      />
+                    )}
+                    <p className="mb-1 text-xs">814 E Woodfield</p>
+                    <p className="mb-3 text-xs">Schaumburg, IL 60173</p>
+                    <p className="mb-1 text-xs">735 N. Perryville Rd. Suite 4</p>
+                    <p className="mb-4 text-xs">Rockford, IL 61107</p>
+                    <div className="flex gap-3">
+                      <span className="text-xl">📘</span>
+                      <span className="text-xl">🐦</span>
+                      <span className="text-xl">📷</span>
+                      <span className="text-xl">▶️</span>
+                    </div>
+                  </div>
+                  
+                  {/* Middle Column - Hours */}
+                  <div>
+                    <h3 className="font-bold mb-2">Hours of Operation</h3>
+                    <p className="mb-1 text-xs">Monday - Thursday 8:00 am - 5:00 pm</p>
+                    <p className="mb-3 text-xs">Friday - 9:00 am - 5:00 pm</p>
+                    <p className="mb-1 text-xs">📞 224-529-4697</p>
+                    <p className="mb-1 text-xs">📞 815-977-5715</p>
+                    <p className="mb-3 text-xs">📞 815-281-5803</p>
+                    <button className="bg-white text-[#0b5d82] px-4 py-2 rounded text-xs font-semibold">
+                      Request an appointment ▶
+                    </button>
+                  </div>
+                  
+                  {/* Right Column - Quick Links */}
+                  <div>
+                    <h3 className="font-bold mb-2">Quick Links</h3>
+                    <p className="mb-1 text-xs">Sinus Pain</p>
+                    <p className="mb-1 text-xs">Sinus Headaches</p>
+                    <p className="mb-1 text-xs">Sinus Quiz</p>
+                    <p className="mb-1 text-xs">Nasal & Sinus Procedures</p>
+                    <p className="mb-1 text-xs">Privacy Policy</p>
+                    <p className="mb-1 text-xs">Accessibility Statement</p>
+                  </div>
+                </div>
+                
+                <div className="mt-6 pt-4 border-t border-white/20 text-center text-xs whitespace-pre-line">
                   {config.patient_footer || '© 2025 Exhale Sinus. All rights reserved.'}
                 </div>
               </div>
