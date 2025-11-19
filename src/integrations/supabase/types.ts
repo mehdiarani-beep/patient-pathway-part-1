@@ -938,6 +938,13 @@ export type Database = {
           education_body: string | null
           education_enabled: boolean | null
           education_subject: string | null
+          footer_address_1: string | null
+          footer_address_2: string | null
+          footer_appointment_button_text: string | null
+          footer_appointment_button_url: string | null
+          footer_hours: string | null
+          footer_phone_numbers: string[] | null
+          footer_quick_links: string[] | null
           id: string
           internal_body: string | null
           internal_enabled: boolean | null
@@ -961,6 +968,13 @@ export type Database = {
           education_body?: string | null
           education_enabled?: boolean | null
           education_subject?: string | null
+          footer_address_1?: string | null
+          footer_address_2?: string | null
+          footer_appointment_button_text?: string | null
+          footer_appointment_button_url?: string | null
+          footer_hours?: string | null
+          footer_phone_numbers?: string[] | null
+          footer_quick_links?: string[] | null
           id?: string
           internal_body?: string | null
           internal_enabled?: boolean | null
@@ -984,6 +998,13 @@ export type Database = {
           education_body?: string | null
           education_enabled?: boolean | null
           education_subject?: string | null
+          footer_address_1?: string | null
+          footer_address_2?: string | null
+          footer_appointment_button_text?: string | null
+          footer_appointment_button_url?: string | null
+          footer_hours?: string | null
+          footer_phone_numbers?: string[] | null
+          footer_quick_links?: string[] | null
           id?: string
           internal_body?: string | null
           internal_enabled?: boolean | null
