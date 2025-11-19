@@ -179,11 +179,8 @@ export function LeadsPage() {
     
     const matchesStatus = statusFilter === 'all' || lead.lead_status === statusFilter;
     const matchesQuizType = quizTypeFilter === 'all' || lead.quiz_type === quizTypeFilter;
-
-    // Exclude partial leads from main table
-    const isNotPartial = !lead.is_partial;
     
-    return matchesSearch && matchesStatus && matchesQuizType && isNotPartial;
+    return matchesSearch && matchesStatus && matchesQuizType;
   });
 
   const filteredAndSortedLeads = [...filteredLeads].sort((a, b) => {
