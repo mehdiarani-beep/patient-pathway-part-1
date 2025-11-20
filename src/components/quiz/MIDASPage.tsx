@@ -150,7 +150,7 @@ export function MIDASPage() {
     const isLastQuestion = currentQuestion === quiz.questions.length - 1;
 
     return (
-      <div className="min-h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
+      <div className="h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4 overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full">
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 sm:mb-4">
@@ -225,12 +225,12 @@ export function MIDASPage() {
   if (stage === 'results') {
     if (leadSubmitted) {
       return (
-        <div className="min-h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
+        <div className="h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4 overflow-y-auto">
           <div className="max-w-2xl mx-auto w-full">
             <Card className="shadow-lg">
               <CardContent className="p-4 sm:p-6 md:p-8 text-center">
                 <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h2 className="text-3xl font-bold text-foreground mb-4">Thank You!</h2>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-4">Thank You!</h2>
                 <p className="text-muted-foreground mb-6">
                   Your results have been sent. {doctorProfile?.clinic_name || 'Our team'} will contact you soon to discuss your assessment.
                 </p>
@@ -242,33 +242,33 @@ export function MIDASPage() {
     }
 
     return (
-      <div className="min-h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
+      <div className="h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4 overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full">
           <Card className="shadow-lg">
             <CardContent className="p-4 sm:p-6 md:p-8">
               <div className="text-center mb-8">
                 <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h2 className="text-3xl font-bold text-foreground mb-2">Assessment Complete</h2>
-                <p className="text-muted-foreground">Here are your results</p>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">Assessment Complete</h2>
+                <p className="text-sm sm:text-base text-muted-foreground">Here are your results</p>
               </div>
 
               <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-8">
                 <div className="text-center mb-4">
-                  <div className="text-5xl font-bold text-primary mb-2">{quizResult.score}</div>
-                  <div className="text-sm uppercase tracking-wide text-muted-foreground">
+                  <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-2">{quizResult.score}</div>
+                  <div className="text-xs sm:text-sm uppercase tracking-wide text-muted-foreground">
                     MIDAS Score
                   </div>
                 </div>
                 <div className="border-t border-border pt-4">
-                  <p className="text-foreground font-semibold mb-2 capitalize">{quizResult.severity}</p>
-                  <p className="text-muted-foreground">{quizResult.interpretation}</p>
+                  <p className="text-sm sm:text-base text-foreground font-semibold mb-2 capitalize">{quizResult.severity}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{quizResult.interpretation}</p>
                 </div>
               </div>
 
               <div className="border-t border-border pt-8">
                 <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-foreground mb-2">Get Your Detailed Results</h3>
-                  <p className="text-muted-foreground">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2">Get Your Detailed Results</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground">
                     Enter your information to receive your complete assessment results and recommendations. We may contact you if you qualify for an in office procedure that may give your symptoms relief.
                   </p>
                 </div>
