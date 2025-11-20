@@ -315,7 +315,7 @@ export function NOSESNOTPage() {
 
             {/* Score Display */}
             <div className="text-center mb-6">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mb-4">
+              <div className="text-base font-bold text-blue-600 mb-4">
                 Score: {quizResult.score}/{maxScore}
               </div>
               <div className="inline-block px-6 py-2 bg-blue-100 text-blue-700 rounded-full text-lg font-medium capitalize">
