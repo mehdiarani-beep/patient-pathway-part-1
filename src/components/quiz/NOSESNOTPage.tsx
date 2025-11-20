@@ -169,7 +169,7 @@ export function NOSESNOTPage() {
         <div className="max-w-4xl mx-auto">
           <Card className="bg-white shadow-xl border-0">
             <CardContent className="p-8">
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-center text-slate-800 mb-6 sm:mb-8">
+              <h3 className="text-sm sm:text-lg md:text-xl font-normal text-center text-slate-800 mb-6 sm:mb-8">
                 Is your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?
               </h3>
 
