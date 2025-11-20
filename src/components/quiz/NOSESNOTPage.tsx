@@ -309,7 +309,7 @@ export function NOSESNOTPage() {
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-12">
             {/* Title */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-slate-900 mb-8">
+            <h1 className="text-base font-bold text-center text-slate-900 mb-8">
               {quizName} Assessment Complete!
             </h1>
 
@@ -318,14 +318,14 @@ export function NOSESNOTPage() {
               <div className="text-base font-bold text-blue-600 mb-4">
                 Score: {quizResult.score}/{maxScore}
               </div>
-              <div className="inline-block px-6 py-2 bg-blue-100 text-blue-700 rounded-full text-lg font-medium capitalize">
+              <div className="inline-block px-6 py-2 bg-blue-100 text-blue-700 rounded-full text-base font-medium capitalize">
                 {quizResult.severity} Symptoms
               </div>
             </div>
 
             {/* Contact Form Section */}
             <div className="mt-12">
-              <h2 className="text-xl sm:text-2xl font-bold text-center text-slate-900 mb-8">
+              <h2 className="text-base font-bold text-center text-slate-900 mb-8">
                 Please provide your information
               </h2>
 
