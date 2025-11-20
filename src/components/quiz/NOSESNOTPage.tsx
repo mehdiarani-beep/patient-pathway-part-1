@@ -318,7 +318,7 @@ export function NOSESNOTPage() {
               <div className="text-[22px] font-bold text-blue-600 mb-4">
                 Score: {quizResult.score}/{maxScore}
               </div>
-              <div className="inline-block px-6 py-2 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold capitalize">
+              <div className="inline-block px-6 py-2 bg-yellow-100 text-yellow-800 rounded-full text-[10px] font-bold capitalize">
                 {quizResult.severity} Symptoms
               </div>
             </div>
