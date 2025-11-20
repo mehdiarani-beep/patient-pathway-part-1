@@ -301,92 +301,80 @@ export function NOSESNOTPage() {
       );
     }
 
+    const quizName = quizType === 'NOSE' ? 'NOSE' : 'SNOT-12';
+    const maxScore = quizType === 'NOSE' ? 100 : 60;
+
     return (
-      <div className="min-h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
-        <div className="max-w-2xl mx-auto w-full">
-          <Card className="shadow-lg">
-            <CardContent className="p-4 sm:p-6 md:p-8">
-              <div className="text-center mb-8">
-                <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">Assessment Complete</h2>
-                <p className="text-muted-foreground">Here are your results</p>
+      <div className="h-full w-full bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 py-8 px-4 overflow-y-auto">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-12">
+            {/* Title */}
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-slate-900 mb-8">
+              {quizName} Assessment Complete!
+            </h1>
+
+            {/* Score Display */}
+            <div className="text-center mb-6">
+              <div className="text-5xl sm:text-6xl md:text-7xl font-bold text-blue-600 mb-4">
+                Score: {quizResult.score}/{maxScore}
               </div>
-
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-8">
-                <div className="text-center mb-4">
-                  <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-2">{quizResult.score}</div>
-                  <div className="text-sm uppercase tracking-wide text-muted-foreground">
-                    {quizType} Score
-                  </div>
-                </div>
-                <div className="border-t border-border pt-4">
-                  <p className="text-foreground font-semibold mb-2 capitalize">{quizResult.severity}</p>
-                  <p className="text-muted-foreground">{quizResult.interpretation}</p>
-                </div>
+              <div className="inline-block px-6 py-2 bg-blue-100 text-blue-700 rounded-full text-lg font-medium capitalize">
+                {quizResult.severity} Symptoms
               </div>
+            </div>
 
-              <div className="border-t border-border pt-8">
-                <div className="text-center mb-6">
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2">Get Your Detailed Results</h3>
-                  <p className="text-muted-foreground">
-                    Enter your information to receive your complete assessment results and recommendations. We may contact you if you qualify for an in office procedure that may give your symptoms relief.
-                  </p>
+            {/* Contact Form Section */}
+            <div className="mt-12">
+              <h2 className="text-xl sm:text-2xl font-bold text-center text-slate-900 mb-8">
+                Please provide your information
+              </h2>
+
+              <div className="space-y-4">
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Input
+                    id="name"
+                    value={leadData.name}
+                    onChange={(e) => setLeadData({ ...leadData, name: e.target.value })}
+                    placeholder="Full Name *"
+                    className="pl-12 h-14 text-base border-slate-200 rounded-xl"
+                  />
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="name" className="flex items-center gap-2 mb-2">
-                      <User className="w-4 h-4" />
-                      Full Name *
-                    </Label>
-                    <Input
-                      id="name"
-                      value={leadData.name}
-                      onChange={(e) => setLeadData({ ...leadData, name: e.target.value })}
-                      placeholder="Enter your full name"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="email" className="flex items-center gap-2 mb-2">
-                      <Mail className="w-4 h-4" />
-                      Email *
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={leadData.email}
-                      onChange={(e) => setLeadData({ ...leadData, email: e.target.value })}
-                      placeholder="Enter your email"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="phone" className="flex items-center gap-2 mb-2">
-                      <Phone className="w-4 h-4" />
-                      Phone Number
-                    </Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={leadData.phone}
-                      onChange={(e) => setLeadData({ ...leadData, phone: e.target.value })}
-                      placeholder="Enter your phone number"
-                    />
-                  </div>
-
-                  <Button 
-                    onClick={handleSubmitLead}
-                    disabled={submittingLead || !leadData.name || !leadData.email}
-                    className="w-full"
-                    size="lg"
-                  >
-                    {submittingLead ? 'Submitting...' : 'Submit Information'}
-                  </Button>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={leadData.email}
+                    onChange={(e) => setLeadData({ ...leadData, email: e.target.value })}
+                    placeholder="Email Address *"
+                    className="pl-12 h-14 text-base border-slate-200 rounded-xl"
+                  />
                 </div>
+
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={leadData.phone}
+                    onChange={(e) => setLeadData({ ...leadData, phone: e.target.value })}
+                    placeholder="Phone Number *"
+                    className="pl-12 h-14 text-base border-slate-200 rounded-xl"
+                  />
+                </div>
+
+                <Button
+                  onClick={handleSubmitLead}
+                  disabled={submittingLead}
+                  className="w-full h-14 text-lg font-semibold rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all"
+                >
+                  {submittingLead ? 'Submitting...' : 'Submit Information'}
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     );
