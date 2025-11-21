@@ -101,7 +101,7 @@ const Embed = () => {
     } else if (quizType === 'TNSS') {
       return 'Assessment of nasal congestion and rhinitis symptoms';
     } else if (quizType === 'MIDAS') {
-      return 'Measure the impact your headaches have on your life';
+      return 'Measure how migraines impact your quality of life';
     }
   }
   const quizData = getQuizData();

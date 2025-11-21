@@ -154,7 +154,7 @@ export function MIDASPage() {
         <div className="max-w-2xl mx-auto w-full">
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 sm:mb-4">
-              Migraine Disability Assessment Test (MIDAS)
+              Migraine-Specific Quality of Life Questionnaire (MSQ)
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground">
               Measure the impact your headaches have on your life
@@ -256,7 +256,7 @@ export function MIDASPage() {
                 <div className="text-center mb-4">
                   <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-2">{quizResult.score}</div>
                   <div className="text-xs sm:text-sm uppercase tracking-wide text-muted-foreground">
-                    MIDAS Score
+                    MSQ Score
                   </div>
                 </div>
                 <div className="border-t border-border pt-4">
