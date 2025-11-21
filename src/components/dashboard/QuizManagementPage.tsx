@@ -66,6 +66,10 @@ export function QuizManagementPage() {
     }
   };
 
+  const getQuizDisplayName = (quizId: string) => {
+    return quizId === 'MIDAS' ? 'MSQ' : quizId;
+  };
+
   const predefinedQuizzes = Object.values(quizzes).filter(quiz => quiz && quiz.id);
   const categorizedQuizzes = {
     Nasal: ['NOSE', 'TNSS','SNOT12', 'NOSE_SNOT'],
@@ -95,7 +99,7 @@ export function QuizManagementPage() {
                       <CardHeader className="flex-shrink-0">
                         <div className="flex items-center justify-between">
                           <CardTitle className="text-lg">{quiz.title}</CardTitle>
-                          <Badge variant="secondary">{quiz.id}</Badge>
+                          <Badge variant="secondary">{getQuizDisplayName(quiz.id)}</Badge>
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-4 flex-1 flex flex-col">

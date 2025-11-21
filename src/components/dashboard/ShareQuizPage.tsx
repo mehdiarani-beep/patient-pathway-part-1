@@ -1006,16 +1006,20 @@ const mailHtmlTNSS = useMemo(() => {
     );
   }
   
+  const getQuizDisplayName = (id: string) => {
+    return id === 'MIDAS' ? 'MSQ' : id;
+  };
+
   const quizInfo = customQuiz ? {
     title: customQuiz.title,
     description: customQuiz.description,
     shareMessage: customQuiz.share_message || `Take this ${customQuiz.title} assessment to evaluate your symptoms.`,
     linkedinMessage: customQuiz.linkedin_message || `Share this ${customQuiz.title} assessment with your patients to evaluate their symptoms.`
   } : {
-    title: quizId || 'Assessment',
+    title: getQuizDisplayName(quizId || 'Assessment'),
     description: quizExists.description || "Medical assessment tool",
-    shareMessage: `Take this ${quizId || 'assessment'} to evaluate your symptoms.`,
-    linkedinMessage: `Share this ${quizId || 'assessment'} with your patients to evaluate their symptoms.`
+    shareMessage: `Take this ${getQuizDisplayName(quizId || '')} assessment to evaluate your symptoms.`,
+    linkedinMessage: `Share this ${getQuizDisplayName(quizId || '')} assessment with your patients to evaluate their symptoms.`
   };
 
   
