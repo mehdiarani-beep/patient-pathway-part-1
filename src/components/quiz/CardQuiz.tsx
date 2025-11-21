@@ -404,7 +404,7 @@ export function CardQuiz() {
                     <div className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                       Score: {quizResult?.score}/{quiz?.maxScore || 100}
                     </div>
-                    <div className={`text-xs sm:text-sm font-medium px-3 py-1 rounded-full inline-block ${
+                    <div className={`text-xs sm:text-sm font-medium px-3 py-1 rounded-full inline-block mb-3 ${
                       quizResult?.severity === 'severe' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' :
                       quizResult?.severity === 'moderate' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
                       quizResult?.severity === 'mild' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
@@ -412,6 +412,11 @@ export function CardQuiz() {
                     }`}>
                       {quizResult?.severity?.charAt(0).toUpperCase() + quizResult?.severity?.slice(1)} Symptoms
                     </div>
+                    {quizResult?.interpretation && (
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line max-w-xl mx-auto">
+                        {quizResult.interpretation}
+                      </p>
+                    )}
                   </div>
                   
                   {/* Information Form - Show in same area */}
