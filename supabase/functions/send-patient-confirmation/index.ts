@@ -196,7 +196,7 @@ const handler = async (req: Request) => {
 
 function getQuizTypeLabel(quizType: string): string {
   const quizLabels: Record<string, string> = {
-    'MIDAS': 'Migraine-Specific Quality of Life Questionnaire',
+    'MIDAS': 'Migraine-Specific Quality of Life Questionnaire (MSQ)',
     'NOSE_SNOT': 'Nasal Assessment',
     'SNOT22': 'SNOT-22 Assessment',
     'SNOT12': 'SNOT-12 Assessment',
