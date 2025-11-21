@@ -318,9 +318,14 @@ export function NOSESNOTPage() {
               <div className="text-[22px] font-bold text-blue-600 mb-4">
                 Score: {quizResult.score}/{maxScore}
               </div>
-              <div className="inline-block px-6 py-2 bg-yellow-100 text-yellow-800 rounded-full text-[10px] font-bold capitalize">
+              <div className="inline-block px-6 py-2 bg-yellow-100 text-yellow-800 rounded-full text-[10px] font-bold capitalize mb-4">
                 {quizResult.severity} Symptoms
               </div>
+              {quizResult.interpretation && (
+                <p className="text-sm text-slate-600 whitespace-pre-line max-w-xl mx-auto">
+                  {quizResult.interpretation}
+                </p>
+              )}
             </div>
 
             {/* Contact Form Section */}
