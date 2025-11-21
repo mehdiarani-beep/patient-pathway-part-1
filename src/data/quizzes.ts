@@ -17,7 +17,7 @@ export const NOSE_SNOT_QUIZ: Quiz = {
 
 export const MIDAS_QUIZ: Quiz = {
   id: 'MIDAS',
-  title: 'Migraine-Specific Quality of Life Questionnaire',
+  title: 'Migraine-Specific Quality of Life Questionnaire (MSQ)',
   description: 'A brief questionnaire to help measure how migraines impact your quality of life.',
   maxScore: 28,
   scoring: {
