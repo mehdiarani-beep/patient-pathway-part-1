@@ -393,18 +393,18 @@ export function CardQuiz() {
               ) : showResults ? (
                 <motion.div 
                   key="results"
-                  className="space-y-4 sm:space-y-6"
+                  className="space-y-2"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
                 >
                   {/* Short Results Display */}
                   <div className="text-center px-2">
-                    <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2">{quizId.toUpperCase()} Assessment Complete!</h2>
-                    <div className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                    <h2 className="text-base sm:text-lg font-bold text-foreground mb-1">{quizId.toUpperCase()} Assessment Complete!</h2>
+                    <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">
                       Score: {quizResult?.score}/{quiz?.maxScore || 100}
                     </div>
-                    <div className={`text-xs sm:text-sm font-medium px-3 py-1 rounded-full inline-block mb-3 ${
+                    <div className={`text-xs font-semibold px-3 py-1 rounded-full inline-block mb-2 ${
                       quizResult?.severity === 'severe' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' :
                       quizResult?.severity === 'moderate' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
                       quizResult?.severity === 'mild' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
@@ -413,7 +413,7 @@ export function CardQuiz() {
                       {quizResult?.severity?.charAt(0).toUpperCase() + quizResult?.severity?.slice(1)} Symptoms
                     </div>
                     {quizResult?.interpretation && (
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line max-w-xl mx-auto">
+                      <p className="text-sm text-muted-foreground whitespace-pre-line max-w-xl mx-auto">
                         {quizResult.interpretation}
                       </p>
                     )}
@@ -421,9 +421,9 @@ export function CardQuiz() {
                   
                   {/* Information Form - Show in same area */}
                   {!leadSubmitted ? (
-                    <div className="space-y-3 sm:space-y-4 px-2">
+                    <div className="space-y-3 px-2">
                       <div className="text-center">
-                        <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2">Please provide your information</h3>
+                        <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">Please provide your information</h3>
                       </div>
                       
                       <div className="space-y-3 sm:space-y-4">
