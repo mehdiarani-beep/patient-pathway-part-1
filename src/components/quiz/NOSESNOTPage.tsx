@@ -309,28 +309,28 @@ export function NOSESNOTPage() {
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-12">
             {/* Title */}
-            <h1 className="text-[15px] font-bold text-center text-slate-900 mb-8">
+            <h1 className="text-base sm:text-lg font-bold text-center text-foreground mb-1">
               {quizName} Assessment Complete!
             </h1>
 
             {/* Score Display */}
-            <div className="text-center mb-6">
-              <div className="text-[22px] font-bold text-blue-600 mb-4">
+            <div className="text-center mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">
                 Score: {quizResult.score}/{maxScore}
               </div>
-              <div className="inline-block px-6 py-2 bg-yellow-100 text-yellow-800 rounded-full text-[10px] font-bold capitalize mb-4">
+              <div className="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold capitalize mb-2">
                 {quizResult.severity} Symptoms
               </div>
               {quizResult.interpretation && (
-                <p className="text-sm text-slate-600 whitespace-pre-line max-w-xl mx-auto">
+                <p className="text-sm text-muted-foreground whitespace-pre-line max-w-xl mx-auto">
                   {quizResult.interpretation}
                 </p>
               )}
             </div>
 
             {/* Contact Form Section */}
-            <div className="mt-12">
-              <h2 className="text-[13px] font-bold text-center text-slate-900 mb-8">
+            <div className="mt-6">
+              <h2 className="text-base sm:text-lg font-bold text-center text-foreground mb-4">
                 Please provide your information
               </h2>
 

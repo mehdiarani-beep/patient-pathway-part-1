@@ -246,29 +246,27 @@ export function MIDASPage() {
         <div className="max-w-2xl mx-auto w-full">
           <Card className="shadow-lg">
             <CardContent className="p-4 sm:p-6 md:p-8">
-              <div className="text-center mb-8">
-                <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">Assessment Complete</h2>
-                <p className="text-sm sm:text-base text-muted-foreground">Here are your results</p>
+              <div className="text-center mb-2">
+                <h2 className="text-base sm:text-lg font-bold text-foreground mb-1">MSQ Assessment Complete!</h2>
               </div>
 
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-8">
-                <div className="text-center mb-4">
-                  <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-2">{quizResult.score}</div>
-                  <div className="text-xs sm:text-sm uppercase tracking-wide text-muted-foreground">
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-4">
+                <div className="text-center mb-2">
+                  <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">{quizResult.score}</div>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground">
                     MSQ Score
                   </div>
                 </div>
-                <div className="border-t border-border pt-4">
-                  <p className="text-sm sm:text-base text-foreground font-semibold mb-2 capitalize">{quizResult.severity}</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">{quizResult.interpretation}</p>
+                <div className="border-t border-border pt-2">
+                  <p className="text-xs font-semibold text-foreground mb-1 capitalize inline-block px-3 py-1 rounded-full bg-yellow-100 text-yellow-800">{quizResult.severity} Symptoms</p>
+                  <p className="text-sm text-muted-foreground mt-2">{quizResult.interpretation}</p>
                 </div>
               </div>
 
-              <div className="border-t border-border pt-8">
-                <div className="text-center mb-6">
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2">Get Your Detailed Results</h3>
-                  <p className="text-sm sm:text-base text-muted-foreground">
+              <div className="border-t border-border pt-4">
+                <div className="text-center mb-4">
+                  <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">Please provide your information</h3>
+                  <p className="text-sm text-muted-foreground">
                     Enter your information to receive your complete assessment results and recommendations. We may contact you if you qualify for an in office procedure that may give your symptoms relief.
                   </p>
                 </div>
