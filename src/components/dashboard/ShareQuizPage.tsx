@@ -1007,7 +1007,7 @@ const mailHtmlTNSS = useMemo(() => {
   }
   
   const getQuizDisplayName = (id: string) => {
-    return id === 'MIDAS' ? 'MSQ' : id;
+    return id.toUpperCase() === 'MIDAS' ? 'MSQ' : id;
   };
 
   const quizInfo = customQuiz ? {
