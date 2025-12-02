@@ -321,13 +321,14 @@ export function EnhancedLeadsTable({ leads, onLeadUpdate }: EnhancedLeadsTablePr
         </Button>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-12">#</TableHead>
-            <TableHead>Patient</TableHead>
-            <TableHead>Contact Information</TableHead>
-            <TableHead>Quiz Type</TableHead>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12">#</TableHead>
+              <TableHead>Patient</TableHead>
+              <TableHead>Contact Information</TableHead>
+              <TableHead>Quiz Type</TableHead>
             <TableHead>Score</TableHead>
             <TableHead>Source</TableHead>
             <TableHead>Status</TableHead>
@@ -479,6 +480,7 @@ export function EnhancedLeadsTable({ leads, onLeadUpdate }: EnhancedLeadsTablePr
           ))}
         </TableBody>
       </Table>
+      </div>
 
       {/* Export Dialog */}
       <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
