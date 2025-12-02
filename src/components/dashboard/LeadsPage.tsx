@@ -434,7 +434,7 @@ export function LeadsPage() {
               </Button>
             </div>
           ) : (
-            <EnhancedLeadsTable leads={activeLeads} onLeadUpdate={fetchLeads} showRowNumber />
+            <EnhancedLeadsTable leads={activeLeads} onLeadUpdate={fetchLeads} />
           )}
         </CardContent>
       </Card>
@@ -452,7 +452,7 @@ export function LeadsPage() {
               <p className="text-gray-500">No deleted leads or partial submissions.</p>
             </div>
           ) : (
-            <EnhancedLeadsTable leads={deletedAndPartialLeads} onLeadUpdate={fetchLeads} showRowNumber />
+            <EnhancedLeadsTable leads={deletedAndPartialLeads} onLeadUpdate={fetchLeads} />
           )}
         </CardContent>
       </Card>
