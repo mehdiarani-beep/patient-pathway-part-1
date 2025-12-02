@@ -18,10 +18,9 @@ import { useNavigate } from 'react-router-dom';
 interface EnhancedLeadsTableProps {
   leads: Lead[];
   onLeadUpdate?: () => void;
-  showRowNumber?: boolean;
 }
 
-export function EnhancedLeadsTable({ leads, onLeadUpdate, showRowNumber = false }: EnhancedLeadsTableProps) {
+export function EnhancedLeadsTable({ leads, onLeadUpdate }: EnhancedLeadsTableProps) {
   const navigate = useNavigate();
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [communicationType, setCommunicationType] = useState<'email' | 'sms'>('email');
@@ -325,7 +324,7 @@ export function EnhancedLeadsTable({ leads, onLeadUpdate, showRowNumber = false 
       <Table>
         <TableHeader>
           <TableRow>
-            {showRowNumber && <TableHead className="w-12">#</TableHead>}
+            <TableHead className="w-12">#</TableHead>
             <TableHead>Patient</TableHead>
             <TableHead>Contact Information</TableHead>
             <TableHead>Quiz Type</TableHead>
@@ -340,11 +339,9 @@ export function EnhancedLeadsTable({ leads, onLeadUpdate, showRowNumber = false 
         <TableBody>
           {leads.map((lead, index) => (
             <TableRow key={lead.id}>
-              {showRowNumber && (
-                <TableCell className="font-medium text-muted-foreground">
-                  {index + 1}
-                </TableCell>
-              )}
+              <TableCell className="font-medium text-muted-foreground">
+                {index + 1}
+              </TableCell>
               <TableCell>
                 <div>
                   <div className="font-medium">{lead.name}</div>
