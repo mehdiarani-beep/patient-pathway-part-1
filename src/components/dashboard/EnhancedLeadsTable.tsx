@@ -394,10 +394,10 @@ export function EnhancedLeadsTable({ leads, onLeadUpdate }: EnhancedLeadsTablePr
               </TableCell>
               <TableCell>
                 <div>
-                  {formatDistanceToNow(new Date(lead.submitted_at), { addSuffix: true })}
+                  {format(new Date(lead.submitted_at), 'MM/dd/yyyy HH:mm')}
                   {lead.scheduled_date && lead.lead_status === 'SCHEDULED' && (
                     <div className="text-xs text-gray-500">
-                      Scheduled: {format(new Date(lead.scheduled_date), 'MMM dd, HH:mm')}
+                      Scheduled: {format(new Date(lead.scheduled_date), 'MM/dd/yyyy HH:mm')}
                     </div>
                   )}
                 </div>
