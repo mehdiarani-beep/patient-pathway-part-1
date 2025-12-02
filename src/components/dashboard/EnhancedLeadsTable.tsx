@@ -147,14 +147,14 @@ export function EnhancedLeadsTable({ leads, onLeadUpdate }: EnhancedLeadsTablePr
   };
 
   const handleDeleteLead = async (leadId: string) => {
-    if (!window.confirm('Are you sure you want to delete this lead? This action cannot be undone.')) return;
+    if (!window.confirm('Are you sure you want to delete this lead?')) return;
     try {
       const { error } = await supabase
         .from('quiz_leads')
-        .delete()
+        .update({ lead_status: 'DELETED' })
         .eq('id', leadId);
       if (error) throw error;
-      toast.success('Lead deleted successfully');
+      toast.success('Lead moved to deleted');
       onLeadUpdate?.();
     } catch (err) {
       toast.error('Failed to delete lead');
