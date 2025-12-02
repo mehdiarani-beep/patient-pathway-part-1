@@ -18,9 +18,10 @@ import { useNavigate } from 'react-router-dom';
 interface EnhancedLeadsTableProps {
   leads: Lead[];
   onLeadUpdate?: () => void;
+  showRowNumber?: boolean;
 }
 
-export function EnhancedLeadsTable({ leads, onLeadUpdate }: EnhancedLeadsTableProps) {
+export function EnhancedLeadsTable({ leads, onLeadUpdate, showRowNumber = false }: EnhancedLeadsTableProps) {
   const navigate = useNavigate();
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [communicationType, setCommunicationType] = useState<'email' | 'sms'>('email');
@@ -324,6 +325,7 @@ export function EnhancedLeadsTable({ leads, onLeadUpdate }: EnhancedLeadsTablePr
       <Table>
         <TableHeader>
           <TableRow>
+            {showRowNumber && <TableHead className="w-12">#</TableHead>}
             <TableHead>Patient</TableHead>
             <TableHead>Contact Information</TableHead>
             <TableHead>Quiz Type</TableHead>
@@ -332,11 +334,17 @@ export function EnhancedLeadsTable({ leads, onLeadUpdate }: EnhancedLeadsTablePr
             <TableHead>Status</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Actions</TableHead>
+            <TableHead className="w-16">Delete</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {leads.map((lead) => (
+          {leads.map((lead, index) => (
             <TableRow key={lead.id}>
+              {showRowNumber && (
+                <TableCell className="font-medium text-muted-foreground">
+                  {index + 1}
+                </TableCell>
+              )}
               <TableCell>
                 <div>
                   <div className="font-medium">{lead.name}</div>
@@ -459,6 +467,16 @@ export function EnhancedLeadsTable({ leads, onLeadUpdate }: EnhancedLeadsTablePr
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              </TableCell>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeleteLead(lead.id)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </TableCell>
             </TableRow>
           ))}

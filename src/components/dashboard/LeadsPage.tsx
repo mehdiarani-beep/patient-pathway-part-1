@@ -264,14 +264,12 @@ export function LeadsPage() {
 
   const weekDays = getWeekDays();
 
+  // Split leads into active and deleted/partial
+  const activeLeads = filteredAndSortedLeads.filter(l => !l.is_partial && l.lead_status !== 'DELETED');
+  const deletedAndPartialLeads = filteredAndSortedLeads.filter(l => l.is_partial || l.lead_status === 'DELETED');
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-blue-800">Master Dashboard</h1>
-        </div>
-      </div>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
@@ -420,11 +418,11 @@ export function LeadsPage() {
       <Card className="shadow-lg border-gray-200">
         <CardHeader>
           <CardTitle>
-            Leads ({filteredAndSortedLeads.length})
+            Leads ({activeLeads.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {leads.length === 0 ? (
+          {activeLeads.length === 0 ? (
             <div className="text-center py-12">
               <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-medium text-gray-700 mb-2">No Leads Found</h3>
@@ -436,7 +434,25 @@ export function LeadsPage() {
               </Button>
             </div>
           ) : (
-            <EnhancedLeadsTable leads={filteredAndSortedLeads} onLeadUpdate={fetchLeads} />
+            <EnhancedLeadsTable leads={activeLeads} onLeadUpdate={fetchLeads} showRowNumber />
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Deleted Leads and Partial Submissions */}
+      <Card className="shadow-lg border-gray-200">
+        <CardHeader>
+          <CardTitle>
+            Deleted Leads & Partial Submissions ({deletedAndPartialLeads.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {deletedAndPartialLeads.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No deleted leads or partial submissions.</p>
+            </div>
+          ) : (
+            <EnhancedLeadsTable leads={deletedAndPartialLeads} onLeadUpdate={fetchLeads} showRowNumber />
           )}
         </CardContent>
       </Card>
