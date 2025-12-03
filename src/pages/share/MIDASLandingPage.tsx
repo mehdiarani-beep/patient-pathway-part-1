@@ -1,5 +1,8 @@
-import { MIDASPage } from '@/components/quiz/MIDASPage';
+import { MIDAS } from "@/components/quiz/MIDAS_Page";
+import doctorImage from "@/assets/dr-vaughn.png";
 
-export default function MIDASLandingPage() {
-  return <MIDASPage />;
-}
+const MigraineVaughn = () => {
+  return <MIDAS doctorName="Vaughn" doctorImage={doctorImage} />;
+};
+
+export default MigraineVaughn;
