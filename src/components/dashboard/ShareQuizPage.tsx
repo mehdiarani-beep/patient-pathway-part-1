@@ -58,6 +58,8 @@ export function ShareQuizPage() {
   const [activeTab, setActiveTab] = useState<string>('full-page');
   const [copied, setCopied] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
+  const [showChatQrCode, setShowChatQrCode] = useState(false);
+  const [showStandardQrCode, setShowStandardQrCode] = useState(false);
   const [embedCode, setEmbedCode] = useState('');
   const [embedType, setEmbedType] = useState<'inline' | 'button' | 'chat'>('inline');
   const [doctorProfile, setDoctorProfile] = useState<any>(null);
@@ -1148,6 +1150,25 @@ const mailHtmlTNSS = useMemo(() => {
                         </Button>
                       )}
                     </div>
+                    
+                    {/* Chat Quiz QR Code */}
+                    <div className="flex items-center gap-4 mt-2">
+                      <h5 className="font-medium text-xs text-gray-600">Chat Quiz QR Code</h5>
+                      {showChatQrCode ? (
+                        <div className="bg-white p-2 rounded-lg border border-gray-200">
+                          <QRCodeSVG value={chatFormatUrl} size={100} />
+                        </div>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setShowChatQrCode(true)}
+                        >
+                          <QrCode className="w-4 h-4 mr-2" />
+                          Generate QR
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Quiz Link - Standard Section */}
@@ -1224,6 +1245,25 @@ const mailHtmlTNSS = useMemo(() => {
                         </Button>
                       )}
                     </div>
+                    
+                    {/* Standard Quiz QR Code */}
+                    <div className="flex items-center gap-4 mt-2">
+                      <h5 className="font-medium text-xs text-gray-600">Standard Quiz QR Code</h5>
+                      {showStandardQrCode ? (
+                        <div className="bg-white p-2 rounded-lg border border-gray-200">
+                          <QRCodeSVG value={standardFormatUrl} size={100} />
+                        </div>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setShowStandardQrCode(true)}
+                        >
+                          <QrCode className="w-4 h-4 mr-2" />
+                          Generate QR
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
                 </div>
@@ -1273,12 +1313,12 @@ const mailHtmlTNSS = useMemo(() => {
                   </Card>
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg">QR Code</CardTitle>
+                      <CardTitle className="text-lg">Landing Page QR Code</CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center">
                       {showQrCode ? (
-                        <div className="bg-white p-4 rounded-lg border border-gray-200">
-                          <QRCodeSVG value={getQuizUrl('qr')} size={200} />
+                        <div className="bg-white p-2 rounded-lg border border-gray-200">
+                          <QRCodeSVG value={getQuizUrl('qr')} size={100} />
                         </div>
                       ) : (
                         <Button 
@@ -1289,7 +1329,6 @@ const mailHtmlTNSS = useMemo(() => {
                           <QrCode className="w-4 h-4 mr-2" />
                           Generate QR Code
                         </Button>
-                        
                       )}
                     </CardContent>
                   </Card>
