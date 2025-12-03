@@ -241,7 +241,7 @@ export function ShareQuizPage() {
     const baseQuizUrl = customQuizId
       ? `${baseUrl}/quiz/custom/${customQuizId}`
       : quizId?.toLowerCase() === 'nose_snot'
-        ? `${baseUrl}/share/nose_snot`
+        ? `${baseUrl}/quiz/nose_snot`
         : `${baseUrl}/quiz/${quizId?.toLowerCase()}`;
     
     const trackingParams = new URLSearchParams();

@@ -212,7 +212,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage }: Template5Props) => {
             <div className="bg-card/50 backdrop-blur-sm rounded-lg border border-border/20 overflow-hidden mt-4 md:mt-0">
               <iframe
                 ref={iframeRef}
-                src="https://patientpathway.ai/share/nose_snot?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share"
+                src="https://patientpathway.ai/quiz/nose_snot?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share"
                 className="w-full transition-all duration-300"
                 style={{ height: isMobile ? `${Math.min(iframeHeight, 600)}px` : `${iframeHeight}px`, minHeight: isMobile ? '400px' : '480px' }}
                 title="Nasal Assessment Quiz"
