@@ -288,61 +288,36 @@ export function ShareQuizPage() {
 const generateShortUrlForFormat = async (longUrl: string, key: string) => {
   setIsGeneratingShortUrls(prev => ({ ...prev, [key]: true }));
   try {
-    // Try multiple URL shortening services directly from client
-    let shortUrl = null;
+    if (!doctorProfile?.id) {
+      toast.error('Doctor profile required to generate short URL');
+      return longUrl;
+    }
+
+    // Generate a unique 6-character short ID
+    const shortId = nanoid(6);
     
-    // Try TinyURL first (most reliable)
-    try {
-      const tinyUrlResponse = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
-      if (tinyUrlResponse.ok) {
-        const tinyUrl = await tinyUrlResponse.text();
-        if (tinyUrl && tinyUrl.startsWith('http')) {
-          shortUrl = tinyUrl.trim();
-        }
-      }
-    } catch (error) {
-      console.log('TinyURL failed, trying next service...');
+    // Store in link_mappings table
+    const { error } = await supabase
+      .from('link_mappings')
+      .insert({
+        short_id: shortId,
+        doctor_id: doctorProfile.id,
+        quiz_type: customQuizId ? 'custom' : quizId?.toLowerCase(),
+        custom_quiz_id: customQuizId || null,
+        lead_source: webSource
+      });
+
+    if (error) {
+      console.error('Error inserting link mapping:', error);
+      throw error;
     }
     
-    // Try is.gd if TinyURL failed
-    if (!shortUrl) {
-      try {
-        const isGdResponse = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
-        if (isGdResponse.ok) {
-          const isGdData = await isGdResponse.json();
-          if (isGdData && isGdData.shorturl) {
-            shortUrl = isGdData.shorturl;
-          }
-        }
-      } catch (error) {
-        console.log('is.gd failed, trying next service...');
-      }
-    }
+    // Return self-hosted short URL
+    const selfHostedShortUrl = `${baseUrl}/s/${shortId}`;
+    setShortUrls(prev => ({ ...prev, [key]: selfHostedShortUrl }));
+    toast.success('Short URL generated successfully!');
     
-    // Try v.gd if previous services failed
-    if (!shortUrl) {
-      try {
-        const vGdResponse = await fetch(`https://v.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
-        if (vGdResponse.ok) {
-          const vGdData = await vGdResponse.json();
-          if (vGdData && vGdData.shorturl) {
-            shortUrl = vGdData.shorturl;
-          }
-        }
-      } catch (error) {
-        console.log('v.gd failed, using original URL...');
-      }
-    }
-    
-    // If all services fail, use original URL
-    if (!shortUrl) {
-      shortUrl = longUrl;
-    }
-    
-    setShortUrls(prev => ({ ...prev, [key]: shortUrl }));
-    toast.success(shortUrl === longUrl ? 'Using original URL (shortening services unavailable)' : 'Short URL generated successfully!');
-    
-    return shortUrl;
+    return selfHostedShortUrl;
   } catch (error) {
     console.error('Error generating short URL:', error);
     toast.error('Failed to generate short URL');
@@ -355,75 +330,43 @@ const generateShortUrlForFormat = async (longUrl: string, key: string) => {
 const generateShortUrl = async (source?: string) => {
   setIsGeneratingShortUrl(true);
   try {
-    const longUrl = getQuizUrl(source || 'website');
+    if (!doctorProfile?.id) {
+      toast.error('Doctor profile required to generate short URL');
+      return null;
+    }
+
+    // Generate a unique 6-character short ID
+    const shortId = nanoid(6);
     
-    
-    // Try multiple URL shortening services directly from client
-    let shortUrl = null;
-    
-    // Try TinyURL first (most reliable)
-    try {
-      const tinyUrlResponse = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
-      if (tinyUrlResponse.ok) {
-        const tinyUrl = await tinyUrlResponse.text();
-        if (tinyUrl && tinyUrl.startsWith('http')) {
-          shortUrl = tinyUrl.trim();
-        }
-      }
-    } catch (error) {
-      console.log('TinyURL failed, trying next service...');
+    // Store in link_mappings table
+    const { error } = await supabase
+      .from('link_mappings')
+      .insert({
+        short_id: shortId,
+        doctor_id: doctorProfile.id,
+        quiz_type: customQuizId ? 'custom' : quizId?.toLowerCase(),
+        custom_quiz_id: customQuizId || null,
+        lead_source: source || webSource
+      });
+
+    if (error) {
+      console.error('Error inserting link mapping:', error);
+      throw error;
     }
     
-    // Try is.gd if TinyURL failed
-    if (!shortUrl) {
-      try {
-        const isGdResponse = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
-        if (isGdResponse.ok) {
-          const isGdData = await isGdResponse.json();
-          if (isGdData && isGdData.shorturl) {
-            shortUrl = isGdData.shorturl;
-          }
-        }
-      } catch (error) {
-        console.log('is.gd failed, trying next service...');
-      }
-    }
-    
-    // Try v.gd if previous services failed
-    if (!shortUrl) {
-      try {
-        const vGdResponse = await fetch(`https://v.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
-        if (vGdResponse.ok) {
-          const vGdData = await vGdResponse.json();
-          if (vGdData && vGdData.shorturl) {
-            shortUrl = vGdData.shorturl;
-          }
-        }
-      } catch (error) {
-        console.log('v.gd failed, using original URL...');
-      }
-    }
-    
-    // If all services fail, use original URL
-    if (!shortUrl) {
-      shortUrl = longUrl;
-    }
-    
-    const fullShortUrl = shortUrl;
+    // Return self-hosted short URL
+    const selfHostedShortUrl = `${baseUrl}/s/${shortId}`;
     
     if (!source) {
-      setShortUrl(fullShortUrl);
-      toast.success(fullShortUrl === longUrl ? 'Using original URL (shortening services unavailable)' : 'Short URL generated successfully!');
+      setShortUrl(selfHostedShortUrl);
+      toast.success('Short URL generated successfully!');
     }
     
-    return fullShortUrl;
+    return selfHostedShortUrl;
   } catch (error) {
     console.error('Error generating short URL:', error);
-    
-    // More specific error messages
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     toast.error(`Failed to generate short URL: ${errorMessage}`);
-    
     return null;
   } finally {
     setIsGeneratingShortUrl(false);
@@ -435,69 +378,42 @@ const generateShortUrlWithRetry = async (source?: string, retries = 3) => {
   
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      const longUrl = getQuizUrl(source || 'website');
+      if (!doctorProfile?.id) {
+        toast.error('Doctor profile required to generate short URL');
+        setIsGeneratingShortUrl(false);
+        return null;
+      }
+
+      // Generate a unique 6-character short ID
+      const shortId = nanoid(6);
       
-      
-      // Try multiple URL shortening services directly from client
-      let shortUrl = null;
-      
-      // Try TinyURL first (most reliable)
-      try {
-        const tinyUrlResponse = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
-        if (tinyUrlResponse.ok) {
-          const tinyUrl = await tinyUrlResponse.text();
-          if (tinyUrl && tinyUrl.startsWith('http')) {
-            shortUrl = tinyUrl.trim();
-          }
-        }
-      } catch (error) {
-        console.log(`Attempt ${attempt} - TinyURL failed, trying next service...`);
+      // Store in link_mappings table
+      const { error } = await supabase
+        .from('link_mappings')
+        .insert({
+          short_id: shortId,
+          doctor_id: doctorProfile.id,
+          quiz_type: customQuizId ? 'custom' : quizId?.toLowerCase(),
+          custom_quiz_id: customQuizId || null,
+          lead_source: source || webSource
+        });
+
+      if (error) {
+        console.error(`Attempt ${attempt} - Error inserting link mapping:`, error);
+        if (attempt === retries) throw error;
+        continue;
       }
       
-      // Try is.gd if TinyURL failed
-      if (!shortUrl) {
-        try {
-          const isGdResponse = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
-          if (isGdResponse.ok) {
-            const isGdData = await isGdResponse.json();
-            if (isGdData && isGdData.shorturl) {
-              shortUrl = isGdData.shorturl;
-            }
-          }
-        } catch (error) {
-          console.log(`Attempt ${attempt} - is.gd failed, trying next service...`);
-        }
-      }
-      
-      // Try v.gd if previous services failed
-      if (!shortUrl) {
-        try {
-          const vGdResponse = await fetch(`https://v.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
-          if (vGdResponse.ok) {
-            const vGdData = await vGdResponse.json();
-            if (vGdData && vGdData.shorturl) {
-              shortUrl = vGdData.shorturl;
-            }
-          }
-        } catch (error) {
-          console.log(`Attempt ${attempt} - v.gd failed, using original URL...`);
-        }
-      }
-      
-      // If all services fail, use original URL
-      if (!shortUrl) {
-        shortUrl = longUrl;
-      }
-      
-      const fullShortUrl = shortUrl;
+      // Return self-hosted short URL
+      const selfHostedShortUrl = `${baseUrl}/s/${shortId}`;
       
       if (!source) {
-        setShortUrl(fullShortUrl);
+        setShortUrl(selfHostedShortUrl);
         toast.success('Short URL generated successfully!');
       }
       
       setIsGeneratingShortUrl(false);
-      return fullShortUrl;
+      return selfHostedShortUrl;
       
     } catch (error) {
       console.error(`Attempt ${attempt} error:`, error);

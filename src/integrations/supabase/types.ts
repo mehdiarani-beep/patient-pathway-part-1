@@ -1145,18 +1145,36 @@ export type Database = {
       }
       link_mappings: {
         Row: {
+          click_count: number | null
+          created_at: string | null
+          custom_quiz_id: string | null
           doctor_id: string
           id: number
+          last_clicked_at: string | null
+          lead_source: string | null
+          quiz_type: string | null
           short_id: string
         }
         Insert: {
+          click_count?: number | null
+          created_at?: string | null
+          custom_quiz_id?: string | null
           doctor_id: string
           id?: number
+          last_clicked_at?: string | null
+          lead_source?: string | null
+          quiz_type?: string | null
           short_id: string
         }
         Update: {
+          click_count?: number | null
+          created_at?: string | null
+          custom_quiz_id?: string | null
           doctor_id?: string
           id?: number
+          last_clicked_at?: string | null
+          lead_source?: string | null
+          quiz_type?: string | null
           short_id?: string
         }
         Relationships: []
@@ -1813,6 +1831,7 @@ export type Database = {
         Args: { platform_name: string }
         Returns: number
       }
+      increment_link_click: { Args: { p_short_id: string }; Returns: undefined }
       increment_template_usage: {
         Args: { template_id: string }
         Returns: undefined
