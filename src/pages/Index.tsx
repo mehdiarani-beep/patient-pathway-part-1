@@ -129,7 +129,7 @@ const Index = () => {
               alt="Patient Pathway" 
               className="h-20 w-auto object-contain rounded-sm shadow-lg mb-2" 
             />
-            <span className="text-xl font-semibold bg-gradient-to-r from-[#f7904f] to-[#04748f] bg-clip-text text-transparent">
+            <span className="text-xl font-semibold text-[#6b8e23]">
               Patient Pathway
             </span>
           </div>
