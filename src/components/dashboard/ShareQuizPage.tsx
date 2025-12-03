@@ -1074,6 +1074,25 @@ const mailHtmlTNSS = useMemo(() => {
                         </Button>
                       )}
                     </div>
+                    
+                    {/* Landing Page QR Code */}
+                    <div className="flex items-center gap-4 mt-2">
+                      <h5 className="font-medium text-xs text-gray-600">Landing Page QR Code</h5>
+                      {showQrCode ? (
+                        <div className="bg-white p-2 rounded-lg border border-gray-200">
+                          <QRCodeSVG value={doctorLandingUrl} size={100} />
+                        </div>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setShowQrCode(true)}
+                        >
+                          <QrCode className="w-4 h-4 mr-2" />
+                          Generate QR
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Quiz Link - Chat Section */}
@@ -1309,27 +1328,6 @@ const mailHtmlTNSS = useMemo(() => {
                           Text/SMS
                         </Button>
                       </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Landing Page QR Code</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center">
-                      {showQrCode ? (
-                        <div className="bg-white p-2 rounded-lg border border-gray-200">
-                          <QRCodeSVG value={getQuizUrl('qr')} size={100} />
-                        </div>
-                      ) : (
-                        <Button 
-                          variant="outline" 
-                          onClick={generateQrCode}
-                          className="w-full"
-                        >
-                          <QrCode className="w-4 h-4 mr-2" />
-                          Generate QR Code
-                        </Button>
-                      )}
                     </CardContent>
                   </Card>
                 </div>
