@@ -1,7 +1,7 @@
 import { useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Check, ChevronDown, Phone, Mail, MapPin, Award, Stethoscope, Heart, Clock, Info, BadgeCheck, Wind, Droplets, Brain, Activity } from "lucide-react";
+import { Check, ChevronDown, Phone, Mail, MapPin, Award, Stethoscope, Heart, Clock, Info, BadgeCheck, Wind, Droplets, Brain, Activity, ExternalLink } from "lucide-react";
 import { NOSESNOTPage } from "@/components/quiz/NOSESNOTPage";
 
 // Import landing page images
@@ -134,41 +134,41 @@ export default function NasalAssessmentLandingPage() {
 
   return (
     <div className="font-sans text-[#1a1a2e] bg-white antialiased">
-      {/* Hero Section */}
+      {/* Hero Section - Refined spacing and gradient */}
       <section 
-        className="relative min-h-[600px] lg:min-h-[700px] flex items-center py-12 lg:py-16"
+        className="relative min-h-[650px] lg:min-h-[720px] flex items-center py-10 lg:py-14"
         style={{
           backgroundImage: `url(${heroNasal})`,
           backgroundSize: "cover",
-          backgroundPosition: "center"
+          backgroundPosition: "center top"
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1a5f6a]/90 to-[#0796cc]/80" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#145a63]/92 via-[#1a6a75]/88 to-[#0796cc]/82" />
         
-        <div className="relative z-10 w-full px-4 max-w-[1400px] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div className="relative z-10 w-full px-4 sm:px-6 max-w-[1320px] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center">
             {/* Left Content */}
             <div className="text-white">
-              <span className="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium mb-6">
+              <span className="inline-block px-4 py-1.5 bg-white/15 backdrop-blur-sm rounded-full text-white text-sm font-medium mb-5 border border-white/20">
                 Board-Certified ENT | Nasal & Sinus Specialist
               </span>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-6">
+              <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-bold leading-[1.15] mb-5 tracking-tight">
                 Is it a Nasal or Sinus Problem?
               </h1>
-              <p className="text-lg lg:text-xl text-white/95 mb-8 leading-relaxed max-w-xl">
+              <p className="text-base lg:text-lg text-white/90 mb-7 leading-relaxed max-w-xl">
                 Many patients don't realize that breathing problems, pressure, and congestion can come from different root causes. This short quiz will help you understand whether your symptoms are due to nasal obstruction or sinus inflammation — and guide you toward the right treatment.
               </p>
               <button 
                 onClick={openChatQuiz}
-                className="hidden lg:inline-block px-8 py-4 bg-white text-[#0796cc] font-semibold rounded-lg shadow-lg hover:bg-gray-50 hover:-translate-y-0.5 transition-all text-lg"
+                className="hidden lg:inline-flex items-center gap-2 px-7 py-3.5 bg-white text-[#0796cc] font-semibold rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 hover:-translate-y-0.5 transition-all text-base"
               >
                 Start the Nasal Assessment
               </button>
             </div>
 
             {/* Right - Quiz Embed (Standard format, responsive height) */}
-            <div id="hero-quiz" className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-              <div className="w-full min-h-[400px]">
+            <div id="hero-quiz" className="bg-white rounded-xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.35)] overflow-hidden border border-white/10">
+              <div className="w-full">
                 <NOSESNOTPage />
               </div>
             </div>
@@ -176,20 +176,20 @@ export default function NasalAssessmentLandingPage() {
         </div>
       </section>
 
-      {/* Doctor Note Section */}
-      <section className="py-16 lg:py-24 bg-white">
-        <div className="max-w-[1200px] mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      {/* Doctor Note Section - Refined */}
+      <section className="py-14 lg:py-20 bg-white">
+        <div className="max-w-[1140px] mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
             <div className="order-2 lg:order-1">
               <img
                 src={doctorProfile?.avatar_url || drVaughnBlack}
                 alt={doctorName}
-                className="w-full max-w-md mx-auto rounded-2xl shadow-xl"
+                className="w-full max-w-lg mx-auto rounded-2xl shadow-2xl object-cover"
               />
             </div>
             <div className="order-1 lg:order-2">
-              <h2 className="text-3xl lg:text-4xl font-bold mb-6">A Note from {doctorName}</h2>
-              <div className="text-gray-600 space-y-4 text-lg leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-bold mb-5 leading-tight">A Note from {doctorName}</h2>
+              <div className="text-gray-600 space-y-3.5 text-base leading-relaxed">
                 <p>
                   If you're dealing with nasal congestion, facial pressure, trouble breathing, or poor sleep — you're not alone. These symptoms can stem from two common but very different issues: nasal airway obstruction (NAO) or chronic sinus inflammation.
                 </p>
@@ -199,12 +199,12 @@ export default function NasalAssessmentLandingPage() {
                 <p>
                   Once you complete the quiz, I'll personally review your score and offer a free phone consultation to go over treatment options — from medications to minimally invasive in-office procedures.
                 </p>
-                <p className="font-medium">Let's get you breathing better again.</p>
+                <p className="font-medium text-[#1a1a2e]">Let's get you breathing better again.</p>
                 <p className="font-semibold text-[#1a1a2e]">— {doctorName}</p>
               </div>
               <button 
                 onClick={openChatQuiz}
-                className="mt-8 px-8 py-4 bg-[#0796cc] text-white font-semibold rounded-lg shadow-lg hover:bg-[#0687b8] transition-all"
+                className="mt-7 px-7 py-3.5 bg-[#0796cc] text-white font-semibold rounded-lg shadow-lg hover:bg-[#0687b8] hover:shadow-xl transition-all"
               >
                 Start your Nasal Assessment
               </button>
@@ -213,39 +213,39 @@ export default function NasalAssessmentLandingPage() {
         </div>
       </section>
 
-      {/* Triage Section */}
-      <section className="py-16 lg:py-24 bg-gray-50">
-        <div className="max-w-[1100px] mx-auto px-4">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <h2 className="text-3xl lg:text-4xl font-bold text-center">
+      {/* Triage Section - Refined */}
+      <section className="py-14 lg:py-20 bg-[#f8f9fa]">
+        <div className="max-w-[1040px] mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-bold text-center leading-tight">
               Which symptoms sound most like yours?
             </h2>
-            <Info className="w-5 h-5 text-[#0796cc]" />
+            <Info className="w-5 h-5 text-[#0796cc] flex-shrink-0" />
           </div>
-          <p className="text-center text-gray-600 mb-12 text-lg">
+          <p className="text-center text-gray-600 mb-10 text-base">
             Choose the option that best describes your main concerns:
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Option A - Nasal Blockage */}
             <div 
               onClick={openChatQuiz}
-              className="cursor-pointer bg-white p-8 border-2 border-gray-200 rounded-2xl hover:border-[#0796cc] hover:shadow-xl transition-all group"
+              className="cursor-pointer bg-white p-7 border-2 border-gray-200 rounded-xl hover:border-[#0796cc] hover:shadow-xl transition-all duration-200 group"
             >
-              <h3 className="text-xl font-bold mb-6 group-hover:text-[#0796cc] transition-colors">
+              <h3 className="text-lg font-bold mb-5 group-hover:text-[#0796cc] transition-colors">
                 Mostly Blockage & Stuffiness
               </h3>
-              <ul className="space-y-3 mb-6">
+              <ul className="space-y-2.5 mb-5">
                 {["Constant nasal congestion or blockage", "Difficulty breathing through nose", "Snoring or sleep problems", "Mouth breathing"].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-gray-600">
+                  <li key={i} className="flex items-start gap-2.5 text-gray-600 text-[15px]">
                     <div className="w-5 h-5 rounded-full bg-[#0796cc] flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-3 h-3 text-white" />
+                      <Check className="w-3 h-3 text-white" strokeWidth={3} />
                     </div>
                     {item}
                   </li>
                 ))}
               </ul>
-              <span className="text-[#0796cc] font-semibold group-hover:underline">
+              <span className="text-[#0796cc] font-semibold group-hover:underline text-[15px]">
                 → Take the NOSE Test
               </span>
             </div>
@@ -253,22 +253,22 @@ export default function NasalAssessmentLandingPage() {
             {/* Option B - Sinus Issues */}
             <div 
               onClick={openChatQuiz}
-              className="cursor-pointer bg-white p-8 border-2 border-gray-200 rounded-2xl hover:border-[#0796cc] hover:shadow-xl transition-all group"
+              className="cursor-pointer bg-white p-7 border-2 border-gray-200 rounded-xl hover:border-[#0796cc] hover:shadow-xl transition-all duration-200 group"
             >
-              <h3 className="text-xl font-bold mb-6 group-hover:text-[#0796cc] transition-colors">
+              <h3 className="text-lg font-bold mb-5 group-hover:text-[#0796cc] transition-colors">
                 Pressure, Drainage & Smell Loss
               </h3>
-              <ul className="space-y-3 mb-6">
+              <ul className="space-y-2.5 mb-5">
                 {["Facial pain or pressure", "Thick nasal discharge or post-nasal drip", "Loss of smell or taste", "Frequent sinus infections"].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-gray-600">
+                  <li key={i} className="flex items-start gap-2.5 text-gray-600 text-[15px]">
                     <div className="w-5 h-5 rounded-full bg-[#0796cc] flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-3 h-3 text-white" />
+                      <Check className="w-3 h-3 text-white" strokeWidth={3} />
                     </div>
                     {item}
                   </li>
                 ))}
               </ul>
-              <span className="text-[#0796cc] font-semibold group-hover:underline">
+              <span className="text-[#0796cc] font-semibold group-hover:underline text-[15px]">
                 → Take the SNOT-12 Test
               </span>
             </div>
@@ -276,105 +276,105 @@ export default function NasalAssessmentLandingPage() {
         </div>
       </section>
 
-      {/* Understanding Your Symptoms Section */}
-      <section className="py-16 lg:py-24 bg-white">
-        <div className="max-w-[1200px] mx-auto px-4">
-          <h2 className="text-3xl lg:text-4xl font-bold text-center mb-4">
+      {/* Understanding Your Symptoms Section - Refined */}
+      <section className="py-14 lg:py-20 bg-white">
+        <div className="max-w-[1140px] mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-bold text-center mb-3 leading-tight">
             Understanding Your Symptoms
           </h2>
-          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto text-lg">
+          <p className="text-center text-gray-600 mb-10 max-w-2xl mx-auto text-base">
             Nasal blockage and sinus problems can feel similar, but they have different causes and treatments.
           </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {/* Nasal Obstruction */}
             <div>
-              <div className="flex items-center gap-2 mb-6">
-                <h3 className="text-2xl font-bold">Nasal Obstruction</h3>
-                <Info className="w-5 h-5 text-[#0796cc]" />
+              <div className="flex items-center gap-2 mb-5">
+                <h3 className="text-xl lg:text-2xl font-bold">Nasal Obstruction</h3>
+                <Info className="w-4 h-4 text-[#0796cc]" />
               </div>
               <img 
                 src={nasalAirway}
                 alt="Nasal airway anatomy"
-                className="w-full aspect-[4/3] object-cover rounded-xl mb-6"
+                className="w-full aspect-[4/3] object-cover rounded-xl mb-5"
               />
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div>
-                  <h4 className="font-bold text-lg mb-2">What it is:</h4>
-                  <p className="text-gray-600">
+                  <h4 className="font-bold text-base mb-1.5">What it is:</h4>
+                  <p className="text-gray-600 text-[15px] leading-relaxed">
                     Blocked airflow due to physical issues like deviated septum, enlarged turbinates, or nasal valve collapse. The structure of your nose prevents air from flowing freely.
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-bold text-lg mb-2">Common Symptoms:</h4>
-                  <ul className="text-gray-600 space-y-2">
+                  <h4 className="font-bold text-base mb-1.5">Common Symptoms:</h4>
+                  <ul className="text-gray-600 space-y-1.5">
                     {["Constant stuffiness (especially lying down)", "Snoring and sleep disturbances", "Mouth breathing", "Difficulty during exercise"].map((item, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <div className="w-5 h-5 rounded-full bg-[#0796cc] flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <Check className="w-3 h-3 text-white" />
+                      <li key={i} className="flex items-start gap-2 text-[15px]">
+                        <div className="w-4.5 h-4.5 rounded-full bg-[#0796cc] flex items-center justify-center flex-shrink-0 mt-0.5 w-[18px] h-[18px]">
+                          <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                         </div>
                         {item}
                       </li>
                     ))}
                   </ul>
                 </div>
-                <a href="#" className="text-[#0796cc] font-medium hover:underline">Learn more →</a>
+                <a href="#" className="text-[#0796cc] font-medium hover:underline text-sm inline-block">Learn more →</a>
               </div>
             </div>
 
             {/* Sinus Problems */}
             <div>
-              <div className="flex items-center gap-2 mb-6">
-                <h3 className="text-2xl font-bold">Sinus Problems</h3>
-                <Info className="w-5 h-5 text-[#0796cc]" />
+              <div className="flex items-center gap-2 mb-5">
+                <h3 className="text-xl lg:text-2xl font-bold">Sinus Problems</h3>
+                <Info className="w-4 h-4 text-[#0796cc]" />
               </div>
               <img 
                 src={heroRhinitis}
                 alt="Woman with sinus symptoms"
-                className="w-full aspect-[4/3] object-cover rounded-xl mb-6"
+                className="w-full aspect-[4/3] object-cover rounded-xl mb-5"
               />
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div>
-                  <h4 className="font-bold text-lg mb-2">What it is:</h4>
-                  <p className="text-gray-600">
+                  <h4 className="font-bold text-base mb-1.5">What it is:</h4>
+                  <p className="text-gray-600 text-[15px] leading-relaxed">
                     Inflammation or infection of the sinuses (air-filled cavities around your nose). This causes swelling, fluid buildup, and pressure in your face.
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-bold text-lg mb-2">Common Symptoms:</h4>
-                  <ul className="text-gray-600 space-y-2">
+                  <h4 className="font-bold text-base mb-1.5">Common Symptoms:</h4>
+                  <ul className="text-gray-600 space-y-1.5">
                     {["Facial pressure or pain", "Thick, colored nasal discharge", "Loss of smell or taste", "Post-nasal drip and cough", "Headaches"].map((item, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <div className="w-5 h-5 rounded-full bg-[#0796cc] flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <Check className="w-3 h-3 text-white" />
+                      <li key={i} className="flex items-start gap-2 text-[15px]">
+                        <div className="w-4.5 h-4.5 rounded-full bg-[#0796cc] flex items-center justify-center flex-shrink-0 mt-0.5 w-[18px] h-[18px]">
+                          <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                         </div>
                         {item}
                       </li>
                     ))}
                   </ul>
                 </div>
-                <a href="#" className="text-[#0796cc] font-medium hover:underline">Learn more →</a>
+                <a href="#" className="text-[#0796cc] font-medium hover:underline text-sm inline-block">Learn more →</a>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Symptom Guide Section */}
-      <section className="py-16 lg:py-24 bg-gray-50">
-        <div className="max-w-[1000px] mx-auto px-4">
-          <div className="flex items-center justify-center gap-2 mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-center">
+      {/* Symptom Guide Section - Refined table */}
+      <section className="py-14 lg:py-20 bg-[#f8f9fa]">
+        <div className="max-w-[960px] mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-center gap-2 mb-10">
+            <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-bold text-center leading-tight">
               How Do I Know Which Test to Take?
             </h2>
-            <Info className="w-5 h-5 text-[#0796cc]" />
+            <Info className="w-5 h-5 text-[#0796cc] flex-shrink-0" />
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
             <div className="grid grid-cols-3">
-              <div className="p-4 bg-gray-100 font-bold text-center border-b"></div>
-              <div className="p-4 bg-[#0796cc]/10 font-bold text-center border-b text-[#0796cc]">Nasal Obstruction</div>
-              <div className="p-4 bg-[#0796cc]/10 font-bold text-center border-b text-[#0796cc]">Sinus Problems</div>
+              <div className="p-4 bg-gray-50 font-bold text-center border-b border-r border-gray-100"></div>
+              <div className="p-4 bg-[#0796cc]/8 font-bold text-center border-b border-r border-gray-100 text-[#0796cc] text-sm">Nasal Obstruction</div>
+              <div className="p-4 bg-[#0796cc]/8 font-bold text-center border-b border-gray-100 text-[#0796cc] text-sm">Sinus Problems</div>
             </div>
             
             {[
@@ -382,10 +382,10 @@ export default function NasalAssessmentLandingPage() {
               { label: "Typical Causes", nasal: "Deviated septum, swollen turbinates, valve collapse", sinus: "Infection, inflammation, polyps" },
               { label: "Often Worse", nasal: "At night or during exercise", sinus: "When bending over or with weather changes" },
               { label: "Assessment", nasal: "NOSE Test (5 questions)", sinus: "SNOT-12 Test (12 questions)" },
-            ].map((row, i) => (
-              <div key={i} className="grid grid-cols-3 border-b last:border-b-0">
-                <div className="p-4 bg-gray-50 font-semibold text-sm">{row.label}</div>
-                <div className="p-4 text-sm text-gray-600">{row.nasal}</div>
+            ].map((row, i, arr) => (
+              <div key={i} className={`grid grid-cols-3 ${i < arr.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                <div className="p-4 bg-gray-50 font-semibold text-sm border-r border-gray-100">{row.label}</div>
+                <div className="p-4 text-sm text-gray-600 border-r border-gray-100">{row.nasal}</div>
                 <div className="p-4 text-sm text-gray-600">{row.sinus}</div>
               </div>
             ))}
@@ -394,7 +394,7 @@ export default function NasalAssessmentLandingPage() {
           <div className="mt-8 text-center">
             <button 
               onClick={openChatQuiz}
-              className="px-8 py-4 bg-[#0796cc] text-white font-semibold rounded-lg shadow-lg hover:bg-[#0687b8] transition-all"
+              className="px-7 py-3.5 bg-[#0796cc] text-white font-semibold rounded-lg shadow-lg hover:bg-[#0687b8] hover:shadow-xl transition-all"
             >
               Take the Assessment Now
             </button>
@@ -402,153 +402,153 @@ export default function NasalAssessmentLandingPage() {
         </div>
       </section>
 
-      {/* About Assessment Section */}
-      <section className="py-16 lg:py-24 bg-white">
-        <div className="max-w-[1200px] mx-auto px-4">
-          <h2 className="text-3xl lg:text-4xl font-bold text-center mb-12">
+      {/* About Assessment Section - Refined cards */}
+      <section className="py-14 lg:py-20 bg-white">
+        <div className="max-w-[1140px] mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-bold text-center mb-10 leading-tight">
             About Nasal Assessment: NOSE and SNOT-12
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             {/* NOSE Assessment */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-              <div className="flex items-center gap-2 mb-6">
-                <h3 className="text-2xl font-bold">NOSE Assessment</h3>
-                <Info className="w-5 h-5 text-[#0796cc]" />
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+              <div className="flex items-center gap-2 mb-5">
+                <h3 className="text-xl font-bold">NOSE Assessment</h3>
+                <Info className="w-4 h-4 text-[#0796cc]" />
               </div>
-              <div className="flex gap-12 mb-6">
+              <div className="flex gap-10 mb-5">
                 <div>
-                  <div className="text-5xl font-bold text-[#0796cc]">5</div>
-                  <div className="text-sm text-gray-500">Questions</div>
+                  <div className="text-[42px] font-bold text-[#0796cc] leading-none">5</div>
+                  <div className="text-xs text-gray-500 mt-1">Questions</div>
                 </div>
                 <div>
-                  <div className="text-5xl font-bold text-[#0796cc]">0-100</div>
-                  <div className="text-sm text-gray-500">Score Range</div>
+                  <div className="text-[42px] font-bold text-[#0796cc] leading-none">0-100</div>
+                  <div className="text-xs text-gray-500 mt-1">Score Range</div>
                 </div>
               </div>
-              <div className="bg-[#0796cc]/10 rounded-lg p-3 mb-4">
+              <div className="bg-[#e8f4f8] rounded-lg px-3 py-2 mb-4">
                 <p className="text-sm text-[#0796cc] font-medium">Over 30 = treatment may help</p>
               </div>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 mb-3 text-sm leading-relaxed">
                 The NOSE (Nasal Obstruction Symptom Evaluation) is a validated clinical tool that measures nasal blockage and breathing difficulty.
               </p>
-              <ul className="text-gray-600 space-y-2 text-sm mb-4">
+              <ul className="text-gray-600 space-y-1.5 text-sm mb-4">
                 <li>• Scores above 30-40 often indicate surgical intervention may provide relief</li>
                 <li>• Evaluates structural issues like deviated septum and turbinate swelling</li>
                 <li>• Quick assessment of how nasal blockage affects daily activities</li>
               </ul>
-              <div className="bg-blue-50 rounded-lg p-3">
-                <p className="text-sm"><strong>Best for:</strong> Nasal congestion, difficulty breathing through nose, snoring</p>
+              <div className="bg-[#f0f7ff] rounded-lg px-3 py-2.5">
+                <p className="text-sm"><span className="font-semibold">Best for:</span> Nasal congestion, difficulty breathing through nose, snoring</p>
               </div>
             </div>
 
             {/* SNOT-12 Assessment */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-              <div className="flex items-center gap-2 mb-6">
-                <h3 className="text-2xl font-bold">SNOT-12 Assessment</h3>
-                <Info className="w-5 h-5 text-[#0796cc]" />
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+              <div className="flex items-center gap-2 mb-5">
+                <h3 className="text-xl font-bold">SNOT-12 Assessment</h3>
+                <Info className="w-4 h-4 text-[#0796cc]" />
               </div>
-              <div className="flex gap-12 mb-6">
+              <div className="flex gap-10 mb-5">
                 <div>
-                  <div className="text-5xl font-bold text-[#0796cc]">12</div>
-                  <div className="text-sm text-gray-500">Questions</div>
+                  <div className="text-[42px] font-bold text-[#0796cc] leading-none">12</div>
+                  <div className="text-xs text-gray-500 mt-1">Questions</div>
                 </div>
                 <div>
-                  <div className="text-5xl font-bold text-[#0796cc]">0-60</div>
-                  <div className="text-sm text-gray-500">Score Range</div>
+                  <div className="text-[42px] font-bold text-[#0796cc] leading-none">0-60</div>
+                  <div className="text-xs text-gray-500 mt-1">Score Range</div>
                 </div>
               </div>
-              <div className="bg-[#0796cc]/10 rounded-lg p-3 mb-4">
+              <div className="bg-[#e8f4f8] rounded-lg px-3 py-2 mb-4">
                 <p className="text-sm text-[#0796cc] font-medium">Over 30 = significant impact</p>
               </div>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 mb-3 text-sm leading-relaxed">
                 The SNOT-12 (Sino-Nasal Outcome Test) measures how chronic rhinosinusitis affects your quality of life.
               </p>
-              <ul className="text-gray-600 space-y-2 text-sm mb-4">
+              <ul className="text-gray-600 space-y-1.5 text-sm mb-4">
                 <li>• Scores above 30 indicate severe impact requiring comprehensive treatment</li>
                 <li>• Assesses sinus pressure, post-nasal drip, facial pain, and smell loss</li>
                 <li>• Worldwide standard for evaluating chronic sinusitis severity</li>
               </ul>
-              <div className="bg-blue-50 rounded-lg p-3">
-                <p className="text-sm"><strong>Best for:</strong> Sinus pain/pressure, post-nasal drip, recurring sinus infections</p>
+              <div className="bg-[#f0f7ff] rounded-lg px-3 py-2.5">
+                <p className="text-sm"><span className="font-semibold">Best for:</span> Sinus pain/pressure, post-nasal drip, recurring sinus infections</p>
               </div>
             </div>
           </div>
 
           {/* What if I have both? */}
-          <div className="bg-white rounded-2xl p-8 shadow-lg max-w-3xl mx-auto border border-gray-100">
-            <h3 className="text-xl font-bold mb-4">What if I have both?</h3>
-            <p className="text-gray-600">
+          <div className="bg-white rounded-xl p-6 shadow-lg max-w-3xl mx-auto border border-gray-100">
+            <h3 className="text-lg font-bold mb-3">What if I have both?</h3>
+            <p className="text-gray-600 text-sm leading-relaxed">
               Many patients experience symptoms from both nasal obstruction and sinus inflammation. In fact, they often occur together because blocked nasal passages can trap bacteria and mucus, leading to sinus infections.
             </p>
-            <p className="text-gray-600 mt-4">
+            <p className="text-gray-600 mt-3 text-sm leading-relaxed">
               If you're experiencing symptoms from both categories, start with the test that best matches your <em>most bothersome</em> symptoms. {doctorName} will review your results and help determine if you need additional evaluation.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Comprehensive Treatment Options */}
-      <section className="py-16 lg:py-24 bg-gray-50">
-        <div className="max-w-[1200px] mx-auto px-4">
-          <h2 className="text-3xl lg:text-4xl font-bold text-center mb-4">
+      {/* Comprehensive Treatment Options - Refined */}
+      <section className="py-14 lg:py-20 bg-[#f8f9fa]">
+        <div className="max-w-[1140px] mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-bold text-center mb-3 leading-tight">
             Comprehensive Treatment Options
           </h2>
-          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+          <p className="text-center text-gray-600 mb-10 max-w-2xl mx-auto text-base">
             Modern treatments range from conservative therapies to minimally invasive procedures that can be performed in the office.
           </p>
 
           {/* For Nasal Obstruction */}
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <Wind className="w-6 h-6 text-[#0796cc]" />
+          <div className="mb-10">
+            <h3 className="text-xl font-bold mb-5 flex items-center gap-2">
+              <Wind className="w-5 h-5 text-[#0796cc]" />
               For Nasal Obstruction
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { title: "VivAer®", subtitle: "Nasal Valve Treatment", desc: "Non-invasive, in-office procedure using temperature-controlled energy to reshape nasal passages." },
                 { title: "Septoplasty", subtitle: "Deviated Septum Repair", desc: "Surgical correction of a crooked septum to improve airflow through both nostrils." },
                 { title: "Turbinate Reduction", subtitle: "Swollen Turbinate Treatment", desc: "Reduces enlarged turbinates that block nasal breathing using various techniques." },
                 { title: "Nasal Valve Repair", subtitle: "Structural Support", desc: "Strengthens weak nasal sidewalls that collapse during breathing." }
               ].map((item, i) => (
-                <div key={i} className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
-                  <h4 className="font-bold text-lg text-[#1a5f6a]">{item.title}</h4>
-                  <p className="text-sm text-[#0796cc] mb-3">{item.subtitle}</p>
-                  <p className="text-gray-600 text-sm">{item.desc}</p>
+                <div key={i} className="bg-white rounded-xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                  <h4 className="font-bold text-base text-[#1a5f6a]">{item.title}</h4>
+                  <p className="text-xs text-[#0796cc] mb-2.5 font-medium">{item.subtitle}</p>
+                  <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* For Sinus Infections */}
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <Droplets className="w-6 h-6 text-[#0796cc]" />
+          <div className="mb-10">
+            <h3 className="text-xl font-bold mb-5 flex items-center gap-2">
+              <Droplets className="w-5 h-5 text-[#0796cc]" />
               For Sinus Infections
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { title: "Balloon Sinuplasty", subtitle: "Minimally Invasive", desc: "Uses a small balloon to open blocked sinus passages without cutting tissue." },
                 { title: "SINUVA®", subtitle: "Sinus Implant", desc: "Dissolving implant that releases anti-inflammatory medication directly into sinuses." },
                 { title: "Endoscopic Surgery", subtitle: "Advanced Treatment", desc: "Removes polyps and diseased tissue while preserving healthy sinus structure." },
                 { title: "Dupixent®", subtitle: "Biologic Therapy", desc: "Injectable medication that targets underlying inflammation in chronic sinusitis with polyps." }
               ].map((item, i) => (
-                <div key={i} className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
-                  <h4 className="font-bold text-lg text-[#1a5f6a]">{item.title}</h4>
-                  <p className="text-sm text-[#0796cc] mb-3">{item.subtitle}</p>
-                  <p className="text-gray-600 text-sm">{item.desc}</p>
+                <div key={i} className="bg-white rounded-xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                  <h4 className="font-bold text-base text-[#1a5f6a]">{item.title}</h4>
+                  <p className="text-xs text-[#0796cc] mb-2.5 font-medium">{item.subtitle}</p>
+                  <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Why Symptoms Overlap */}
-          <div className="bg-white rounded-2xl p-8 shadow-lg max-w-3xl mx-auto">
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-xl p-6 shadow-lg max-w-3xl mx-auto border border-gray-100">
+            <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
               <Brain className="w-5 h-5 text-[#0796cc]" />
               Why Symptoms Overlap
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm leading-relaxed">
               Nasal obstruction and sinus problems often occur together. A blocked nose can prevent proper sinus drainage, leading to infections. Similarly, chronic sinus inflammation can cause swelling that blocks nasal passages. That's why a comprehensive evaluation by an ENT specialist is important to identify all contributing factors and create an effective treatment plan.
             </p>
           </div>
@@ -556,51 +556,51 @@ export default function NasalAssessmentLandingPage() {
       </section>
 
       {/* Treatment Images Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-[1200px] mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <section className="py-12 bg-white">
+        <div className="max-w-[1140px] mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <img 
               src={heroNasal}
               alt="Understanding sinus pressure and pain"
-              className="w-full h-80 object-cover rounded-2xl shadow-lg"
+              className="w-full h-72 object-cover rounded-xl shadow-lg"
             />
             <img 
               src={sinusPain}
               alt="Finding relief from sinus symptoms"
-              className="w-full h-80 object-cover rounded-2xl shadow-lg"
+              className="w-full h-72 object-cover rounded-xl shadow-lg"
             />
           </div>
         </div>
       </section>
 
-      {/* What Happens After Section */}
-      <section className="py-16 lg:py-24 bg-gray-50">
-        <div className="max-w-[1000px] mx-auto px-4">
-          <h2 className="text-3xl lg:text-4xl font-bold text-center mb-12">
+      {/* What Happens After Section - Refined */}
+      <section className="py-14 lg:py-20 bg-[#f8f9fa]">
+        <div className="max-w-[960px] mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-bold text-center mb-10 leading-tight">
             What Happens After You Complete the Assessment?
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             {[
               { num: "1", title: "Get Your Score", desc: "You'll receive your score immediately along with a personalized interpretation of what it means." },
               { num: "2", title: `${doctorName} Reviews`, desc: `Your results are sent directly to ${doctorName}, who will personally review your symptoms.` },
               { num: "3", title: "Schedule a Consultation", desc: `Virtual or in-person appointment with ${doctorName}` }
             ].map((step, i) => (
-              <div key={i} className="bg-white rounded-2xl p-8 shadow-lg text-center">
-                <div className="w-16 h-16 bg-[#0796cc] text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+              <div key={i} className="bg-white rounded-xl p-6 shadow-lg text-center">
+                <div className="w-14 h-14 bg-[#0796cc] text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                   {step.num}
                 </div>
-                <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                <p className="text-gray-600">{step.desc}</p>
+                <h3 className="text-lg font-bold mb-2">{step.title}</h3>
+                <p className="text-gray-600 text-sm">{step.desc}</p>
               </div>
             ))}
           </div>
 
-          <div className="bg-[#1a5f6a] rounded-2xl p-8 text-center text-white">
-            <p className="text-xl mb-6">Ready to take control of your breathing and quality of life?</p>
+          <div className="bg-[#1a5f6a] rounded-xl p-7 text-center text-white shadow-xl">
+            <p className="text-lg mb-5">Ready to take control of your breathing and quality of life?</p>
             <button 
               onClick={openChatQuiz}
-              className="px-8 py-4 bg-white text-[#0796cc] font-semibold rounded-lg shadow-lg hover:bg-gray-50 transition-all text-lg"
+              className="px-7 py-3.5 bg-white text-[#0796cc] font-semibold rounded-lg shadow-lg hover:bg-gray-50 hover:shadow-xl transition-all"
             >
               Start your Nasal Assessment
             </button>
@@ -608,52 +608,52 @@ export default function NasalAssessmentLandingPage() {
         </div>
       </section>
 
-      {/* Why Choose Section */}
-      <section className="py-16 lg:py-24 bg-white">
-        <div className="max-w-[1200px] mx-auto px-4">
-          <h2 className="text-3xl lg:text-4xl font-bold text-center mb-12">
+      {/* Why Choose Section - Refined */}
+      <section className="py-14 lg:py-20 bg-white">
+        <div className="max-w-[1140px] mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-bold text-center mb-10 leading-tight">
             Why Choose {doctorName} for Your Nasal & Sinus Health
           </h2>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { icon: Award, title: "Board-Certified ENT", desc: "Fellowship-trained specialist with comprehensive diagnostic approach", link: "20+ Years Experience" },
                 { icon: Stethoscope, title: "Advanced Technology", desc: "State-of-the-art diagnostics and minimally invasive procedures", link: "VivAer® & Balloon Sinuplasty Provider" },
                 { icon: Heart, title: "Patient-Centered Care", desc: "Personalized treatment plans for your unique needs", link: "Most insurance plans accepted" }
               ].map((item, i) => (
-                <div key={i} className="text-center p-6 bg-gray-50 rounded-xl">
-                  <div className="w-12 h-12 bg-[#0796cc] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <item.icon className="w-6 h-6 text-white" />
+                <div key={i} className="text-center p-5 bg-[#f8f9fa] rounded-xl">
+                  <div className="w-11 h-11 bg-[#0796cc] rounded-full flex items-center justify-center mx-auto mb-3">
+                    <item.icon className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="font-bold mb-2">{item.title}</h3>
-                  <p className="text-sm text-gray-600">{item.desc}</p>
+                  <h3 className="font-bold text-sm mb-1.5">{item.title}</h3>
+                  <p className="text-xs text-gray-600 leading-relaxed">{item.desc}</p>
                   <a href="#" className="text-xs text-[#0796cc] mt-2 font-medium hover:underline block">{item.link}</a>
                 </div>
               ))}
             </div>
 
-            <div className="bg-[#1a5f6a] rounded-2xl p-8 text-white">
+            <div className="bg-[#1a5f6a] rounded-xl p-7 text-white shadow-xl">
               <img 
                 src={doctorProfile?.avatar_url || drVaughnProfessional}
                 alt={doctorName}
-                className="w-48 h-48 object-cover rounded-full mx-auto mb-6 shadow-lg border-4 border-white/20"
+                className="w-44 h-44 object-cover rounded-full mx-auto mb-5 shadow-lg border-4 border-white/20"
               />
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <h3 className="text-2xl font-bold text-center">
+              <div className="flex items-center justify-center gap-2 mb-1.5">
+                <h3 className="text-xl font-bold text-center">
                   {doctorProfile?.first_name || "Ryan C."} {doctorProfile?.last_name || "Vaughn"}, MD
                 </h3>
-                <BadgeCheck className="w-6 h-6 text-[#0796cc]" />
+                <BadgeCheck className="w-5 h-5 text-[#0796cc]" />
               </div>
-              <p className="text-center text-white/80 mb-4">
+              <p className="text-center text-white/80 mb-4 text-sm">
                 Board-Certified ENT • Nasal & Sinus Specialist • 20+ Years Experience
               </p>
-              <p className="text-white/90 text-center">
+              <p className="text-white/90 text-center text-sm leading-relaxed">
                 {doctorName} has helped thousands of patients overcome nasal and sinus conditions through comprehensive, minimally-invasive ENT treatments. His expertise spans from conservative management to advanced surgical interventions.
               </p>
-              <div className="flex flex-wrap justify-center gap-2 mt-6">
+              <div className="flex flex-wrap justify-center gap-2 mt-5">
                 {["Nasal Obstruction Expert", "Chronic Sinusitis Specialist", "Minimally Invasive Procedures"].map((tag, i) => (
-                  <span key={i} className="px-3 py-1 bg-white/10 text-white rounded-full text-sm flex items-center gap-1">
+                  <span key={i} className="px-2.5 py-1 bg-white/10 text-white rounded-full text-xs flex items-center gap-1">
                     <Activity className="w-3 h-3" />
                     {tag}
                   </span>
@@ -666,42 +666,42 @@ export default function NasalAssessmentLandingPage() {
 
       {/* Doctor Exam Image */}
       <section className="py-8 bg-white">
-        <div className="max-w-[800px] mx-auto px-4">
+        <div className="max-w-[760px] mx-auto px-4 sm:px-6">
           <img 
             src={nasalExamDoctor}
             alt="Doctor examining patient's nasal symptoms"
-            className="w-full h-96 object-cover rounded-2xl shadow-xl"
+            className="w-full h-80 object-cover rounded-xl shadow-xl"
           />
         </div>
       </section>
 
       {/* FAQ & References Section - 2 Column Layout */}
-      <section className="py-16 lg:py-24 bg-gray-50">
-        <div className="max-w-[1200px] mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <section className="py-14 lg:py-20 bg-[#f8f9fa]">
+        <div className="max-w-[1140px] mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {/* FAQs */}
             <div>
-              <h2 className="text-2xl lg:text-3xl font-bold mb-8">
+              <h2 className="text-xl lg:text-2xl font-bold mb-6">
                 Frequently Asked Questions
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {faqs.map((faq, index) => (
                   <div 
                     key={index}
-                    className="bg-white rounded-xl shadow-sm overflow-hidden"
+                    className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100"
                   >
                     <button
                       onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                      className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                      className="w-full px-5 py-3.5 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
                     >
-                      <span className="font-semibold">{faq.question}</span>
+                      <span className="font-semibold text-sm pr-4">{faq.question}</span>
                       <ChevronDown 
-                        className={`w-5 h-5 text-gray-500 transition-transform ${openFaq === index ? 'rotate-180' : ''}`}
+                        className={`w-4 h-4 text-gray-500 transition-transform flex-shrink-0 ${openFaq === index ? 'rotate-180' : ''}`}
                       />
                     </button>
                     {openFaq === index && (
-                      <div className="px-6 pb-4">
-                        <p className="text-gray-600">{faq.answer}</p>
+                      <div className="px-5 pb-4">
+                        <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
                       </div>
                     )}
                   </div>
@@ -711,17 +711,25 @@ export default function NasalAssessmentLandingPage() {
 
             {/* References */}
             <div>
-              <h2 className="text-2xl lg:text-3xl font-bold mb-8">
+              <h2 className="text-xl lg:text-2xl font-bold mb-6">
                 References
               </h2>
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <ol className="text-sm text-gray-600 space-y-3 list-decimal list-inside">
-                  {references.map((ref, i) => (
-                    <li key={i}>
-                      <strong>{ref.name}</strong>: <a href={ref.url} className="text-[#0796cc] hover:underline" target="_blank" rel="noopener noreferrer">{ref.url.replace('https://', '')}</a>
+              <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-100">
+                <ul className="space-y-3">
+                  {references.map((ref, index) => (
+                    <li key={index}>
+                      <a 
+                        href={ref.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-[#0796cc] hover:underline text-sm group"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span>{ref.name}</span>
+                      </a>
                     </li>
                   ))}
-                </ol>
+                </ul>
               </div>
             </div>
           </div>
@@ -729,87 +737,110 @@ export default function NasalAssessmentLandingPage() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-16 lg:py-24 bg-[#1a5f6a]">
-        <div className="max-w-[800px] mx-auto px-4 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
+      <section className="py-14 lg:py-20 bg-[#1a5f6a]">
+        <div className="max-w-[900px] mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-bold text-white mb-4 leading-tight">
             Ready to Breathe Better?
           </h2>
-          <p className="text-white/90 text-lg mb-8">
-            Don't let nasal or sinus problems hold you back any longer. Take the first step toward lasting relief today.
+          <p className="text-white/90 mb-7 text-base max-w-xl mx-auto">
+            Take the first step toward relief. Our simple assessment takes just 2-3 minutes and helps identify the root cause of your symptoms.
           </p>
           <button 
             onClick={openChatQuiz}
-            className="px-8 py-4 bg-white text-[#0796cc] font-semibold rounded-lg shadow-lg hover:bg-gray-50 hover:-translate-y-0.5 transition-all text-lg"
+            className="px-8 py-4 bg-white text-[#0796cc] font-semibold rounded-lg shadow-xl hover:bg-gray-50 hover:-translate-y-0.5 transition-all text-base"
           >
-            Start your Nasal Assessment
+            Start Your Assessment Now
           </button>
         </div>
       </section>
 
       {/* Footer - 3 Column Layout */}
-      <footer className="py-12 bg-[#1a5f6a] text-white">
-        <div className="max-w-[1200px] mx-auto px-4">
+      <footer className="bg-[#0f3d44] text-white py-12">
+        <div className="max-w-[1140px] mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            {/* Column 1: Logo & Clinic */}
+            {/* Column 1 - Logo & Description */}
             <div>
               <img 
                 src={doctorProfile?.logo_url || exhaleLogo}
                 alt={clinicName}
-                className="h-12 mb-4 brightness-0 invert"
+                className="h-10 mb-4 brightness-0 invert"
               />
-              <p className="font-semibold text-lg">{clinicName}</p>
-              <p className="text-white/70 text-sm mt-2">
-                Board-certified ENT specialists providing comprehensive nasal and sinus care.
+              <p className="text-white/70 text-sm leading-relaxed">
+                Comprehensive ENT care for nasal, sinus, and respiratory conditions. 
+                Serving patients with advanced diagnostic and treatment solutions.
               </p>
             </div>
 
-            {/* Column 2: Locations */}
+            {/* Column 2 - Locations */}
             <div>
-              <h4 className="font-bold mb-4">Locations</h4>
-              <div className="space-y-4">
-                <div className="text-white/80 text-sm">
-                  <p className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span>{doctorProfile?.location || "25 Highland Park Village Ste 100-309, Dallas, TX 75205"}</span>
-                  </p>
+              <h4 className="font-bold mb-4 text-sm">Locations</h4>
+              <div className="space-y-4 text-sm text-white/70">
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-white">Oklahoma City</p>
+                    <p>{doctorProfile?.location || "13921 N May Ave, Oklahoma City, OK 73134"}</p>
+                  </div>
                 </div>
-                {doctorProfile?.phone && (
-                  <a href={`tel:${doctorProfile.phone}`} className="text-white/80 hover:text-white text-sm flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    {doctorProfile.phone}
-                  </a>
-                )}
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-white">Edmond</p>
+                    <p>3560 S Boulevard St, Ste 150, Edmond, OK 73013</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Column 3: Quick Links */}
+            {/* Column 3 - Quick Links */}
             <div>
-              <h4 className="font-bold mb-4">Quick Links</h4>
+              <h4 className="font-bold mb-4 text-sm">Quick Links</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href={doctorProfile?.website || "#"} className="text-white/80 hover:text-white">Visit Website</a></li>
-                <li><button onClick={openChatQuiz} className="text-white/80 hover:text-white">Take Assessment</button></li>
-                <li><a href="#" className="text-white/80 hover:text-white">Privacy Policy</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white">Terms of Service</a></li>
+                <li>
+                  <a href={doctorProfile?.website || "https://exhalesinus.com"} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors flex items-center gap-1.5">
+                    <ExternalLink className="w-3 h-3" />
+                    Visit Our Website
+                  </a>
+                </li>
+                <li>
+                  <a href={`tel:${doctorProfile?.phone || "4057557855"}`} className="text-white/70 hover:text-white transition-colors flex items-center gap-1.5">
+                    <Phone className="w-3 h-3" />
+                    {doctorProfile?.phone || "(405) 755-7855"}
+                  </a>
+                </li>
+                <li>
+                  <a href={`mailto:${doctorProfile?.email || "info@exhalesinus.com"}`} className="text-white/70 hover:text-white transition-colors flex items-center gap-1.5">
+                    <Mail className="w-3 h-3" />
+                    {doctorProfile?.email || "info@exhalesinus.com"}
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-white/20 text-center text-white/60 text-sm">
-            <p>© {new Date().getFullYear()} {clinicName}. All rights reserved.</p>
-            <p className="mt-2">Powered by Patient Pathway</p>
+          <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-white/50 text-xs">
+              © {new Date().getFullYear()} {clinicName}. All rights reserved.
+            </p>
+            <p className="text-white/50 text-xs">
+              Powered by Patient Pathway
+            </p>
           </div>
         </div>
       </footer>
 
-      {/* Mobile CTA */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg z-50">
+      {/* Mobile CTA Bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-[0_-4px_12px_rgba(0,0,0,0.1)] z-50">
         <button 
           onClick={openChatQuiz}
-          className="w-full py-4 bg-[#0796cc] text-white font-semibold rounded-lg shadow-lg"
+          className="w-full py-3.5 bg-[#0796cc] text-white font-semibold rounded-lg shadow-lg"
         >
-          Take the Assessment
+          Start Your Assessment
         </button>
       </div>
+
+      {/* Bottom padding for mobile CTA */}
+      <div className="lg:hidden h-20" />
     </div>
   );
 }
