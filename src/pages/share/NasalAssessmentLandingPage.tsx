@@ -5,9 +5,9 @@ import { Check, ChevronDown, Phone, Mail, MapPin, Award, Stethoscope, Heart, Clo
 import { NOSESNOTPage } from "@/components/quiz/NOSESNOTPage";
 
 // Import landing page images
-import heroNasal from "@/assets/landing/hero-nasal.jpg";
-import drVaughnBlack from "@/assets/landing/dr-vaughn-black.png";
-import drVaughnProfessional from "@/assets/landing/dr-vaughn-professional.png";
+import heroBackground from "@/assets/landing/hero-background.jpg";
+import drVaughnNote from "@/assets/landing/dr-vaughn-note.png";
+import drVaughnHeadshot from "@/assets/landing/dr-vaughn-headshot.png";
 import nasalExamDoctor from "@/assets/landing/nasal-exam-doctor.jpg";
 import sinusPain from "@/assets/landing/sinus-pain.jpg";
 import nasalAirway from "@/assets/landing/nasal-airway.jpg";
@@ -138,7 +138,7 @@ export default function NasalAssessmentLandingPage() {
       <section 
         className="relative min-h-[650px] lg:min-h-[720px] flex items-center py-10 lg:py-14"
         style={{
-          backgroundImage: `url(${heroNasal})`,
+          backgroundImage: `url(${heroBackground})`,
           backgroundSize: "cover",
           backgroundPosition: "center top"
         }}
@@ -182,7 +182,7 @@ export default function NasalAssessmentLandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
             <div className="order-2 lg:order-1">
               <img
-                src={doctorProfile?.avatar_url || drVaughnBlack}
+                src={doctorProfile?.avatar_url || drVaughnNote}
                 alt={doctorName}
                 className="w-full max-w-lg mx-auto rounded-2xl shadow-2xl object-cover"
               />
@@ -560,7 +560,7 @@ export default function NasalAssessmentLandingPage() {
         <div className="max-w-[1140px] mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <img 
-              src={heroNasal}
+              src={heroBackground}
               alt="Understanding sinus pressure and pain"
               className="w-full h-72 object-cover rounded-xl shadow-lg"
             />
@@ -635,7 +635,7 @@ export default function NasalAssessmentLandingPage() {
 
             <div className="bg-[#1a5f6a] rounded-xl p-7 text-white shadow-xl">
               <img 
-                src={doctorProfile?.avatar_url || drVaughnProfessional}
+                src={doctorProfile?.avatar_url || drVaughnHeadshot}
                 alt={doctorName}
                 className="w-44 h-44 object-cover rounded-full mx-auto mb-5 shadow-lg border-4 border-white/20"
               />
