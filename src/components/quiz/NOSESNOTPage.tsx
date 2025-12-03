@@ -165,56 +165,52 @@ export function NOSESNOTPage() {
 
   if (stage === 'triage') {
     return (
-      <div className="h-full w-full bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 py-8 px-4 overflow-y-auto">
-        <div className="max-w-4xl mx-auto">
-          <Card className="bg-white shadow-xl border-0">
-            <CardContent className="p-8">
-              <h3 className="text-sm sm:text-lg md:text-xl font-normal text-center text-slate-800 mb-6 sm:mb-8">
-                Is your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?
-              </h3>
+      <div className="h-full w-full bg-white py-6 px-4 overflow-y-auto">
+        <div className="max-w-2xl mx-auto">
+          <h3 className="text-sm sm:text-base md:text-lg font-medium text-center text-slate-800 mb-6 leading-relaxed">
+            Is your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?
+          </h3>
 
-              <div className="space-y-3">
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <button
-                      onClick={() => handleTriageAnswer('A')}
-                      className={`w-full p-4 sm:p-5 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-blue-400 hover:bg-blue-50 text-sm sm:text-base ${
-                        selectedTriage === 'A'
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-slate-200 bg-white'
-                      }`}
-                    >
-                      <span className="font-semibold">A.</span> Nasal blockage/stuffiness
-                    </button>
-                  </motion.div>
+          <div className="space-y-3">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <button
+                onClick={() => handleTriageAnswer('A')}
+                className={`w-full p-4 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-[#0796cc] hover:bg-[#0796cc]/5 text-sm sm:text-base ${
+                  selectedTriage === 'A'
+                    ? 'border-[#0796cc] bg-[#0796cc]/5'
+                    : 'border-slate-200 bg-white'
+                }`}
+              >
+                <span className="font-semibold text-[#0796cc]">A.</span> Nasal blockage/stuffiness
+              </button>
+            </motion.div>
 
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <button
-                      onClick={() => handleTriageAnswer('B')}
-                      className={`w-full p-4 sm:p-5 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-blue-400 hover:bg-blue-50 text-sm sm:text-base ${
-                        selectedTriage === 'B'
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-slate-200 bg-white'
-                      }`}
-                    >
-                      <span className="font-semibold">B.</span> Sinus-related symptoms like facial pressure, headaches, or a reduced sense of smell
-                    </button>
-                  </motion.div>
-                </div>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <button
+                onClick={() => handleTriageAnswer('B')}
+                className={`w-full p-4 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-[#0796cc] hover:bg-[#0796cc]/5 text-sm sm:text-base ${
+                  selectedTriage === 'B'
+                    ? 'border-[#0796cc] bg-[#0796cc]/5'
+                    : 'border-slate-200 bg-white'
+                }`}
+              >
+                <span className="font-semibold text-[#0796cc]">B.</span> Sinus-related symptoms like facial pressure, headaches, or a reduced sense of smell
+              </button>
+            </motion.div>
+          </div>
 
-              <div className="mt-8 pt-6 border-t border-slate-200">
-                <div className="flex justify-between items-center text-sm text-slate-600">
-                  <span>Progress</span>
-                  <span>0%</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="mt-6 pt-4 border-t border-slate-200">
+            <div className="flex justify-between items-center text-xs text-slate-500">
+              <span>Progress</span>
+              <span>0%</span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -227,56 +223,52 @@ export function NOSESNOTPage() {
     const totalQuestions = quiz.questions.length;
 
     return (
-      <div className="h-full w-full bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 py-8 px-4 overflow-y-auto">
-        <div className="max-w-4xl mx-auto">
-          <Card className="bg-white shadow-xl border-0">
-            <CardContent className="p-8">
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-center text-slate-800 mb-6 sm:mb-8">
-                Question {currentQuestion + 1}: {quizType === 'NOSE' && currentQuestion === 0 ? 'Rate your nasal blockage or obstruction' : currentQ.text}
-              </h3>
+      <div className="h-full w-full bg-white py-6 px-4 overflow-y-auto">
+        <div className="max-w-2xl mx-auto">
+          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-center text-slate-800 mb-6">
+            Question {currentQuestion + 1}: {quizType === 'NOSE' && currentQuestion === 0 ? 'Rate your nasal blockage or obstruction' : currentQ.text}
+          </h3>
 
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentQuestion}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="space-y-3">
-                    {currentQ.options.map((option, index) => (
-                      <motion.div
-                        key={index}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <button
-                          onClick={() => handleQuizAnswer(index, option)}
-                          className={`w-full p-4 sm:p-5 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-blue-400 hover:bg-blue-50 text-sm sm:text-base ${
-                            selectedOption === index
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-slate-200 bg-white'
-                          }`}
-                        >
-                          {option}
-                        </button>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-
-              <div className="mt-8 pt-6 border-t border-slate-200">
-                <div className="flex justify-between items-center text-sm text-slate-600 mb-2">
-                  <span>Progress</span>
-                  <span>{Math.round(progress)}%</span>
-                </div>
-                <div className="text-center text-sm text-slate-600">
-                  Question {currentQuestion + 1} of {totalQuestions}
-                </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentQuestion}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="space-y-3">
+                {currentQ.options.map((option, index) => (
+                  <motion.div
+                    key={index}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <button
+                      onClick={() => handleQuizAnswer(index, option)}
+                      className={`w-full p-4 text-left rounded-xl border-2 transition-all text-slate-700 hover:border-[#0796cc] hover:bg-[#0796cc]/5 text-sm sm:text-base ${
+                        selectedOption === index
+                          ? 'border-[#0796cc] bg-[#0796cc]/5'
+                          : 'border-slate-200 bg-white'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  </motion.div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="mt-6 pt-4 border-t border-slate-200">
+            <div className="flex justify-between items-center text-xs text-slate-500 mb-1">
+              <span>Progress</span>
+              <span>{Math.round(progress)}%</span>
+            </div>
+            <div className="text-center text-xs text-slate-500">
+              Question {currentQuestion + 1} of {totalQuestions}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -285,17 +277,13 @@ export function NOSESNOTPage() {
   if (stage === 'results') {
     if (leadSubmitted) {
       return (
-        <div className="min-h-full w-full bg-gradient-to-br from-background to-secondary/20 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
-          <div className="max-w-2xl mx-auto w-full">
-            <Card className="shadow-lg">
-              <CardContent className="p-4 sm:p-6 md:p-8 text-center">
-                <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-4">Thank You!</h2>
-                <p className="text-muted-foreground mb-6">
-                  Your results have been sent. {doctorProfile?.clinic_name || 'Our team'} will contact you soon to discuss your assessment.
-                </p>
-              </CardContent>
-            </Card>
+        <div className="h-full w-full bg-white py-6 px-4 overflow-y-auto">
+          <div className="max-w-lg mx-auto text-center">
+            <CheckCircle className="w-12 h-12 text-[#0796cc] mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-slate-800 mb-2">Thank You!</h2>
+            <p className="text-slate-600 text-sm">
+              Your results have been sent. {doctorProfile?.clinic_name || 'Our team'} will contact you soon to discuss your assessment.
+            </p>
           </div>
         </div>
       );
@@ -305,79 +293,77 @@ export function NOSESNOTPage() {
     const maxScore = quizType === 'NOSE' ? 100 : 60;
 
     return (
-      <div className="h-full w-full bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 py-8 px-4 overflow-y-auto">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-12">
-            {/* Title */}
-            <h1 className="text-base sm:text-lg font-bold text-center text-foreground mb-1">
-              {quizName} Assessment Complete!
-            </h1>
+      <div className="h-full w-full bg-white py-6 px-4 overflow-y-auto">
+        <div className="max-w-lg mx-auto">
+          {/* Title */}
+          <h1 className="text-base font-bold text-center text-slate-800 mb-2">
+            {quizName} Assessment Complete!
+          </h1>
 
-            {/* Score Display */}
-            <div className="text-center mb-2">
-              <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">
-                Score: {quizResult.score}/{maxScore}
-              </div>
-              <div className="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold capitalize mb-2">
-                {quizResult.severity} Symptoms
-              </div>
-              {quizResult.interpretation && (
-                <p className="text-sm text-muted-foreground whitespace-pre-line max-w-xl mx-auto">
-                  {quizResult.interpretation}
-                </p>
-              )}
+          {/* Score Display */}
+          <div className="text-center mb-4">
+            <div className="text-2xl font-bold text-[#0796cc] mb-1">
+              Score: {quizResult.score}/{maxScore}
             </div>
+            <div className="inline-block px-3 py-1 bg-[#0796cc]/10 text-[#0796cc] rounded-full text-xs font-semibold capitalize mb-2">
+              {quizResult.severity} Symptoms
+            </div>
+            {quizResult.interpretation && (
+              <p className="text-xs text-slate-500 max-w-md mx-auto">
+                {quizResult.interpretation}
+              </p>
+            )}
+          </div>
 
-            {/* Contact Form Section */}
-            <div className="mt-6">
-              <h2 className="text-base sm:text-lg font-bold text-center text-foreground mb-4">
-                Please provide your information
-              </h2>
+          {/* Contact Form Section */}
+          <div className="border-t border-slate-200 pt-4">
+            <h2 className="text-sm font-bold text-center text-slate-800 mb-3">
+              Please provide your information
+            </h2>
 
-              <div className="space-y-4">
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <Input
-                    id="name"
-                    value={leadData.name}
-                    onChange={(e) => setLeadData({ ...leadData, name: e.target.value })}
-                    placeholder="Full Name *"
-                    className="pl-12 h-14 text-base border-slate-200 rounded-xl"
-                  />
-                </div>
-
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={leadData.email}
-                    onChange={(e) => setLeadData({ ...leadData, email: e.target.value })}
-                    placeholder="Email Address *"
-                    className="pl-12 h-14 text-base border-slate-200 rounded-xl"
-                  />
-                </div>
-
-                <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={leadData.phone}
-                    onChange={(e) => setLeadData({ ...leadData, phone: e.target.value })}
-                    placeholder="Phone Number *"
-                    className="pl-12 h-14 text-base border-slate-200 rounded-xl"
-                  />
-                </div>
-
-                <Button
-                  onClick={handleSubmitLead}
-                  disabled={submittingLead}
-                  className="w-full h-14 text-lg font-semibold rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all"
-                >
-                  {submittingLead ? 'Submitting...' : 'Submit Information'}
-                </Button>
+            <div className="space-y-3">
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  id="name"
+                  value={leadData.name}
+                  onChange={(e) => setLeadData({ ...leadData, name: e.target.value })}
+                  placeholder="Full Name *"
+                  className="pl-10 h-11 text-sm border-slate-200 rounded-lg"
+                />
               </div>
+
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={leadData.email}
+                  onChange={(e) => setLeadData({ ...leadData, email: e.target.value })}
+                  placeholder="Email Address *"
+                  className="pl-10 h-11 text-sm border-slate-200 rounded-lg"
+                />
+              </div>
+
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={leadData.phone}
+                  onChange={(e) => setLeadData({ ...leadData, phone: e.target.value })}
+                  placeholder="Phone Number"
+                  className="pl-10 h-11 text-sm border-slate-200 rounded-lg"
+                />
+              </div>
+
+              <Button
+                onClick={handleSubmitLead}
+                disabled={submittingLead}
+                className="w-full h-11 text-sm font-semibold rounded-lg bg-[#0796cc] hover:bg-[#0687b8] transition-all"
+              >
+                {submittingLead ? 'Submitting...' : 'Submit Information'}
+              </Button>
             </div>
           </div>
         </div>
