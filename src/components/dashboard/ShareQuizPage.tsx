@@ -31,7 +31,8 @@ import {
   UserRound,
   MessageCircle,
   Send,
-  Square
+  Square,
+  Download
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -604,6 +605,43 @@ const sendEmail = async () => {
     setShowQrCode(true);
   };
 
+  const downloadQrAsPng = (elementId: string, filename: string) => {
+    const svgElement = document.getElementById(elementId);
+    if (!svgElement) {
+      toast.error('QR code not found');
+      return;
+    }
+    
+    const svg = svgElement.querySelector('svg');
+    if (!svg) {
+      toast.error('QR code SVG not found');
+      return;
+    }
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const img = new Image();
+    
+    img.onload = () => {
+      canvas.width = img.width * 2;
+      canvas.height = img.height * 2;
+      ctx?.scale(2, 2);
+      ctx?.drawImage(img, 0, 0);
+      
+      const pngUrl = canvas.toDataURL('image/png');
+      const downloadLink = document.createElement('a');
+      downloadLink.href = pngUrl;
+      downloadLink.download = `${filename}.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      toast.success('QR code downloaded!');
+    };
+    
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+  };
+
   const embedUrl = useMemo(() => {
     const url = new URL(`${baseUrl}/embed/${customQuizId || quizId}`);
     if (doctorProfile?.id) {
@@ -1079,9 +1117,19 @@ const mailHtmlTNSS = useMemo(() => {
                     <div className="flex items-center gap-4 mt-2">
                       <h5 className="font-medium text-xs text-gray-600">Landing Page QR Code</h5>
                       {showQrCode ? (
-                        <div className="bg-white p-2 rounded-lg border border-gray-200">
-                          <QRCodeSVG value={doctorLandingUrl} size={100} />
-                        </div>
+                        <>
+                          <div id="landing-qr" className="bg-white p-2 rounded-lg border border-gray-200">
+                            <QRCodeSVG value={doctorLandingUrl} size={100} />
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => downloadQrAsPng('landing-qr', 'landing-page-qr')}
+                          >
+                            <Download className="w-4 h-4 mr-1" />
+                            .png
+                          </Button>
+                        </>
                       ) : (
                         <Button 
                           variant="outline" 
@@ -1174,9 +1222,19 @@ const mailHtmlTNSS = useMemo(() => {
                     <div className="flex items-center gap-4 mt-2">
                       <h5 className="font-medium text-xs text-gray-600">Chat Quiz QR Code</h5>
                       {showChatQrCode ? (
-                        <div className="bg-white p-2 rounded-lg border border-gray-200">
-                          <QRCodeSVG value={chatFormatUrl} size={100} />
-                        </div>
+                        <>
+                          <div id="chat-qr" className="bg-white p-2 rounded-lg border border-gray-200">
+                            <QRCodeSVG value={chatFormatUrl} size={100} />
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => downloadQrAsPng('chat-qr', 'chat-quiz-qr')}
+                          >
+                            <Download className="w-4 h-4 mr-1" />
+                            .png
+                          </Button>
+                        </>
                       ) : (
                         <Button 
                           variant="outline" 
@@ -1269,9 +1327,19 @@ const mailHtmlTNSS = useMemo(() => {
                     <div className="flex items-center gap-4 mt-2">
                       <h5 className="font-medium text-xs text-gray-600">Standard Quiz QR Code</h5>
                       {showStandardQrCode ? (
-                        <div className="bg-white p-2 rounded-lg border border-gray-200">
-                          <QRCodeSVG value={standardFormatUrl} size={100} />
-                        </div>
+                        <>
+                          <div id="standard-qr" className="bg-white p-2 rounded-lg border border-gray-200">
+                            <QRCodeSVG value={standardFormatUrl} size={100} />
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => downloadQrAsPng('standard-qr', 'standard-quiz-qr')}
+                          >
+                            <Download className="w-4 h-4 mr-1" />
+                            .png
+                          </Button>
+                        </>
                       ) : (
                         <Button 
                           variant="outline" 
