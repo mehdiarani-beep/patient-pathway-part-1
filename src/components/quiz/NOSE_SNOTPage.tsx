@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -23,19 +23,23 @@ import nasalExamDoctor from "@/assets/nasal-exam-doctor.jpg";
 import sinusProblemTissue from "@/assets/sinus-problem-tissue.jpg";
 import sinusPressure from "@/assets/sinus-pressure.jpg";
 import sinusRelief from "@/assets/sinus-relief.jpg";
+import { NOSESNOTPage } from "./NOSESNOTPage";
 
 interface Template5Props {
   doctorName: string;
   doctorImage: string;
+  doctorId: string;
 }
 
 type TestType = 'nose' | 'snot' | null;
 
-export const NOSE_SNOT = ({ doctorName, doctorImage }: Template5Props) => {
+export const NOSE_SNOT = ({ doctorName, doctorImage, doctorId }: Template5Props) => {
   const [selectedTest, setSelectedTest] = useState<TestType>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [iframeHeight, setIframeHeight] = useState<number>(480);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  
+  // Build dynamic URLs
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const quizParams = `doctor=${doctorId}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share`;
 
   // Detect mobile and update on resize
   useEffect(() => {
@@ -49,47 +53,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage }: Template5Props) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Dynamic iframe height adjustment
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      // Listen for height updates from the iframe
-      if (event.data && typeof event.data === 'object' && event.data.type === 'resize') {
-        const newHeight = event.data.height || 480;
-        setIframeHeight(newHeight);
-      } else if (typeof event.data === 'number' && event.data > 0) {
-        setIframeHeight(event.data);
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-
-    // Also use ResizeObserver for iframe content changes
-    const iframe = iframeRef.current;
-    if (iframe) {
-      const resizeObserver = new ResizeObserver(() => {
-        try {
-          const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
-          if (iframeDocument && iframeDocument.body) {
-            const contentHeight = iframeDocument.body.scrollHeight;
-            if (contentHeight > 0) {
-              setIframeHeight(contentHeight + 20);
-            }
-          }
-        } catch (e) {
-          // Cross-origin restrictions - rely on postMessage
-        }
-      });
-
-      resizeObserver.observe(iframe);
-
-      return () => {
-        resizeObserver.disconnect();
-        window.removeEventListener('message', handleMessage);
-      };
-    }
-
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
+  // No iframe height adjustment needed - using direct component
 
   useEffect(() => {
     // Prevent auto-scroll to embedded iframe
@@ -204,20 +168,13 @@ export const NOSE_SNOT = ({ doctorName, doctorImage }: Template5Props) => {
               <Button 
                 size="lg" 
                 className="text-base md:text-lg px-6 sm:px-8 md:px-10 py-4 sm:py-5 md:py-7 w-full sm:w-auto hidden md:inline-flex shadow-2xl hover:shadow-3xl transition-all" 
-                onClick={() => window.open('https://patientpathway.ai/embed/nose_snot?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank')}
+                onClick={() => window.open(`${baseUrl}/embed/nose_snot?${quizParams}`, '_blank')}
               >
                 Start the Nasal Assessment
               </Button>
             </div>
-            <div className="bg-card/50 backdrop-blur-sm rounded-lg border border-border/20 overflow-hidden mt-4 md:mt-0">
-              <iframe
-                ref={iframeRef}
-                src="https://patientpathway.ai/quiz/nose_snot?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share"
-                className="w-full transition-all duration-300"
-                style={{ height: isMobile ? `${Math.min(iframeHeight, 600)}px` : `${iframeHeight}px`, minHeight: isMobile ? '400px' : '480px' }}
-                title="Nasal Assessment Quiz"
-                scrolling="auto"
-              />
+            <div className="bg-card/50 backdrop-blur-sm rounded-lg border border-border/20 overflow-hidden mt-4 md:mt-0 min-h-[400px] md:min-h-[480px]">
+              <NOSESNOTPage doctorId={doctorId} />
             </div>
           </div>
         </div>
@@ -267,7 +224,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage }: Template5Props) => {
                 <Button 
                   size="lg" 
                   className="mt-4 sm:mt-6 md:mt-8 w-full sm:w-auto text-sm sm:text-base"
-                  onClick={() => window.open('https://patientpathway.ai/embed/nose_snot?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank')}
+                  onClick={() => window.open(`${baseUrl}/embed/nose_snot?${quizParams}`, '_blank')}
                 >
                   Start your Nasal Assessment
                 </Button>
@@ -293,7 +250,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage }: Template5Props) => {
                 <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                   {/* NOSE Option */}
                   <button
-                    onClick={() => window.open('https://patientpathway.ai/embed/nose?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank')}
+                    onClick={() => window.open(`${baseUrl}/embed/nose?${quizParams}`, '_blank')}
                     className="p-4 sm:p-6 rounded-lg border-2 transition-all hover:scale-105 active:scale-95 text-left border-border hover:border-primary/50"
                   >
                     <div className="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4">
@@ -325,7 +282,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage }: Template5Props) => {
 
                   {/* SNOT Option */}
                   <button
-                    onClick={() => window.open('https://patientpathway.ai/embed/snot12?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank')}
+                    onClick={() => window.open(`${baseUrl}/embed/snot12?${quizParams}`, '_blank')}
                     className="p-4 sm:p-6 rounded-lg border-2 transition-all hover:scale-105 active:scale-95 text-left border-border hover:border-primary/50"
                   >
                     <div className="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4">
@@ -1553,7 +1510,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage }: Template5Props) => {
         <div className="container mx-auto px-3 py-2.5 sm:py-3">
           <Button 
             size="lg" 
-            onClick={() => window.open('https://patientpathway.ai/embed/nose_snot?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank')}
+            onClick={() => window.open(`${baseUrl}/embed/nose_snot?${quizParams}`, '_blank')}
             className="w-full text-sm sm:text-base py-5 sm:py-6 shadow-lg"
           >
             Start the Nasal Assessment

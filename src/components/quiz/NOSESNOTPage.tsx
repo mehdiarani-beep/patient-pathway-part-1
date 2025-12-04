@@ -27,7 +27,11 @@ interface DoctorProfile {
   avatar_url?: string;
 }
 
-export function NOSESNOTPage() {
+interface NOSESNOTPageProps {
+  doctorId?: string;
+}
+
+export function NOSESNOTPage({ doctorId: propDoctorId }: NOSESNOTPageProps = {}) {
   const [searchParams] = useSearchParams();
   const [stage, setStage] = useState<'triage' | 'quiz' | 'results' | 'contact'>('triage');
   const [selectedTriage, setSelectedTriage] = useState<string>('');
@@ -46,7 +50,8 @@ export function NOSESNOTPage() {
     phone: ''
   });
 
-  const doctorId = searchParams.get('doctor');
+  // Use prop doctorId if provided, otherwise fall back to URL param
+  const doctorId = propDoctorId || searchParams.get('doctor');
   const key = searchParams.get('key');
 
   useEffect(() => {
