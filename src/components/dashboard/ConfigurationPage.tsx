@@ -44,6 +44,8 @@ export function ConfigurationPage() {
     team: false
   });
   const [inviting, setInviting] = useState(false);
+  const [clinicJoinCode, setClinicJoinCode] = useState('');
+  const [joiningClinic, setJoiningClinic] = useState(false);
 
   // Patient invitation states
   const [patientInviteEmail, setPatientInviteEmail] = useState('');
@@ -268,6 +270,37 @@ export function ConfigurationPage() {
       toast.error('Failed to send invitation');
     } finally {
       setInviting(false);
+    }
+  };
+
+  const handleJoinClinicByCode = async () => {
+    if (!clinicJoinCode.trim()) {
+      toast.error('Enter a clinic invitation code');
+      return;
+    }
+
+    setJoiningClinic(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('join-clinic-by-code', {
+        body: { invitationCode: clinicJoinCode.trim() }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.success) {
+        toast.success('Clinic linked successfully');
+        setClinicJoinCode('');
+        fetchDoctorProfile();
+      } else {
+        toast.error(data?.error || 'Failed to join clinic');
+      }
+    } catch (error: any) {
+      console.error('Error joining clinic:', error);
+      toast.error(error?.message || 'Failed to join clinic');
+    } finally {
+      setJoiningClinic(false);
     }
   };
 
@@ -601,6 +634,43 @@ const handleCSVUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
+        <Card className="md:col-span-2 border-2 border-indigo-100 bg-indigo-50/30 rounded-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-indigo-500" />
+              Join Master Clinic
+            </CardTitle>
+            <CardDescription>
+              Enter the invitation code provided by your master clinic to link your doctor account.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {profile.clinic_name ? (
+              <div className="rounded-md bg-white px-3 py-2 text-sm text-gray-700">
+                Currently linked to <span className="font-semibold">{profile.clinic_name}</span>
+              </div>
+            ) : (
+              <div className="rounded-md bg-white px-3 py-2 text-sm text-gray-700">
+                This account is not yet linked to a master clinic.
+              </div>
+            )}
+            <div className="flex flex-col gap-2 md:flex-row">
+              <Input
+                placeholder="Enter clinic invitation code"
+                value={clinicJoinCode}
+                onChange={(e) => setClinicJoinCode(e.target.value)}
+              />
+              <Button onClick={handleJoinClinicByCode} disabled={joiningClinic}>
+                {joiningClinic && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Join Clinic
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500">
+              A clinic administrator can generate this code from the master portal.
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Basic Information */}
         <Card className="border-2 border-gray-200 rounded-lg">
           <CardHeader>

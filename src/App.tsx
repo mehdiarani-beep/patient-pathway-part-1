@@ -29,6 +29,8 @@ import NasalAssessmentLandingPage from './pages/share/NasalAssessmentLandingPage
 import MIDASLandingPage from './pages/share/MIDASLandingPage';
 import EPWORTHLandingPage from './pages/share/EPWORTH_LandingPage.tsx';
 import AdminPortal from './pages/AdminPortal';
+import MasterPortal from './pages/MasterPortal';
+import MasterLoginPage from './pages/MasterLoginPage';
 import TeamSignupPage from './pages/TeamSignupPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import TeamMemberLandingPage from './pages/TeamMemberLandingPage';
@@ -43,6 +45,8 @@ function App() {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/admin-portal" element={<AdminPortal />} />
+              <Route path="/master-login" element={<MasterLoginPage />} />
+              <Route path="/master" element={<MasterPortal />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/team-signup" element={<TeamSignupPage />} />

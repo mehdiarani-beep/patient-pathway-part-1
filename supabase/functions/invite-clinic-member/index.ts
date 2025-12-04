@@ -11,7 +11,7 @@ interface InviteClinicMemberRequest {
   email: string;
   firstName?: string;
   lastName?: string;
-  role: 'manager' | 'staff';
+  role: 'manager' | 'staff' | 'doctor';
   permissions?: {
     leads: boolean;
     content: boolean;
