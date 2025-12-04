@@ -34,6 +34,7 @@ import MasterLoginPage from './pages/MasterLoginPage';
 import TeamSignupPage from './pages/TeamSignupPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import TeamMemberLandingPage from './pages/TeamMemberLandingPage';
+import NOSESNOTQuizPage from './pages/NOSESNOTQuizPage';
 const queryClient = new QueryClient();
 function App() {
   return (
@@ -66,6 +67,7 @@ function App() {
               <Route path="/portal/share/custom/:customQuizId" element={<ShareQuizPage />} />
               <Route path="/quiz" element={<UniversalQuizPage />} />
               <Route path="/quiz/custom/:quizId" element={<CustomQuizPage />} />
+              <Route path="/quiz/nose_snot" element={<NOSESNOTQuizPage />} />
               <Route path="/quiz/:quizId" element={<CardQuizPage />} />
               <Route path="/embed/quiz" element={<EmbeddedQuiz />} />
               <Route path="/social-accounts" element={<SocialAccountsPage />} />
