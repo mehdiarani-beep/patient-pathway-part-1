@@ -117,7 +117,7 @@ serve(async (req) => {
 
     const { data: existingDoctor, error: doctorError } = await supabaseClient
       .from('doctor_profiles')
-      .select('id')
+      .select('id, clinic_name')
       .eq('user_id', user.id)
       .maybeSingle()
 
