@@ -959,9 +959,7 @@ const mailHtmlTNSS = useMemo(() => {
     );
   }
 
-  const quizExists = customQuizId ? customQuiz : Object.values(quizzes).find(
-    quiz => quiz.id.toLowerCase() === quizId?.toLowerCase()
-  );
+  const quizExists = customQuizId ? customQuiz : (quizId ? quizzes[quizId.toUpperCase()] : null);
   
   if (!quizExists) {
     return (
