@@ -303,7 +303,7 @@ export const AnimatedSidebar: React.FC<AnimatedSidebarProps> = ({ currentPage, o
                 }}
               >
                 <ListChecks size={16} className="mr-2" />
-                All Assessments
+                Clinic Assessments
               </button>
               
               {/* Physician items */}
