@@ -31,12 +31,13 @@ import { toast } from "sonner";
 interface Template5Props {
   doctorName: string;
   doctorImage: string;
-  doctorId: string;
+  doctorIdparam: string;
+  physicianId?: string;
 }
 
 type TestType = 'nose' | 'snot' | null;
 
-export const NOSE_SNOT = ( physicianId, doctorIdparam ) => {
+export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId }: Template5Props) => {
   const [selectedTest, setSelectedTest] = useState<TestType>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
 

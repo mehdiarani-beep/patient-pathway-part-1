@@ -22,9 +22,11 @@ import sleepTiredLaptop from "@/assets/sleep-tired-laptop.jpg";
 interface Template7Props {
   doctorName: string;
   doctorImage: string;
+  doctorId?: string;
+  physicianId?: string;
 }
 
-export const EPWORTH = ({ doctorName, doctorImage }: Template7Props) => {
+export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Template7Props) => {
   const [iframeHeight, setIframeHeight] = useState<number>(480);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
