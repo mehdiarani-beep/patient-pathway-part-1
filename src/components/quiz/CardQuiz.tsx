@@ -54,6 +54,7 @@ export function CardQuiz() {
   });
 
   const doctorId = searchParams.get('doctor');
+  const physicianId = searchParams.get('physician');
   const quizType = quizId?.toUpperCase() as QuizType;
   const quiz = quizType ? quizzes[quizType] : null;
 

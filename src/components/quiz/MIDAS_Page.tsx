@@ -23,9 +23,11 @@ import migraineHomeOffice from "@/assets/migraine-home-office.png";
 interface Template6Props {
   doctorName: string;
   doctorImage: string;
+  doctorId?: string;
+  physicianId?: string;
 }
 
-export const MIDAS = ({ doctorName, doctorImage }: Template6Props) => {
+export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Template6Props) => {
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [iframeHeight, setIframeHeight] = useState<number>(480);
   const iframeRef = useRef<HTMLIFrameElement>(null);

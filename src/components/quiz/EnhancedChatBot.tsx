@@ -43,9 +43,10 @@ interface EnhancedChatBotProps {
   shareKey?: string;
   customQuiz?: any;
   doctorId?: string;
+  physicianId?: string;
 }
 
-export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId }: EnhancedChatBotProps) {
+export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId, physicianId }: EnhancedChatBotProps) {
   const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');

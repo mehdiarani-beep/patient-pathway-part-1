@@ -13,6 +13,7 @@ const Embed = () => {
   const [error, setError] = useState<string | null>(null);
 
   const doctorId = searchParams.get('doctor');
+  const physicianId = searchParams.get('physician');
 
   useEffect(() => {
     const fetchQuizData = async () => {
@@ -122,6 +123,7 @@ const Embed = () => {
           quizType={quizType} 
           customQuiz={customQuiz}
           doctorId={doctorId}
+          physicianId={physicianId}
         />
       </div>
     </div>
