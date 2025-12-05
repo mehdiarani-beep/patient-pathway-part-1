@@ -27,11 +27,41 @@ interface DoctorProfile {
   avatar_url?: string;
 }
 
-interface NOSESNOTPageProps {
-  doctorId?: string;
+interface ClinicData {
+  id: string;
+  clinic_name: string;
+  logo_url?: string;
+  avatar_url?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  description?: string;
+  primary_color?: string;
+  secondary_color?: string;
 }
 
-export function NOSESNOTPage({ doctorId: propDoctorId }: NOSESNOTPageProps = {}) {
+interface PhysicianData {
+  id: string;
+  first_name: string;
+  last_name: string;
+  degree_type?: string;
+  headshot_url?: string;
+  bio?: string;
+  email?: string;
+  mobile?: string;
+  credentials?: string[];
+}
+
+interface NOSESNOTPageProps {
+  doctorId?: string;
+  physicianId?: string;
+}
+
+export function NOSESNOTPage({ doctorId: propDoctorId, physicianId: propPhysicianId }: NOSESNOTPageProps = {}) {
   const [searchParams] = useSearchParams();
   const [stage, setStage] = useState<'triage' | 'quiz' | 'results' | 'contact'>('triage');
   const [selectedTriage, setSelectedTriage] = useState<string>('');
@@ -44,6 +74,11 @@ export function NOSESNOTPage({ doctorId: propDoctorId }: NOSESNOTPageProps = {})
   const [submittingLead, setSubmittingLead] = useState(false);
   const [leadSubmitted, setLeadSubmitted] = useState(false);
   
+  // New state for clinic and physician data
+  const [clinicData, setClinicData] = useState<ClinicData | null>(null);
+  const [physicianData, setPhysicianData] = useState<PhysicianData | null>(null);
+  const [isClinicQuiz, setIsClinicQuiz] = useState<boolean>(false);
+  
   const [leadData, setLeadData] = useState({
     name: '',
     email: '',
@@ -52,7 +87,73 @@ export function NOSESNOTPage({ doctorId: propDoctorId }: NOSESNOTPageProps = {})
 
   // Use prop doctorId if provided, otherwise fall back to URL param
   const doctorId = propDoctorId || searchParams.get('doctor');
+  const physicianId = propPhysicianId || searchParams.get('physician');
   const key = searchParams.get('key');
+
+  // Fetch clinic or physician data based on ID comparison
+  useEffect(() => {
+    const fetchClinicData = async () => {
+      if (!doctorId) return;
+      
+      try {
+        // First get the clinic_id from doctor_profiles
+        const { data: doctorData, error: doctorError } = await supabase
+          .from('doctor_profiles')
+          .select('clinic_id')
+          .eq('id', doctorId)
+          .maybeSingle();
+
+        if (doctorError) throw doctorError;
+        
+        if (doctorData?.clinic_id) {
+          const { data: clinic, error: clinicError } = await supabase
+            .from('clinic_profiles')
+            .select('*')
+            .eq('id', doctorData.clinic_id)
+            .maybeSingle();
+
+          if (clinicError) throw clinicError;
+          setClinicData(clinic);
+        }
+      } catch (error) {
+        console.error('Error fetching clinic data:', error);
+      }
+    };
+
+    const fetchPhysicianData = async () => {
+      if (!physicianId) return;
+      
+      try {
+        const { data: physician, error } = await supabase
+          .from('clinic_physicians')
+          .select('*')
+          .eq('id', physicianId)
+          .maybeSingle();
+
+        if (error) throw error;
+        setPhysicianData(physician);
+      } catch (error) {
+        console.error('Error fetching physician data:', error);
+      }
+    };
+
+    // Determine if this is a clinic quiz or physician quiz
+    if (physicianId && doctorId) {
+      if (physicianId === doctorId) {
+        // Clinic-level quiz - fetch clinic data
+        setIsClinicQuiz(true);
+        fetchClinicData();
+      } else {
+        // Physician-level quiz - fetch physician data
+        setIsClinicQuiz(false);
+        fetchPhysicianData();
+      }
+    } else if (doctorId) {
+      // Only doctorId provided - treat as clinic quiz
+      setIsClinicQuiz(true);
+      fetchClinicData();
+    }
+  }, [doctorId, physicianId]);
 
   useEffect(() => {
     const fetchDoctorProfile = async () => {
@@ -62,7 +163,7 @@ export function NOSESNOTPage({ doctorId: propDoctorId }: NOSESNOTPageProps = {})
             .from('doctor_profiles')
             .select('*')
             .eq('id', doctorId)
-            .single();
+            .maybeSingle();
 
           if (error) throw error;
           setDoctorProfile(data);

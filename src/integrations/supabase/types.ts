@@ -505,13 +505,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "contacts_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
-          },
-          {
             foreignKeyName: "contacts_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
@@ -587,13 +580,6 @@ export type Database = {
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "custom_quizzes_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
-          },
         ]
       }
       doctor_notifications: {
@@ -641,13 +627,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "doctor_notifications_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
           },
         ]
       }
@@ -758,13 +737,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "doctor_profiles_doctor_id_clinic_fkey"
-            columns: ["doctor_id_clinic"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
-          },
-          {
             foreignKeyName: "doctor_profiles_email_alias_fkey"
             columns: ["email_alias"]
             isOneToOne: false
@@ -818,13 +790,6 @@ export type Database = {
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "email_alias_requests_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
-          },
         ]
       }
       email_aliases: {
@@ -859,13 +824,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "email_aliases_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
           },
         ]
       }
@@ -1184,13 +1142,6 @@ export type Database = {
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "email_notification_configs_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
-          },
         ]
       }
       email_templates: {
@@ -1285,8 +1236,10 @@ export type Database = {
           id: number
           last_clicked_at: string | null
           lead_source: string | null
+          physician_id: string | null
           quiz_type: string | null
           short_id: string
+          target_url: string | null
         }
         Insert: {
           click_count?: number | null
@@ -1296,8 +1249,10 @@ export type Database = {
           id?: number
           last_clicked_at?: string | null
           lead_source?: string | null
+          physician_id?: string | null
           quiz_type?: string | null
           short_id: string
+          target_url?: string | null
         }
         Update: {
           click_count?: number | null
@@ -1307,10 +1262,20 @@ export type Database = {
           id?: number
           last_clicked_at?: string | null
           lead_source?: string | null
+          physician_id?: string | null
           quiz_type?: string | null
           short_id?: string
+          target_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_link_mappings_physician"
+            columns: ["physician_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nose_landing_pages: {
         Row: {
@@ -1392,13 +1357,6 @@ export type Database = {
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "oauth_states_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
-          },
         ]
       }
       quiz_incidents: {
@@ -1440,13 +1398,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quiz_incidents_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
           },
         ]
       }
@@ -1538,13 +1489,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quiz_leads_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
           },
           {
             foreignKeyName: "quiz_leads_location_id_fkey"
@@ -1648,13 +1592,6 @@ export type Database = {
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "social_media_calendar_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
-          },
         ]
       }
       social_media_templates: {
@@ -1720,13 +1657,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "social_media_templates_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
           },
         ]
       }
@@ -1835,13 +1765,6 @@ export type Database = {
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "social_posts_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
-          },
         ]
       }
       team_members: {
@@ -1907,13 +1830,6 @@ export type Database = {
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "team_members_doctor_id_fkey"
-            columns: ["doctor_id"]
-            isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
-          },
         ]
       }
     }
@@ -1944,11 +1860,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "doctor_profiles_doctor_id_clinic_fkey"
-            columns: ["doctor_id_clinic"]
+            foreignKeyName: "team_members_doctor_id_fkey"
+            columns: ["doctor_profile_id"]
             isOneToOne: false
-            referencedRelation: "team_member_access"
-            referencedColumns: ["doctor_profile_id"]
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
           },
         ]
       }

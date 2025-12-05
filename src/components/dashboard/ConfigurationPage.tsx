@@ -28,6 +28,8 @@ export function ConfigurationPage() {
   const [saving, setSaving] = useState(false);
   const [clinicId, setClinicId] = useState<string | null>(null);
   const [doctorProfileId, setDoctorProfileId] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   
   const [businessInfo, setBusinessInfo] = useState<BusinessInfo>({
     clinic_name: '',
@@ -137,6 +139,63 @@ export function ConfigurationPage() {
     setBusinessInfo(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !clinicId) return;
+
+    setUploadingLogo(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${clinicId}/logo-${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('clinic-assets')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('clinic-assets')
+        .getPublicUrl(fileName);
+
+      setBusinessInfo(prev => ({ ...prev, logo_url: publicUrl }));
+      toast.success('Logo uploaded successfully');
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast.error('Failed to upload logo');
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !clinicId) return;
+
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${clinicId}/avatar-${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('clinic-assets')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('clinic-assets')
+        .getPublicUrl(fileName);
+
+      setBusinessInfo(prev => ({ ...prev, avatar_url: publicUrl }));
+      toast.success('Avatar uploaded successfully');
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast.error('Failed to upload avatar');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const handleSaveBusinessInfo = async () => {
     if (!user || !businessInfo.clinic_name.trim()) {
@@ -266,6 +325,10 @@ export function ConfigurationPage() {
           <BusinessInfoSection
             data={businessInfo}
             onChange={handleBusinessInfoChange}
+            onLogoUpload={handleLogoUpload}
+            onAvatarUpload={handleAvatarUpload}
+            uploadingLogo={uploadingLogo}
+            uploadingAvatar={uploadingAvatar}
           />
         </TabsContent>
 
