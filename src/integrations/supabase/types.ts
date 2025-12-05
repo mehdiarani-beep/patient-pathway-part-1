@@ -99,6 +99,65 @@ export type Database = {
           },
         ]
       }
+      clinic_assets: {
+        Row: {
+          clinic_id: string
+          created_at: string | null
+          file_size: number | null
+          file_type: string
+          height: number | null
+          id: string
+          metadata: Json | null
+          mime_type: string | null
+          name: string
+          storage_path: string | null
+          updated_at: string | null
+          uploaded_by: string | null
+          url: string
+          width: number | null
+        }
+        Insert: {
+          clinic_id: string
+          created_at?: string | null
+          file_size?: number | null
+          file_type: string
+          height?: number | null
+          id?: string
+          metadata?: Json | null
+          mime_type?: string | null
+          name: string
+          storage_path?: string | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+          url: string
+          width?: number | null
+        }
+        Update: {
+          clinic_id?: string
+          created_at?: string | null
+          file_size?: number | null
+          file_type?: string
+          height?: number | null
+          id?: string
+          metadata?: Json | null
+          mime_type?: string | null
+          name?: string
+          storage_path?: string | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+          url?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinic_assets_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clinic_locations: {
         Row: {
           address: string | null
@@ -106,10 +165,12 @@ export type Database = {
           clinic_id: string
           created_at: string
           email: string | null
+          google_business_url: string | null
           id: string
           is_primary: boolean | null
           name: string
           phone: string | null
+          social_links: Json | null
           state: string | null
           updated_at: string
           zip_code: string | null
@@ -120,10 +181,12 @@ export type Database = {
           clinic_id: string
           created_at?: string
           email?: string | null
+          google_business_url?: string | null
           id?: string
           is_primary?: boolean | null
           name: string
           phone?: string | null
+          social_links?: Json | null
           state?: string | null
           updated_at?: string
           zip_code?: string | null
@@ -134,10 +197,12 @@ export type Database = {
           clinic_id?: string
           created_at?: string
           email?: string | null
+          google_business_url?: string | null
           id?: string
           is_primary?: boolean | null
           name?: string
           phone?: string | null
+          social_links?: Json | null
           state?: string | null
           updated_at?: string
           zip_code?: string | null
@@ -253,6 +318,65 @@ export type Database = {
           },
         ]
       }
+      clinic_physicians: {
+        Row: {
+          bio: string | null
+          clinic_id: string
+          created_at: string | null
+          credentials: string[] | null
+          degree_type: string | null
+          display_order: number | null
+          email: string | null
+          first_name: string
+          headshot_url: string | null
+          id: string
+          is_active: boolean | null
+          last_name: string
+          mobile: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bio?: string | null
+          clinic_id: string
+          created_at?: string | null
+          credentials?: string[] | null
+          degree_type?: string | null
+          display_order?: number | null
+          email?: string | null
+          first_name: string
+          headshot_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_name: string
+          mobile?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bio?: string | null
+          clinic_id?: string
+          created_at?: string | null
+          credentials?: string[] | null
+          degree_type?: string | null
+          display_order?: number | null
+          email?: string | null
+          first_name?: string
+          headshot_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_name?: string
+          mobile?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinic_physicians_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clinic_profiles: {
         Row: {
           address: string | null
@@ -266,6 +390,9 @@ export type Database = {
           email: string | null
           id: string
           logo_url: string | null
+          owner_email: string | null
+          owner_mobile: string | null
+          owner_name: string | null
           phone: string | null
           primary_color: string | null
           secondary_color: string | null
@@ -286,6 +413,9 @@ export type Database = {
           email?: string | null
           id?: string
           logo_url?: string | null
+          owner_email?: string | null
+          owner_mobile?: string | null
+          owner_name?: string | null
           phone?: string | null
           primary_color?: string | null
           secondary_color?: string | null
@@ -306,6 +436,9 @@ export type Database = {
           email?: string | null
           id?: string
           logo_url?: string | null
+          owner_email?: string | null
+          owner_mobile?: string | null
+          owner_name?: string | null
           phone?: string | null
           primary_color?: string | null
           secondary_color?: string | null
@@ -1333,6 +1466,7 @@ export type Database = {
           location_id: string | null
           name: string
           phone: string | null
+          physician_id: string | null
           quiz_type: string
           scheduled_date: string | null
           score: number
@@ -1354,6 +1488,7 @@ export type Database = {
           location_id?: string | null
           name: string
           phone?: string | null
+          physician_id?: string | null
           quiz_type: string
           scheduled_date?: string | null
           score: number
@@ -1375,6 +1510,7 @@ export type Database = {
           location_id?: string | null
           name?: string
           phone?: string | null
+          physician_id?: string | null
           quiz_type?: string
           scheduled_date?: string | null
           score?: number
@@ -1415,6 +1551,13 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "clinic_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_leads_physician_id_fkey"
+            columns: ["physician_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_physicians"
             referencedColumns: ["id"]
           },
         ]
