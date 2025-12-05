@@ -11,6 +11,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { GuidedSymptomChecker } from './SymptomChecker';
 
+// Only these quizzes are currently active
+const ACTIVE_QUIZ_IDS = ['NOSE_SNOT', 'EPWORTH', 'MIDAS'];
+
 export function QuizManagementPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -94,30 +97,45 @@ export function QuizManagementPage() {
               <div key={category}>
                 <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">{category} Related</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {quizzes.map((quiz) => (
-                    <Card key={quiz.id} className="hover:shadow-md transition-shadow h-full flex flex-col">
-                      <CardHeader className="flex-shrink-0">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-lg">{quiz.title}</CardTitle>
-                          <Badge variant="secondary">{getQuizDisplayName(quiz.id)}</Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4 flex-1 flex flex-col">
-                        <p className="text-sm text-gray-600 flex-1">{quiz.description}</p>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <span>{quiz.questions?.length || 0} Questions</span>
-                          <span>•</span>
-                          <span>Max Score: {quiz.maxScore || 0}</span>
-                        </div>
-                        <div className="flex gap-2 mt-auto">
-                          <Button size="sm" onClick={() => handleShareQuiz(quiz.id, false)} className="flex-1">
-                            <Share2 className="w-4 h-4 mr-2" />
-                            Share
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {quizzes.map((quiz) => {
+                    const isActive = ACTIVE_QUIZ_IDS.includes(quiz.id);
+                    return (
+                      <Card 
+                        key={quiz.id} 
+                        className={`transition-shadow h-full flex flex-col ${isActive ? 'hover:shadow-md' : 'opacity-50'}`}
+                      >
+                        <CardHeader className="flex-shrink-0">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg">{quiz.title}</CardTitle>
+                            {isActive ? (
+                              <Badge variant="secondary">{getQuizDisplayName(quiz.id)}</Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-muted-foreground">Coming Soon</Badge>
+                            )}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4 flex-1 flex flex-col">
+                          <p className="text-sm text-muted-foreground flex-1">{quiz.description}</p>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>{quiz.questions?.length || 0} Questions</span>
+                            <span>•</span>
+                            <span>Max Score: {quiz.maxScore || 0}</span>
+                          </div>
+                          <div className="flex gap-2 mt-auto">
+                            <Button 
+                              size="sm" 
+                              onClick={() => handleShareQuiz(quiz.id, false)} 
+                              className="flex-1"
+                              disabled={!isActive}
+                            >
+                              <Share2 className="w-4 h-4 mr-2" />
+                              Share
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
             ))}
