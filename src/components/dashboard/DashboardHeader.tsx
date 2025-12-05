@@ -12,7 +12,8 @@ export function DashboardHeader() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isTeamMember, setIsTeamMember] = useState(false);
-  const [maindoctorname, setMaindoctorname] = useState<string | null>(null);
+  const [clinicName, setClinicName] = useState<string | null>(null);
+
   useEffect(() => {
     if (user) {
       fetchDoctorProfile();
@@ -42,6 +43,7 @@ export function DashboardHeader() {
         const profile = await getOrCreateDoctorProfile(user.id, user.email || undefined);
         setDoctorProfile(profile);
         setIsTeamMember(false);
+        setClinicName(profile?.clinic_name || null);
         return;
       }
 
@@ -50,7 +52,6 @@ export function DashboardHeader() {
       // Check if user is staff or manager
       if (userProfile.is_staff || userProfile.is_manager) {
         setIsTeamMember(true);
-        setMaindoctorname(userProfile.first_name);
         // If team member, fetch the main doctor's profile using doctor_id_clinic
         if (userProfile.doctor_id_clinic) {
           const { data: mainDoctorProfile, error: mainDoctorError } = await supabase
@@ -63,17 +64,34 @@ export function DashboardHeader() {
             console.error('Error fetching main doctor profile:', mainDoctorError);
             // Fallback to user's own profile
             setDoctorProfile(userProfile);
+            setClinicName(userProfile.clinic_name || null);
           } else {
             // Display main doctor's profile info
             setDoctorProfile(mainDoctorProfile);
+            setClinicName(mainDoctorProfile?.clinic_name || null);
           }
         } else {
           setDoctorProfile(userProfile);
+          setClinicName(userProfile.clinic_name || null);
         }
       } else {
         // Regular doctor, use their own profile
         setIsTeamMember(false);
         setDoctorProfile(userProfile);
+        setClinicName(userProfile.clinic_name || null);
+      }
+
+      // Also try to get clinic name from clinic_profiles if available
+      if (userProfile.clinic_id) {
+        const { data: clinicProfile } = await supabase
+          .from('clinic_profiles')
+          .select('clinic_name')
+          .eq('id', userProfile.clinic_id)
+          .single();
+        
+        if (clinicProfile?.clinic_name) {
+          setClinicName(clinicProfile.clinic_name);
+        }
       }
     } catch (error) {
       console.error('Error in fetchDoctorProfile:', error);
@@ -84,42 +102,26 @@ export function DashboardHeader() {
   };
 
   const getInitials = () => {
+    if (clinicName) {
+      // Get initials from clinic name (first letter of first two words)
+      const words = clinicName.split(' ').filter(w => w.length > 0);
+      if (words.length >= 2) {
+        return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+      }
+      return clinicName.substring(0, 2).toUpperCase();
+    }
     if (doctorProfile?.first_name && doctorProfile?.last_name) {
       return (doctorProfile.first_name.charAt(0) + doctorProfile.last_name.charAt(0)).toUpperCase();
     }
     if (user?.email) {
       return user.email.substring(0, 2).toUpperCase();
     }
-    return 'DR';
-  };
-
-  const getDoctorName = () => {
-    if (doctorProfile?.first_name && doctorProfile?.last_name) {
-      return `${doctorProfile.first_name} ${doctorProfile.last_name}`;
-    }
-    if (user?.email) {
-      const name = user.email.split('@')[0];
-      return name.charAt(0).toUpperCase() + name.slice(1);
-    }
-    return 'Doctor';
+    return 'PP';
   };
 
   const getDisplayName = () => {
-    if (isTeamMember) {
-      // For team members, show "Dr. [Main Doctor Name]" with team member indicator
-      return `Dr. ${getDoctorName()}`;
-    } else {
-      // For regular doctors, show "Dr. [Doctor Name]"
-      return `Dr. ${getDoctorName()}`;
-    }
-  };
-
-  const getDisplayTitle = () => {
-    if (isTeamMember) {
-      return `Team Member - ${maindoctorname}`;
-    } else {
-      return doctorProfile?.specialty || 'Medical Professional';
-    }
+    // Show clinic name instead of doctor name
+    return clinicName || 'My Clinic';
   };
 
   return (
@@ -150,9 +152,6 @@ export function DashboardHeader() {
                 <h2 className="text-base font-semibold text-gray-900">
                   {getDisplayName()}
                 </h2>
-                <p className="text-xs text-gray-500">
-                  {getDisplayTitle()}
-                </p>
               </div>
             </div>
             <NotificationDropdown />
@@ -180,7 +179,7 @@ export function DashboardHeader() {
               {doctorProfile?.avatar_url ? (
                 <AvatarImage 
                   src={doctorProfile.avatar_url} 
-                  alt={`Dr. ${getDoctorName()}`}
+                  alt={getDisplayName()}
                   onError={(e) => {
                     console.error('Avatar image failed to load:', e);
                     const target = e.target as HTMLImageElement;
@@ -196,9 +195,6 @@ export function DashboardHeader() {
                 <h2 className="text-lg font-semibold text-gray-900">
                   {getDisplayName()}
                 </h2>
-                <p className="text-sm text-gray-500">
-                  {getDisplayTitle()}
-                </p>
             </div>
           </div>
           
@@ -229,7 +225,7 @@ export function DashboardHeader() {
               {doctorProfile?.avatar_url ? (
                 <AvatarImage 
                   src={doctorProfile.avatar_url} 
-                  alt={`Dr. ${getDoctorName()}`}
+                  alt={getDisplayName()}
                   onError={(e) => {
                     console.error('Avatar image failed to load:', e);
                     const target = e.target as HTMLImageElement;
@@ -245,9 +241,6 @@ export function DashboardHeader() {
                 <h2 className="text-lg font-semibold text-gray-900">
                   {getDisplayName()}
                 </h2>
-                <p className="text-sm text-gray-500">
-                  {getDisplayTitle()}
-                </p>
             </div>
           </div>
           

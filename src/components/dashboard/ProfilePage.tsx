@@ -16,8 +16,7 @@ import {
   Camera,
   Save,
   Upload,
-  CheckCircle,
-  Globe
+  CheckCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,16 +30,14 @@ export function ProfilePage() {
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isTeamMember, setIsTeamMember] = useState(false);
+  const [userRole, setUserRole] = useState<string>('owner');
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
     email: '',
     phone: '',
-    specialty: '',
-    clinic_name: '',
     avatar_url: '',
-    doctor_id: '',
-    website: ''
+    doctor_id: ''
   });
   const [teamMemberData, setTeamMemberData] = useState({
     first_name: '',
@@ -82,12 +79,14 @@ export function ProfilePage() {
         // No profile exists, create one (regular doctor)
         profile = await getOrCreateDoctorProfile(user.id, user.email || undefined);
         setIsTeamMember(false);
+        setUserRole('owner');
       } else {
         userProfile = userProfiles[0];
         
         // Check if user is staff or manager
         if (userProfile.is_staff || userProfile.is_manager) {
           setIsTeamMember(true);
+          setUserRole(userProfile.is_manager ? 'manager' : 'staff');
           // If team member, fetch the main doctor's profile using doctor_id_clinic
           if (userProfile.doctor_id_clinic) {
             const { data: mainDoctorProfile, error: mainDoctorError } = await supabase
@@ -114,6 +113,20 @@ export function ProfilePage() {
           profile = userProfile;
         }
       }
+
+      // Fetch role from clinic_members if available
+      if (userProfile?.clinic_id) {
+        const { data: clinicMember } = await supabase
+          .from('clinic_members')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('clinic_id', userProfile.clinic_id)
+          .single();
+        
+        if (clinicMember?.role) {
+          setUserRole(clinicMember.role);
+        }
+      }
       
       if (profile) {
         setDoctorProfile(profile);
@@ -125,11 +138,8 @@ export function ProfilePage() {
             last_name: userProfile.last_name || '', // Personal data
             email: profile.email || user.email || '', // Clinic data
             phone: profile.phone || '', // Clinic data
-            specialty: profile.specialty || '', // Clinic data
-            clinic_name: profile.clinic_name || '', // Clinic data
             avatar_url: profile.avatar_url || '', // Clinic data
-            doctor_id: profile.doctor_id || '', // Clinic data
-            website: profile.website || '' // Clinic data
+            doctor_id: profile.doctor_id || '' // Clinic data
           });
           setTeamMemberData({
             first_name: userProfile.first_name || '',
@@ -142,11 +152,8 @@ export function ProfilePage() {
             last_name: profile.last_name || '',
             email: profile.email || user.email || '',
             phone: profile.phone || '',
-            specialty: profile.specialty || '',
-            clinic_name: profile.clinic_name || '',
             avatar_url: profile.avatar_url || '',
-            doctor_id: profile.doctor_id || '',
-            website: profile.website || ''
+            doctor_id: profile.doctor_id || ''
           });
         }
       } else {
@@ -192,7 +199,6 @@ export function ProfilePage() {
     event.target.value = '';
   };
 
-  // Update the handleSave function to validate and format the website URL
   const handleSave = async () => {
     if (!user) return;
     
@@ -372,35 +378,15 @@ export function ProfilePage() {
           }
         }
 
-        // Format website URL if provided
-        let formattedWebsite = formData.website;
-        if (formattedWebsite && !formattedWebsite.startsWith('http')) {
-          formattedWebsite = `https://${formattedWebsite}`;
-        }
-        
-        // Validate website URL
-        if (formattedWebsite) {
-          try {
-            new URL(formattedWebsite);
-          } catch (e) {
-            toast.error('Please enter a valid website URL');
-            setSaving(false);
-            return;
-          }
-        }
-
         const profileData = {
           user_id: user.id,
           first_name: formData.first_name,
           last_name: formData.last_name,
           email: formData.email,
           phone: formData.phone,
-          specialty: formData.specialty,
-          clinic_name: formData.clinic_name,
           avatar_url: finalAvatarUrl,
           doctor_id: formData.doctor_id || generateDoctorId(),
-          updated_at: new Date().toISOString(),
-          website: formattedWebsite
+          updated_at: new Date().toISOString()
         };
 
         // Check if profile exists
@@ -435,8 +421,8 @@ export function ProfilePage() {
         // Store whether we had a file to upload before clearing it
         const hadFileToUpload = !!selectedFile;
         
-        // Update form data with formatted website and clear selected file
-        setFormData(prev => ({ ...prev, website: formattedWebsite, avatar_url: finalAvatarUrl }));
+        // Update form data and clear selected file
+        setFormData(prev => ({ ...prev, avatar_url: finalAvatarUrl }));
         setSelectedFile(null);
 
         setSuccessMessage('Profile updated successfully! All changes have been saved.');
@@ -486,6 +472,16 @@ export function ProfilePage() {
       return formData.email.substring(0, 2).toUpperCase();
     }
     return isTeamMember ? 'TM' : 'DR';
+  };
+
+  const getRoleDisplayName = () => {
+    const roleMap: Record<string, string> = {
+      owner: 'Owner',
+      manager: 'Manager',
+      staff: 'Staff',
+      physician: 'Physician'
+    };
+    return roleMap[userRole] || 'User';
   };
 
   if (loading) {
@@ -539,7 +535,7 @@ export function ProfilePage() {
 
       <div className="text-center">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-[#0E7C9D] to-[#FD904B] bg-clip-text text-transparent mb-4">
-          Doctor Profile
+          {getRoleDisplayName()} Profile
         </h1>
         <p className="text-gray-600 text-lg">
           Manage your professional information and account settings
@@ -549,7 +545,7 @@ export function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Card className="rounded-3xl shadow-lg border-0 bg-gradient-to-br from-white to-blue-50">
             <CardTitle className='text-2xl font-bold text-[#0E7C9D] text-center mt-2 items-center'>
-              Clinic Details
+              Profile Details
             </CardTitle>
           <CardContent className="p-8 text-center">
             <div className="relative inline-block mb-6">
@@ -557,7 +553,7 @@ export function ProfilePage() {
                 {formData.avatar_url ? (
                   <AvatarImage 
                     src={formData.avatar_url} 
-                    alt={isTeamMember ? `${teamMemberData.first_name} ${teamMemberData.last_name}` : `Dr. ${formData.first_name} ${formData.last_name}`}
+                    alt={isTeamMember ? `${teamMemberData.first_name} ${teamMemberData.last_name}` : `${formData.first_name} ${formData.last_name}`}
                     onError={(e) => {
                       console.error('Avatar image failed to load:', e);
                       const target = e.target as HTMLImageElement;
@@ -593,13 +589,15 @@ export function ProfilePage() {
             </div>
             
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              {isTeamMember ? `${teamMemberData.first_name} ${teamMemberData.last_name}` : `Dr. ${formData.first_name} ${formData.last_name}`}
+              {isTeamMember ? `${teamMemberData.first_name} ${teamMemberData.last_name}` : `${formData.first_name} ${formData.last_name}`}
             </h2>
-            <p className="text-gray-600 mb-4">{formData.specialty || 'Medical Professional'}</p>
+            <Badge className="bg-[#0E7C9D]/10 text-[#0E7C9D] px-4 py-2 rounded-2xl mb-4">
+              {getRoleDisplayName()}
+            </Badge>
             
             {formData.doctor_id && (
-              <Badge className="bg-[#0E7C9D] text-white px-4 py-2 rounded-2xl mb-4">
-                Doctor ID: {formData.doctor_id}
+              <Badge className="bg-[#0E7C9D] text-white px-4 py-2 rounded-2xl mb-4 ml-2">
+                ID: {formData.doctor_id}
               </Badge>
             )}
             
@@ -612,25 +610,6 @@ export function ProfilePage() {
                 <div className="flex items-center gap-3 text-gray-600">
                   <Phone className="w-4 h-4" />
                   <span className="text-sm">{formData.phone}</span>
-                </div>
-              )}
-              {formData.clinic_name && (
-                <div className="flex items-center gap-3 text-gray-600">
-                  <Building className="w-4 h-4" />
-                  <span className="text-sm">{formData.clinic_name}</span>
-                </div>
-              )}
-              {formData.website && (
-                <div className="flex items-center gap-3 text-gray-600">
-                  <Globe className="w-4 h-4" />
-                  <a 
-                    href={formData.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:text-blue-800 hover:underline truncate max-w-[200px]"
-                  >
-                    {formData.website.replace(/^https?:\/\//, '')}
-                  </a>
                 </div>
               )}
               <div className="flex items-center gap-3 text-gray-600">
@@ -705,46 +684,6 @@ export function ProfilePage() {
                   className="rounded-2xl"
                   disabled={isTeamMember}
                 />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="specialty">{isTeamMember ? "Clinic's Medical Specialty" : "Medical Specialty"}</Label>
-                  <select
-                    id="specialty"
-                    value={formData.specialty}
-                    onChange={(e) => setFormData(prev => ({ ...prev, specialty: e.target.value }))}
-                    className="flex h-10 w-full rounded-2xl border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                    disabled={isTeamMember}
-                  >
-                    <option value="">Select Specialty</option>
-                    <option value="ENT">ENT (Otolaryngology)</option>
-                    <option value="Sleep Medicine">Sleep Medicine</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="clinic_name">{isTeamMember ? "Clinic's Name" : "Clinic/Hospital Name"}</Label>
-                  <Input
-                    id="clinic_name"
-                    value={formData.clinic_name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, clinic_name: e.target.value }))}
-                    className="rounded-2xl"
-                    disabled={isTeamMember}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <Label htmlFor="website">{isTeamMember ? "Clinic's Website URL" : "Website URL"}</Label>
-                  <Input
-                    id="website"
-                    type="url"
-                    placeholder="https://your-clinic-website.com"
-                    value={formData.website}
-                    onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
-                    className="rounded-2xl"
-                    disabled={isTeamMember}
-                  />
-                </div>
               </div>
             </CardContent>
           </Card>
