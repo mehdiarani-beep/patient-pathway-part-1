@@ -19,6 +19,7 @@ import migraineCloseup from "@/assets/migraine-closeup.png";
 import migraineDistressed from "@/assets/migraine-distressed.png";
 import migraineMan from "@/assets/migraine-man.png";
 import migraineHomeOffice from "@/assets/migraine-home-office.png";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Template6Props {
   doctorName: string;
@@ -27,10 +28,63 @@ interface Template6Props {
   physicianId?: string;
 }
 
+interface PhysicianData {
+  id: string;
+  first_name: string;
+  last_name: string;
+  degree_type: string;
+  credentials: string[] | null;
+  bio: string | null;
+  headshot_url: string | null;
+}
+
 export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Template6Props) => {
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [iframeHeight, setIframeHeight] = useState<number>(480);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [physicianData, setPhysicianData] = useState<PhysicianData | null>(null);
+  const [isClinicLevel, setIsClinicLevel] = useState<boolean>(true);
+
+  // Build dynamic URLs
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const physicianParam = physicianId && physicianId !== doctorId ? `&physician=${physicianId}` : '';
+  const quizParams = `doctor=${doctorId || '192eedfe-92fd-4306-a272-4c06c01604cf'}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share${physicianParam}`;
+
+  // Fetch physician data
+  useEffect(() => {
+    const fetchData = async () => {
+      const isClinic = !physicianId || physicianId === doctorId;
+      setIsClinicLevel(isClinic);
+      
+      if (!isClinic && physicianId) {
+        const { data: physician, error } = await supabase
+          .from('clinic_physicians')
+          .select('id, first_name, last_name, degree_type, credentials, bio, headshot_url')
+          .eq('id', physicianId)
+          .eq('is_active', true)
+          .maybeSingle();
+        
+        if (!error && physician) {
+          setPhysicianData(physician as PhysicianData);
+        }
+      }
+    };
+    
+    fetchData();
+  }, [doctorId, physicianId]);
+
+  // Display values
+  const displayName = isClinicLevel ? doctorName : (physicianData?.last_name || doctorName);
+  const displayFullName = isClinicLevel ? 'Ryan C. Vaughn' : `${physicianData?.first_name || ''} ${physicianData?.last_name || ''}`.trim();
+  const displayDegree = isClinicLevel ? 'MD' : (physicianData?.degree_type || 'MD');
+  const displayCredentials = isClinicLevel 
+    ? 'Board-Certified ENT • Migraine & Headache Specialist • 20+ Years Experience' 
+    : (physicianData?.credentials?.join(' • ') || 'ENT Specialist');
+  const displayBio = isClinicLevel 
+    ? 'Many patients live for years with untreated migraines, thinking their headaches are "normal" — when in fact, they\'re not. Dr. Vaughn specializes in comprehensive migraine care, offering solutions from lifestyle changes and supplements to prescription therapy and in-office migraine relief procedures.'
+    : (physicianData?.bio || 'Experienced ENT specialist dedicated to helping patients find migraine relief.');
+  const displayHeadshot = isClinicLevel ? drVaughnProfessionalHeadshot : (physicianData?.headshot_url || drVaughnProfessionalHeadshot);
+  const displayNoteImage = isClinicLevel ? drVaughnBlack : (physicianData?.headshot_url || drVaughnBlack);
 
   // Detect mobile and update on resize
   useEffect(() => {
@@ -174,7 +228,7 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
               <Button 
                 size="lg" 
                 className="text-base md:text-lg px-6 sm:px-8 md:px-10 py-4 sm:py-5 md:py-7 w-full sm:w-auto hidden md:inline-flex shadow-2xl hover:shadow-3xl transition-all" 
-                onClick={() => window.open('/embed/midas?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank')}
+                onClick={() => window.open(`${baseUrl}/embed/midas?${quizParams}`, '_blank')}
               >
                 Start the Migraine Assessment
               </Button>
@@ -182,7 +236,7 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
             <div className="bg-card/50 backdrop-blur-sm rounded-lg border border-border/20 overflow-hidden mt-4 md:mt-0">
               <iframe
                 ref={iframeRef}
-                src="/quiz/midas?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share"
+                src={`/quiz/midas?${quizParams}`}
                 className="w-full transition-all duration-300"
                 style={{ height: `${iframeHeight}px`, minHeight: '400px' }}
                 title="MSQ Assessment"
@@ -198,13 +252,13 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
         <Button 
           className="w-full text-sm sm:text-base"
           size="lg"
-          onClick={() => window.open('/embed/midas?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank')}
+          onClick={() => window.open(`${baseUrl}/embed/midas?${quizParams}`, '_blank')}
         >
           Start the Migraine Assessment
         </Button>
       </div>
 
-      {/* Note from Dr. Vaughn Section */}
+      {/* Note from Dr. Section */}
       <section className="py-8 sm:py-10 md:py-12 lg:py-16 bg-background">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
           <div className="max-w-6xl mx-auto">
@@ -212,8 +266,8 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
               {/* Left Column - Doctor Image */}
               <div className="relative order-2 md:order-1">
                 <img 
-                  src={drVaughnBlack}
-                  alt="Dr. Vaughn"
+                  src={displayNoteImage}
+                  alt={`Dr. ${displayName}`}
                   className="w-full max-w-md mx-auto md:max-w-full rounded-lg shadow-xl"
                   loading="lazy"
                 />
@@ -222,7 +276,7 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
               {/* Right Column - Note */}
               <div className="order-1 md:order-2">
                 <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6">
-                  A Note from Dr. Vaughn
+                  A Note from Dr. {displayName}
                 </h2>
                 <div className="space-y-2 sm:space-y-3 md:space-y-4 text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed">
                   <p>
@@ -245,13 +299,13 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
                     Let's help you find lasting relief.
                   </p>
                   <p className="italic">
-                    — Dr. Vaughn
+                    — Dr. {displayName}
                   </p>
                 </div>
                 <Button 
                   size="lg" 
                   className="mt-4 sm:mt-6 md:mt-8 w-full sm:w-auto text-sm sm:text-base"
-                  onClick={() => window.open('/embed/midas?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank')}
+                  onClick={() => window.open(`${baseUrl}/embed/midas?${quizParams}`, '_blank')}
                 >
                   Start your Migraine Assessment
                 </Button>
@@ -390,7 +444,7 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
             <Button 
               size="lg"
               className="w-full sm:w-auto text-sm sm:text-base"
-              onClick={() => window.open('/embed/midas?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank')}
+              onClick={() => window.open(`${baseUrl}/embed/midas?${quizParams}`, '_blank')}
             >
               Start your Migraine Assessment
             </Button>
@@ -438,7 +492,7 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-xs sm:text-sm font-medium">
                       <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline mr-1 text-amber-600" />
-                      <strong>Disclaimer:</strong> This test is a screening tool, not a medical diagnosis. Results will be reviewed by Dr. Vaughn's team.
+                      <strong>Disclaimer:</strong> This test is a screening tool, not a medical diagnosis. Results will be reviewed by Dr. {displayName}'s team.
                     </p>
                   </CardContent>
                 </Card>
@@ -571,12 +625,12 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
         </div>
       </section>
 
-      {/* Why Choose Dr. Vaughn */}
+      {/* Why Choose Dr. */}
       <section className="py-8 sm:py-10 md:py-12 lg:py-16 xl:py-20 bg-muted/30">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 sm:mb-8 text-center">
-              Why Choose Dr. Vaughn for Your Migraine Treatment
+              Why Choose Dr. {displayName} for Your Migraine Treatment
             </h2>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8 md:mb-10">
@@ -631,23 +685,23 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
                 <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
                   <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full overflow-hidden shadow-lg flex-shrink-0">
                     <img 
-                      src={drVaughnProfessionalHeadshot}
-                      alt="Ryan C. Vaughn, MD - Board-Certified ENT and Migraine Specialist"
+                      src={displayHeadshot}
+                      alt={`${displayFullName}, ${displayDegree}`}
                       className="w-full h-full object-cover"
-                      style={{ objectPosition: '50% 45%', transform: 'scale(1.35)' }}
+                      style={{ objectPosition: '50% 45%', transform: isClinicLevel ? 'scale(1.35)' : 'scale(1)' }}
                       loading="lazy"
                     />
                   </div>
                   <div className="text-center md:text-left">
                     <div className="flex items-center justify-center md:justify-start gap-2 mb-1.5 sm:mb-2">
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold">Ryan C. Vaughn, MD</h3>
+                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold">{displayFullName}, {displayDegree}</h3>
                       <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
                     <p className="text-primary font-normal mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
-                      Board-Certified ENT • Migraine & Headache Specialist • 20+ Years Experience
+                      {displayCredentials}
                     </p>
                     <p className="text-muted-foreground mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
-                      Many patients live for years with untreated migraines, thinking their headaches are "normal" — when in fact, they're not. Dr. Vaughn specializes in comprehensive migraine care, offering solutions from lifestyle changes and supplements to prescription therapy and in-office migraine relief procedures.
+                      {displayBio}
                     </p>
                     <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm">
                       <div className="flex items-center gap-1.5 sm:gap-2">
@@ -852,7 +906,7 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
             <div className="flex justify-center">
               <Button 
                 size="lg" 
-                onClick={() => window.open('/embed/midas?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank')}
+                onClick={() => window.open(`${baseUrl}/embed/midas?${quizParams}`, '_blank')}
                 className="w-full sm:w-auto text-sm sm:text-base md:text-lg py-5 sm:py-6 md:py-7 px-5 sm:px-6 md:px-8"
               >
                 Start your Migraine Assessment
@@ -914,14 +968,6 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
                   rel="noopener noreferrer"
                 >
                   Request an Appointment
-                </a>
-                <a 
-                  href="https://www.exhalesinus.com/ryan-c-vaughn-md" 
-                  className="block hover:text-primary transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  About Dr. {doctorName}
                 </a>
                 <a 
                   href="https://www.exhalesinus.com/" 

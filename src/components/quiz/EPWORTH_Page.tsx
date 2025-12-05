@@ -18,6 +18,7 @@ import sleepTiredKitchen from "@/assets/sleep-tired-kitchen.jpg";
 import sleepTiredDriver from "@/assets/sleep-tired-driver.jpg";
 import sleepTiredOffice from "@/assets/sleep-tired-office.jpg";
 import sleepTiredLaptop from "@/assets/sleep-tired-laptop.jpg";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Template7Props {
   doctorName: string;
@@ -26,9 +27,66 @@ interface Template7Props {
   physicianId?: string;
 }
 
+interface PhysicianData {
+  id: string;
+  first_name: string;
+  last_name: string;
+  degree_type: string;
+  credentials: string[] | null;
+  bio: string | null;
+  headshot_url: string | null;
+}
+
 export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Template7Props) => {
   const [iframeHeight, setIframeHeight] = useState<number>(480);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [physicianData, setPhysicianData] = useState<PhysicianData | null>(null);
+  const [isClinicLevel, setIsClinicLevel] = useState<boolean>(true);
+
+  // Build dynamic URLs
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const physicianParam = physicianId && physicianId !== doctorId ? `&physician=${physicianId}` : '';
+  const quizParams = `doctor=${doctorId || '192eedfe-92fd-4306-a272-4c06c01604cf'}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share${physicianParam}`;
+
+  // Fetch physician data
+  useEffect(() => {
+    const fetchData = async () => {
+      const isClinic = !physicianId || physicianId === doctorId;
+      setIsClinicLevel(isClinic);
+      
+      if (!isClinic && physicianId) {
+        const { data: physician, error } = await supabase
+          .from('clinic_physicians')
+          .select('id, first_name, last_name, degree_type, credentials, bio, headshot_url')
+          .eq('id', physicianId)
+          .eq('is_active', true)
+          .maybeSingle();
+        
+        if (!error && physician) {
+          setPhysicianData(physician as PhysicianData);
+        }
+      }
+    };
+    
+    fetchData();
+  }, [doctorId, physicianId]);
+
+  // Display values
+  const displayName = isClinicLevel ? doctorName : (physicianData?.last_name || doctorName);
+  const displayFullName = isClinicLevel ? 'Ryan C. Vaughn' : `${physicianData?.first_name || ''} ${physicianData?.last_name || ''}`.trim();
+  const displayDegree = isClinicLevel ? 'MD' : (physicianData?.degree_type || 'MD');
+  const displayCredentials = isClinicLevel 
+    ? 'Board-Certified ENT • Sleep Disorder Specialist • 20+ Years Experience' 
+    : (physicianData?.credentials?.join(' • ') || 'ENT Specialist');
+  const displayBio = isClinicLevel 
+    ? 'Dr. Vaughn has helped hundreds of patients overcome sleep apnea and reclaim their energy through comprehensive, minimally-invasive ENT treatments. His expertise spans from conservative management to advanced surgical interventions.'
+    : (physicianData?.bio || 'Experienced ENT specialist dedicated to helping patients sleep better.');
+  const displayHeadshot = isClinicLevel ? drVaughnProfessional : (physicianData?.headshot_url || drVaughnProfessional);
+  const displayNoteImage = isClinicLevel ? drVaughnBlack : (physicianData?.headshot_url || drVaughnBlack);
+
+  const handleTestClick = () => {
+    window.open(`${baseUrl}/embed/epworth?${quizParams}`, '_blank');
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -106,10 +164,6 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const handleTestClick = () => {
-    window.open('/embed/epworth?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank');
-  };
-
   return (
     <div 
       className="min-h-screen epworth-custom-theme font-sans"
@@ -184,7 +238,7 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
             <div className="bg-card/50 backdrop-blur-sm rounded-lg border border-border/20 overflow-hidden mt-4 md:mt-0">
               <iframe
                 ref={iframeRef}
-                src="/quiz/epworth?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share"
+                src={`/quiz/epworth?${quizParams}`}
                 className="w-full transition-all duration-300"
                 style={{ height: `${iframeHeight}px`, minHeight: '400px' }}
                 title="Epworth Sleepiness Test"
@@ -202,15 +256,15 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
             <div className="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
               <div className="order-2 md:order-1">
                 <img
-                  src={drVaughnBlack}
-                  alt="Dr. Ryan C. Vaughn, Board-Certified ENT and Sleep Specialist"
+                  src={displayNoteImage}
+                  alt={`Dr. ${displayName}, Board-Certified ENT and Sleep Specialist`}
                   className="w-full max-w-md mx-auto md:max-w-full rounded-lg shadow-lg"
                   loading="lazy"
                 />
               </div>
               <div className="order-1 md:order-2 space-y-2 sm:space-y-3 md:space-y-4">
                 <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold">
-                  A Note from Dr. {doctorName}
+                  A Note from Dr. {displayName}
                 </h2>
                 <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
                   Many of my patients come to me feeling exhausted, despite getting what seems like enough sleep. The Epworth Sleepiness Scale is a quick, validated tool that helps us understand if your daytime fatigue might be related to obstructive sleep apnea or another sleep disorder.
@@ -225,7 +279,7 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
                   Let's get you sleeping better again.
                 </p>
                 <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-medium">
-                  — Dr. Vaughn
+                  — Dr. {displayName}
                 </p>
                 <Button
                   asChild 
@@ -233,7 +287,7 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
                   className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground text-sm sm:text-base mt-4 sm:mt-6"
                 >
                   <a
-                    href="/embed/epworth?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share"
+                    href={`${baseUrl}/embed/epworth?${quizParams}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -323,7 +377,7 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
                   <div>
                     <p className="text-base sm:text-lg font-semibold mb-1.5 sm:mb-2">Meet Sarah</p>
                     <p className="text-muted-foreground italic mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
-                      "I thought I was just tired from work and raising kids. Turns out, I had moderate sleep apnea. After treatment with Dr. Vaughn, I wake up refreshed and have energy all day. The test took 2 minutes—I wish I'd done it years ago."
+                      "I thought I was just tired from work and raising kids. Turns out, I had moderate sleep apnea. After treatment with Dr. {displayName}, I wake up refreshed and have energy all day. The test took 2 minutes—I wish I'd done it years ago."
                     </p>
                     <p className="text-xs sm:text-sm text-primary font-medium">— Sarah M., Patient since 2022</p>
                   </div>
@@ -339,7 +393,7 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
               >
                 Take your Sleepiness Assessment →
               </Button>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2 sm:mt-3">No cost • No obligation • Results reviewed by Dr. Vaughn</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 sm:mt-3">No cost • No obligation • Results reviewed by Dr. {displayName}</p>
             </div>
           </div>
         </div>
@@ -442,7 +496,7 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
               Advanced Sleep Treatment Options
             </h2>
             <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-8 sm:mb-10 text-center max-w-3xl mx-auto">
-              Dr. Vaughn specializes in diagnosing and treating structural ENT issues that cause sleep disorders. We offer comprehensive solutions beyond CPAP.
+              Dr. {displayName} specializes in diagnosing and treating structural ENT issues that cause sleep disorders. We offer comprehensive solutions beyond CPAP.
             </p>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
@@ -533,7 +587,7 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
                   </ul>
                   <div className="bg-primary/5 p-2 sm:p-3 rounded-lg">
                     <p className="text-xs italic text-muted-foreground">
-                      "I avoided CPAP thanks to Dr. Vaughn's approach." — Robert K.
+                      "I avoided CPAP thanks to Dr. {displayName}'s approach." — Robert K.
                     </p>
                   </div>
                 </CardContent>
@@ -620,7 +674,7 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-xs sm:text-sm font-medium">
                       <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline mr-1 text-amber-600" />
-                      <strong>Disclaimer:</strong> This test is a screening tool, not a medical diagnosis. Results will be reviewed by Dr. Vaughn's team.
+                      <strong>Disclaimer:</strong> This test is a screening tool, not a medical diagnosis. Results will be reviewed by Dr. {displayName}'s team.
                     </p>
                   </CardContent>
                 </Card>
@@ -685,7 +739,7 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 sm:mb-8 text-center">
-              Why Choose Dr. Vaughn for Your Sleep Health
+              Why Choose Dr. {displayName} for Your Sleep Health
             </h2>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8 md:mb-10">
@@ -737,23 +791,23 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
                 <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
                   <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full overflow-hidden shadow-lg flex-shrink-0">
                     <img 
-                      src={drVaughnProfessional}
-                      alt="Dr. Ryan C. Vaughn, Board-Certified ENT and Sleep Specialist"
+                      src={displayHeadshot}
+                      alt={`${displayFullName}, ${displayDegree}`}
                       className="w-full h-full object-cover"
-                      style={{ objectPosition: '50% 45%', transform: 'scale(1.35)' }}
+                      style={{ objectPosition: '50% 45%', transform: isClinicLevel ? 'scale(1.35)' : 'scale(1)' }}
                       loading="lazy"
                     />
                   </div>
                   <div className="text-center md:text-left">
                     <div className="flex items-center justify-center md:justify-start gap-2 mb-1.5 sm:mb-2">
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold">Ryan C. Vaughn, MD</h3>
+                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold">{displayFullName}, {displayDegree}</h3>
                       <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
                     <p className="text-primary font-semibold mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
-                      Board-Certified ENT • Sleep Medicine Specialist • 20+ Years Experience
+                      {displayCredentials}
                     </p>
                     <p className="text-muted-foreground mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
-                      Dr. Vaughn has helped hundreds of patients overcome sleep apnea and reclaim their energy through comprehensive, minimally-invasive ENT treatments. His expertise spans from conservative management to advanced surgical interventions.
+                      {displayBio}
                     </p>
                     <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm">
                       <div className="flex items-center gap-1.5 sm:gap-2">
@@ -961,7 +1015,7 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
-                <span>Results reviewed by Dr. Vaughn</span>
+                <span>Results reviewed by Dr. {displayName}</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
@@ -1028,14 +1082,6 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
                   rel="noopener noreferrer"
                 >
                   Request an Appointment
-                </a>
-                <a 
-                  href="https://www.exhalesinus.com/ryan-c-vaughn-md" 
-                  className="block hover:text-primary transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  About Dr. Vaughn
                 </a>
                 <a 
                   href="https://www.exhalesinus.com/" 
