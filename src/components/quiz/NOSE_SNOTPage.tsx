@@ -1592,14 +1592,6 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                   Request an Appointment
                 </a>
                 <a 
-                  href="https://www.exhalesinus.com/ryan-c-vaughn-md" 
-                  className="block hover:text-primary transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  About Dr. Vaughn
-                </a>
-                <a 
                   href="https://www.exhalesinus.com/" 
                   className="block hover:text-primary transition-colors"
                   target="_blank"
