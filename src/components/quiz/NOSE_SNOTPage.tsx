@@ -37,6 +37,30 @@ interface Template5Props {
 
 type TestType = 'nose' | 'snot' | null;
 
+interface ClinicData {
+  clinic_name: string;
+  logo_url: string | null;
+  avatar_url: string | null;
+  phone: string | null;
+  website: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zip_code: string | null;
+}
+
+interface PhysicianData {
+  id: string;
+  first_name: string;
+  last_name: string;
+  degree_type: string;
+  credentials: string[] | null;
+  bio: string | null;
+  headshot_url: string | null;
+  email: string | null;
+  mobile: string | null;
+}
+
 export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId }: Template5Props) => {
   const [selectedTest, setSelectedTest] = useState<TestType>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -45,9 +69,90 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
   const [loading, setLoading] = useState(true);
   const [clinicId, setClinicId] = useState<string | null>(null);
   const [doctorProfileId, setDoctorProfileId] = useState<string | null>(null);
+  const [clinicData, setClinicData] = useState<ClinicData | null>(null);
+  const [physicianData, setPhysicianData] = useState<PhysicianData | null>(null);
+  const [isClinicLevel, setIsClinicLevel] = useState<boolean>(true);
+  
   // Build dynamic URLs
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const quizParams = `doctor=${doctorIdparam}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share`;
+  const physicianParam = physicianId && physicianId !== doctorIdparam ? `&physician=${physicianId}` : '';
+  const quizParams = `doctor=${doctorIdparam}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share${physicianParam}`;
+  
+  // Fetch physician or clinic data based on physicianId
+  useEffect(() => {
+    const fetchData = async () => {
+      // Check if this is clinic-level (physicianId matches doctorId) or physician-specific
+      const isClinic = !physicianId || physicianId === doctorIdparam;
+      setIsClinicLevel(isClinic);
+      
+      if (isClinic) {
+        // Fetch clinic data from clinic_profiles via doctor_profiles
+        const { data: doctorProfile, error: doctorError } = await supabase
+          .from('doctor_profiles')
+          .select('clinic_id')
+          .eq('id', doctorIdparam)
+          .maybeSingle();
+        
+        if (doctorError) {
+          console.error('Error fetching doctor profile:', doctorError);
+          return;
+        }
+        
+        if (doctorProfile?.clinic_id) {
+          const { data: clinic, error: clinicError } = await supabase
+            .from('clinic_profiles')
+            .select('clinic_name, logo_url, avatar_url, phone, website, address, city, state, zip_code')
+            .eq('id', doctorProfile.clinic_id)
+            .maybeSingle();
+          
+          if (!clinicError && clinic) {
+            setClinicData(clinic);
+          }
+        }
+      } else {
+        // Fetch physician data from clinic_physicians
+        const { data: physician, error: physicianError } = await supabase
+          .from('clinic_physicians')
+          .select('id, first_name, last_name, degree_type, credentials, bio, headshot_url, email, mobile')
+          .eq('id', physicianId)
+          .eq('is_active', true)
+          .maybeSingle();
+        
+        if (!physicianError && physician) {
+          setPhysicianData(physician as PhysicianData);
+        } else {
+          console.error('Error fetching physician:', physicianError);
+        }
+      }
+      
+      setLoading(false);
+    };
+    
+    fetchData();
+  }, [doctorIdparam, physicianId]);
+  
+  // Get display values based on whether it's clinic or physician level
+  const displayName = isClinicLevel 
+    ? doctorName 
+    : physicianData?.last_name || doctorName;
+  const displayFullName = isClinicLevel 
+    ? `Ryan C. Vaughn` 
+    : `${physicianData?.first_name || ''} ${physicianData?.last_name || ''}`.trim();
+  const displayDegree = isClinicLevel 
+    ? 'MD' 
+    : physicianData?.degree_type || 'MD';
+  const displayCredentials = isClinicLevel 
+    ? 'Board-Certified ENT • Nasal & Sinus Specialist • 20+ Years Experience' 
+    : (physicianData?.credentials?.join(' • ') || 'ENT Specialist');
+  const displayBio = isClinicLevel 
+    ? 'Dr. Vaughn has helped thousands of patients overcome nasal and sinus conditions through comprehensive, minimally-invasive ENT treatments. His expertise spans from conservative management to advanced surgical interventions across the Chicagoland area.'
+    : (physicianData?.bio || 'Experienced ENT specialist dedicated to helping patients breathe better.');
+  const displayHeadshot = isClinicLevel 
+    ? drVaughnProfessional 
+    : (physicianData?.headshot_url || drVaughnProfessional);
+  const displayNoteImage = isClinicLevel 
+    ? drVaughnBlack 
+    : (physicianData?.headshot_url || drVaughnBlack);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -195,8 +300,8 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
               {/* Left Column - Doctor Image */}
               <div className="relative order-2 md:order-1">
                 <img 
-                  src={drVaughnBlack}
-                  alt="Dr. Vaughn"
+                  src={displayNoteImage}
+                  alt={`Dr. ${displayName}`}
                   className="w-full max-w-md mx-auto md:max-w-full rounded-lg shadow-xl"
                   loading="lazy"
                 />
@@ -205,7 +310,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
               {/* Right Column - Note */}
               <div className="order-1 md:order-2">
                 <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6">
-                  A Note from Dr. Vaughn
+                  A Note from Dr. {displayName}
                 </h2>
                 <div className="space-y-2 sm:space-y-3 md:space-y-4 text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed">
                   <p>
@@ -225,7 +330,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                     Let's get you breathing better again.
                   </p>
                   <p className="italic">
-                    — Dr. Vaughn
+                    — Dr. {displayName}
                   </p>
                 </div>
                 <Button 
@@ -632,7 +737,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                 </p>
                 <p className="text-center text-muted-foreground mt-4 sm:mt-6 text-sm sm:text-base">
                   If you're experiencing symptoms from both categories, start with the test that best matches 
-                  your <em>most bothersome</em> symptoms. Dr. Vaughn will review your results and help 
+                  your <em>most bothersome</em> symptoms. Dr. {displayName} will review your results and help 
                   determine if you need additional evaluation.
                 </p>
               </CardContent>
@@ -1070,9 +1175,9 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                   <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3 sm:mb-4">
                     <span className="text-xl sm:text-2xl font-bold text-primary">2</span>
                   </div>
-                  <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">Dr. Vaughn Reviews</h3>
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">Dr. {displayName} Reviews</h3>
                   <p className="text-muted-foreground text-xs sm:text-sm md:text-base">
-                    Your results are sent directly to Dr. Vaughn, who will personally review your symptoms.
+                    Your results are sent directly to Dr. {displayName}, who will personally review your symptoms.
                   </p>
                 </CardContent>
               </Card>
@@ -1084,7 +1189,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                   </div>
                   <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">Schedule a Consultation</h3>
                   <p className="text-muted-foreground text-xs sm:text-sm md:text-base">
-                    Virtual or in-person appointment with Dr. Vaughn
+                    Virtual or in-person appointment with Dr. {displayName}
                   </p>
                 </CardContent>
               </Card>
@@ -1097,7 +1202,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
               <div className="flex justify-center">
                 <Button 
                   size="lg" 
-                  onClick={() => window.open('https://patientpathway.ai/embed/nose_snot?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank')}
+                  onClick={() => window.open(`${baseUrl}/embed/nose_snot?${quizParams}`, '_blank')}
                   className="w-full sm:w-auto text-sm sm:text-base md:text-lg py-5 sm:py-6 md:py-7 px-5 sm:px-6 md:px-8"
                 >
                   Start your Nasal Assessment
@@ -1111,12 +1216,12 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
 
 
 
-      {/* Why Choose Dr. Vaughn */}
+      {/* Why Choose Dr. */}
       <section className="py-8 sm:py-10 md:py-12 lg:py-16 xl:py-20 bg-muted/30">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 sm:mb-8 text-center">
-              Why Choose Dr. Vaughn for Your Nasal & Sinus Health
+              Why Choose Dr. {displayName} for Your Nasal & Sinus Health
             </h2>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8 md:mb-10">
@@ -1171,23 +1276,23 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                 <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
                   <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full overflow-hidden shadow-lg flex-shrink-0">
                     <img 
-                      src={drVaughnProfessional}
-                      alt="Dr. Ryan C. Vaughn, Board-Certified ENT Specialist"
+                      src={displayHeadshot}
+                      alt={`${displayFullName}, ${displayDegree}`}
                       className="w-full h-full object-cover"
-                      style={{ objectPosition: '50% 45%', transform: 'scale(1.35)' }}
+                      style={{ objectPosition: '50% 45%', transform: isClinicLevel ? 'scale(1.35)' : 'scale(1)' }}
                       loading="lazy"
                     />
                   </div>
                   <div className="text-center md:text-left">
                     <div className="flex items-center justify-center md:justify-start gap-2 mb-1.5 sm:mb-2">
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold">Ryan C. Vaughn, MD</h3>
+                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold">{displayFullName}, {displayDegree}</h3>
                       <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
                     <p className="text-primary font-semibold mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
-                      Board-Certified ENT • Nasal & Sinus Specialist • 20+ Years Experience
+                      {displayCredentials}
                     </p>
                     <p className="text-muted-foreground mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
-                      Dr. Vaughn has helped thousands of patients overcome nasal and sinus conditions through comprehensive, minimally-invasive ENT treatments. His expertise spans from conservative management to advanced surgical interventions across the Chicagoland area.
+                      {displayBio}
                     </p>
                     <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm">
                       <div className="flex items-center gap-1.5 sm:gap-2">
@@ -1228,7 +1333,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                   <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
                     No. The NOSE and SNOT-12 assessments are screening tools that help quantify your symptoms. 
                     They are widely used in clinical practice but do not replace a thorough evaluation by 
-                    Dr. Vaughn. Your test results will guide the consultation and help determine if 
+                    Dr. {displayName}. Your test results will guide the consultation and help determine if 
                     further imaging or examination is needed.
                   </AccordionContent>
                 </AccordionItem>
@@ -1327,7 +1432,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
                     This is very common! Many patients have both structural nasal issues and chronic sinusitis. 
-                    Dr. Vaughn will perform a comprehensive evaluation to identify all contributing factors 
+                    Dr. {displayName} will perform a comprehensive evaluation to identify all contributing factors 
                     and may recommend combined treatments to address multiple issues simultaneously.
                   </AccordionContent>
                 </AccordionItem>
@@ -1423,7 +1528,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
             <div className="flex justify-center">
               <Button 
                 size="lg" 
-                onClick={() => window.open('https://patientpathway.ai/embed/nose_snot?doctor=192eedfe-92fd-4306-a272-4c06c01604cf&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share', '_blank')}
+                onClick={() => window.open(`${baseUrl}/embed/nose_snot?${quizParams}`, '_blank')}
                 className="w-full sm:w-auto text-base md:text-lg py-6 md:py-7 px-6 md:px-8"
               >
                 Start your Nasal Assessment
