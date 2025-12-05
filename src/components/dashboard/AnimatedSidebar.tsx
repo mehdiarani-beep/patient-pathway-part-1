@@ -23,6 +23,7 @@ import {
   TestTube,
   Mail,
   Share2,
+  FolderOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -83,6 +84,12 @@ const bottomMenuItems = [
     label: 'Configuration',
     icon: <Building size={22} />,
     description: 'Clinic settings'
+  },
+  {
+    id: 'assets',
+    label: 'Assets Library',
+    icon: <FolderOpen size={22} />,
+    description: 'Media & files'
   },
   {
     id: 'settings',
