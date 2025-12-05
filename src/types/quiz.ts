@@ -39,6 +39,14 @@ export interface Lead {
   incident_source?: string;
   custom_quiz_id?: string;
   quiz_title?: string;
+  is_partial?: boolean;
+  physician_id?: string;
+  physician?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    degree_type?: string;
+  } | null;
 }
 
 export interface QuizIncident {

@@ -328,15 +328,16 @@ export function EnhancedLeadsTable({ leads, onLeadUpdate }: EnhancedLeadsTablePr
               <TableHead className="w-12">#</TableHead>
               <TableHead>Patient</TableHead>
               <TableHead>Contact Information</TableHead>
+              <TableHead>Physician</TableHead>
               <TableHead>Quiz Type</TableHead>
-            <TableHead>Score</TableHead>
-            <TableHead>Source</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Actions</TableHead>
-            <TableHead className="w-16">Delete</TableHead>
-          </TableRow>
-        </TableHeader>
+              <TableHead>Score</TableHead>
+              <TableHead>Source</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Actions</TableHead>
+              <TableHead className="w-16">Delete</TableHead>
+            </TableRow>
+          </TableHeader>
         <TableBody>
           {leads.map((lead, index) => (
             <TableRow key={lead.id}>
@@ -353,6 +354,20 @@ export function EnhancedLeadsTable({ leads, onLeadUpdate }: EnhancedLeadsTablePr
                   {lead.email && <div>{lead.email}</div>}
                   {lead.phone && <div>{lead.phone}</div>}
                 </div>
+              </TableCell>
+              <TableCell>
+                {lead.physician ? (
+                  <div className="text-sm">
+                    <span className="font-medium">
+                      {lead.physician.first_name} {lead.physician.last_name}
+                    </span>
+                    {lead.physician.degree_type && (
+                      <span className="text-muted-foreground">, {lead.physician.degree_type}</span>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground text-sm">—</span>
+                )}
               </TableCell>
               <TableCell>
                 <Badge variant="outline">
