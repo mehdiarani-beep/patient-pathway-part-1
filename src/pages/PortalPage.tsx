@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AnimatedSidebar } from '@/components/dashboard/AnimatedSidebar';
 import { QuizManagementPage } from '@/components/dashboard/QuizManagementPage';
+import { PhysicianAssessmentPage } from '@/components/dashboard/PhysicianAssessmentPage';
 import { TrendsPage } from '@/components/dashboard/TrendsPage';
 import { LeadsPage } from '@/components/dashboard/LeadsPage';
 import { ProfilePage } from '@/components/dashboard/ProfilePage';
@@ -195,6 +196,12 @@ export default function PortalPage() {
     return null;
   }
   const renderCurrentPage = () => {
+    // Handle physician-specific assessment pages
+    if (currentPage.startsWith('physician-')) {
+      const physicianId = currentPage.replace('physician-', '');
+      return <PhysicianAssessmentPage physicianId={physicianId} />;
+    }
+    
     switch (currentPage) {
       case 'dashboard':
         return <LeadsPage />;
@@ -250,6 +257,7 @@ export default function PortalPage() {
                     {currentPage === 'dashboard' && 'Dashboard'}
                     {(currentPage === 'analytics' || currentPage === 'trends') && 'Analytics & Trends'}
                     {currentPage === 'quizzes' && 'Assessments'}
+                    {currentPage.startsWith('physician-') && 'Physician Assessments'}
                     {currentPage === 'schedule' && 'Schedule'}
                     {currentPage === 'social' && 'Social Integrations'}
                     {currentPage === 'social-media' && 'Social Media Manager'}
@@ -267,6 +275,7 @@ export default function PortalPage() {
                     {currentPage === 'dashboard' && 'Overview of your leads and recent activity'}
                     {(currentPage === 'analytics' || currentPage === 'trends') && 'Performance metrics, insights, and data trends'}
                     {currentPage === 'quizzes' && 'Manage your assessments and quizzes'}
+                    {currentPage.startsWith('physician-') && 'Share assessments for this physician'}
                     {currentPage === 'schedule' && 'View and manage your appointments'}
                     {currentPage === 'social' && 'Connect and manage your social media accounts'}
                     {currentPage === 'social-media' && 'Create, schedule, and manage your social media posts'}
