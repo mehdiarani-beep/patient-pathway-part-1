@@ -380,6 +380,7 @@ export type Database = {
       clinic_profiles: {
         Row: {
           address: string | null
+          avatar_url: string | null
           city: string | null
           clinic_name: string
           clinic_slug: string | null
@@ -403,6 +404,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          avatar_url?: string | null
           city?: string | null
           clinic_name: string
           clinic_slug?: string | null
@@ -426,6 +428,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          avatar_url?: string | null
           city?: string | null
           clinic_name?: string
           clinic_slug?: string | null

@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building, Globe, Phone, User } from 'lucide-react';
+import { Building, Globe, Phone, User, Image } from 'lucide-react';
 
 interface BusinessInfo {
   clinic_name: string;
@@ -12,16 +12,26 @@ interface BusinessInfo {
   owner_mobile: string;
   owner_email: string;
   logo_url: string;
+  avatar_url: string;
 }
 
 interface BusinessInfoSectionProps {
   data: BusinessInfo;
   onChange: (field: keyof BusinessInfo, value: string) => void;
   onLogoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  uploading: boolean;
+  onAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  uploadingLogo: boolean;
+  uploadingAvatar: boolean;
 }
 
-export function BusinessInfoSection({ data, onChange, onLogoUpload, uploading }: BusinessInfoSectionProps) {
+export function BusinessInfoSection({ 
+  data, 
+  onChange, 
+  onLogoUpload, 
+  onAvatarUpload,
+  uploadingLogo,
+  uploadingAvatar
+}: BusinessInfoSectionProps) {
   return (
     <Card>
       <CardHeader>
@@ -34,41 +44,99 @@ export function BusinessInfoSection({ data, onChange, onLogoUpload, uploading }:
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Logo Section */}
-        <div className="flex items-start gap-6">
-          <div className="w-24 h-24 rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center bg-muted/50 overflow-hidden">
-            {data.logo_url ? (
-              <img
-                src={data.logo_url}
-                alt="Clinic Logo"
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/placeholder.svg';
-                }}
-              />
-            ) : (
-              <Building className="w-8 h-8 text-muted-foreground" />
-            )}
-          </div>
-          <div className="flex-1">
-            <Label>Clinic Logo</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                placeholder="https://example.com/logo.png"
-                value={data.logo_url}
-                onChange={(e) => onChange('logo_url', e.target.value)}
-                className="flex-1"
-              />
-              <label className="inline-flex items-center justify-center px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer text-sm font-medium">
-                {uploading ? 'Uploading...' : 'Upload'}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={onLogoUpload}
-                  className="hidden"
-                  disabled={uploading}
+        {/* Branding Section - Logo and Avatar side by side */}
+        <div className="border rounded-lg p-4 bg-muted/30">
+          <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
+            <Image className="w-4 h-4" />
+            Clinic Branding
+          </h4>
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Logo Upload */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-4">
+                <div className="w-32 h-20 rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center bg-background overflow-hidden">
+                  {data.logo_url ? (
+                    <img
+                      src={data.logo_url}
+                      alt="Clinic Logo"
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/placeholder.svg';
+                      }}
+                    />
+                  ) : (
+                    <Building className="w-8 h-8 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <Label className="text-sm font-medium">Clinic Logo</Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Full logo for landing pages, email footers, and headers
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="https://example.com/logo.png"
+                  value={data.logo_url}
+                  onChange={(e) => onChange('logo_url', e.target.value)}
+                  className="flex-1 text-sm"
                 />
-              </label>
+                <label className="inline-flex items-center justify-center px-3 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer text-sm font-medium whitespace-nowrap">
+                  {uploadingLogo ? 'Uploading...' : 'Upload'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={onLogoUpload}
+                    className="hidden"
+                    disabled={uploadingLogo}
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Avatar Upload */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-4">
+                <div className="w-16 h-16 rounded-full border-2 border-dashed border-muted-foreground/25 flex items-center justify-center bg-background overflow-hidden">
+                  {data.avatar_url ? (
+                    <img
+                      src={data.avatar_url}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/placeholder.svg';
+                      }}
+                    />
+                  ) : (
+                    <User className="w-6 h-6 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <Label className="text-sm font-medium">Avatar</Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Small circular image for quiz chat bubbles
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="https://example.com/avatar.png"
+                  value={data.avatar_url}
+                  onChange={(e) => onChange('avatar_url', e.target.value)}
+                  className="flex-1 text-sm"
+                />
+                <label className="inline-flex items-center justify-center px-3 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer text-sm font-medium whitespace-nowrap">
+                  {uploadingAvatar ? 'Uploading...' : 'Upload'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={onAvatarUpload}
+                    className="hidden"
+                    disabled={uploadingAvatar}
+                  />
+                </label>
+              </div>
             </div>
           </div>
         </div>
