@@ -96,9 +96,11 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
   // Fetch physician or clinic data based on physicianId
   useEffect(() => {
     const fetchData = async () => {
-      // Check if this is clinic-level (physicianId matches doctorId) or physician-specific
+      // Check if this is clinic-level (no physicianId OR physicianId matches doctorId)
       const isClinic = !physicianId || physicianId === doctorIdparam;
       setIsClinicLevel(isClinic);
+      
+      console.log('NOSE_SNOT Fetching data:', { doctorIdparam, physicianId, isClinic });
       
       // First get clinic_id from doctor_profiles
       const { data: doctorProfile, error: doctorError } = await supabase
@@ -115,8 +117,9 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
       
       const fetchedClinicId = doctorProfile?.clinic_id;
       setClinicId(fetchedClinicId);
+      console.log('NOSE_SNOT clinic_id:', fetchedClinicId);
       
-      // Fetch clinic data
+      // Always fetch clinic data for footer and branding
       if (fetchedClinicId) {
         const { data: clinic, error: clinicError } = await supabase
           .from('clinic_profiles')
@@ -125,7 +128,10 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
           .maybeSingle();
         
         if (!clinicError && clinic) {
+          console.log('NOSE_SNOT clinic data:', clinic);
           setClinicData(clinic);
+        } else {
+          console.error('Error fetching clinic:', clinicError);
         }
         
         // Fetch clinic locations
@@ -139,23 +145,22 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
           setClinicLocations(locations);
         }
         
-        // Fetch all physicians for clinic-level view
-        if (isClinic) {
-          const { data: physicians, error: physiciansError } = await supabase
-            .from('clinic_physicians')
-            .select('id, first_name, last_name, degree_type, credentials, bio, headshot_url, note_image_url, email, mobile')
-            .eq('clinic_id', fetchedClinicId)
-            .eq('is_active', true)
-            .order('display_order', { ascending: true });
-          
-          if (!physiciansError && physicians) {
-            setAllPhysicians(physicians as PhysicianData[]);
-          }
+        // Always fetch all physicians for the clinic
+        const { data: physicians, error: physiciansError } = await supabase
+          .from('clinic_physicians')
+          .select('id, first_name, last_name, degree_type, credentials, bio, headshot_url, note_image_url, email, mobile')
+          .eq('clinic_id', fetchedClinicId)
+          .eq('is_active', true)
+          .order('display_order', { ascending: true });
+        
+        if (!physiciansError && physicians) {
+          console.log('NOSE_SNOT physicians:', physicians);
+          setAllPhysicians(physicians as PhysicianData[]);
         }
       }
       
+      // If physician-specific, also fetch that physician's data
       if (!isClinic && physicianId) {
-        // Fetch specific physician data from clinic_physicians
         const { data: physician, error: physicianError } = await supabase
           .from('clinic_physicians')
           .select('id, first_name, last_name, degree_type, credentials, bio, headshot_url, note_image_url, email, mobile')
@@ -177,12 +182,13 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
   }, [doctorIdparam, physicianId]);
   
   // Get display values based on whether it's clinic or physician level
+  const clinicName = clinicData?.clinic_name || 'Our Practice';
   const displayName = isClinicLevel 
-    ? (clinicData?.clinic_name || doctorName)
+    ? clinicName
     : physicianData?.last_name || doctorName;
   const displayFullName = isClinicLevel 
-    ? (clinicData?.clinic_name || 'Our Practice')
-    : `${physicianData?.first_name || ''} ${physicianData?.last_name || ''}`.trim();
+    ? clinicName
+    : `${physicianData?.first_name || ''} ${physicianData?.last_name || ''}`.trim() || doctorName;
   const displayDegree = isClinicLevel 
     ? '' 
     : physicianData?.degree_type || 'MD';
@@ -190,13 +196,15 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
     ? 'Board-Certified ENT • Nasal & Sinus Specialist' 
     : (physicianData?.credentials?.join(' • ') || 'ENT Specialist');
   const displayBio = isClinicLevel 
-    ? 'Our team has helped thousands of patients overcome nasal and sinus conditions through comprehensive, minimally-invasive ENT treatments.'
+    ? `${clinicName} has helped thousands of patients overcome nasal and sinus conditions through comprehensive, minimally-invasive ENT treatments.`
     : (physicianData?.bio || 'Experienced ENT specialist dedicated to helping patients breathe better.');
+  // For clinic level, use first physician's headshot or logo, for physician use their specific headshot
   const displayHeadshot = isClinicLevel 
-    ? drVaughnProfessional 
+    ? (allPhysicians[0]?.headshot_url || clinicData?.logo_url || drVaughnProfessional)
     : (physicianData?.headshot_url || drVaughnProfessional);
+  // For note image at clinic level, use logo or first physician image
   const displayNoteImage = isClinicLevel 
-    ? drVaughnBlack 
+    ? (clinicData?.logo_url || allPhysicians[0]?.headshot_url || drVaughnBlack)
     : (physicianData?.note_image_url || physicianData?.headshot_url || drVaughnBlack);
 
   // Handle note image upload
@@ -337,6 +345,12 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
         fontFamily: 'Inter, sans-serif',
       } as React.CSSProperties}
     >
+      {/* Loading State */}
+      {loading && (
+        <div className="fixed inset-0 bg-background/80 flex items-center justify-center z-50">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      )}
       {/* Hero Section */}
       <section 
         className="relative min-h-[400px] sm:min-h-[500px] md:min-h-[600px] flex items-center py-4 sm:py-6 md:py-8 lg:py-12"
