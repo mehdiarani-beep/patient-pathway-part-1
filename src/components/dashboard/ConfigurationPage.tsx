@@ -19,13 +19,15 @@ interface BusinessInfo {
   owner_mobile: string;
   owner_email: string;
   logo_url: string;
+  avatar_url: string;
 }
 
 export function ConfigurationPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [clinicId, setClinicId] = useState<string | null>(null);
   const [doctorProfileId, setDoctorProfileId] = useState<string | null>(null);
   
@@ -36,7 +38,8 @@ export function ConfigurationPage() {
     owner_name: '',
     owner_mobile: '',
     owner_email: '',
-    logo_url: ''
+    logo_url: '',
+    avatar_url: ''
   });
 
   useEffect(() => {
@@ -53,7 +56,7 @@ export function ConfigurationPage() {
       // Get doctor profile with clinic info
       const { data: profile, error: profileError } = await supabase
         .from('doctor_profiles')
-        .select('id, clinic_id, clinic_name, phone, website, logo_url')
+        .select('id, clinic_id, clinic_name, phone, website, logo_url, avatar_url')
         .eq('user_id', user.id)
         .single();
 
@@ -81,7 +84,8 @@ export function ConfigurationPage() {
               owner_name: clinic.owner_name || '',
               owner_mobile: clinic.owner_mobile || '',
               owner_email: clinic.owner_email || '',
-              logo_url: clinic.logo_url || ''
+              logo_url: clinic.logo_url || '',
+              avatar_url: clinic.avatar_url || ''
             });
           }
         } else {
@@ -93,7 +97,8 @@ export function ConfigurationPage() {
             owner_name: '',
             owner_mobile: '',
             owner_email: user.email || '',
-            logo_url: profile.logo_url || ''
+            logo_url: profile.logo_url || '',
+            avatar_url: profile.avatar_url || ''
           });
         }
       }
@@ -123,7 +128,7 @@ export function ConfigurationPage() {
       return;
     }
 
-    setUploading(true);
+    setUploadingLogo(true);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `logo-${user.id}-${Date.now()}.${fileExt}`;
@@ -145,7 +150,47 @@ export function ConfigurationPage() {
       console.error('Error uploading logo:', error);
       toast.error('Failed to upload logo');
     } finally {
-      setUploading(false);
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `avatar-${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('profiles')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('profiles')
+        .getPublicUrl(filePath);
+
+      setBusinessInfo(prev => ({ ...prev, avatar_url: urlData.publicUrl }));
+      toast.success('Avatar uploaded!');
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      toast.error('Failed to upload avatar');
+    } finally {
+      setUploadingAvatar(false);
     }
   };
 
@@ -168,7 +213,8 @@ export function ConfigurationPage() {
             owner_name: businessInfo.owner_name.trim() || null,
             owner_mobile: businessInfo.owner_mobile.trim() || null,
             owner_email: businessInfo.owner_email.trim() || null,
-            logo_url: businessInfo.logo_url.trim() || null
+            logo_url: businessInfo.logo_url.trim() || null,
+            avatar_url: businessInfo.avatar_url.trim() || null
           })
           .eq('id', clinicId);
 
@@ -185,6 +231,7 @@ export function ConfigurationPage() {
             owner_mobile: businessInfo.owner_mobile.trim() || null,
             owner_email: businessInfo.owner_email.trim() || null,
             logo_url: businessInfo.logo_url.trim() || null,
+            avatar_url: businessInfo.avatar_url.trim() || null,
             created_by: user.id
           })
           .select()
@@ -211,7 +258,8 @@ export function ConfigurationPage() {
             clinic_name: businessInfo.clinic_name.trim(),
             phone: businessInfo.phone.trim() || null,
             website: businessInfo.website.trim() || null,
-            logo_url: businessInfo.logo_url.trim() || null
+            logo_url: businessInfo.logo_url.trim() || null,
+            avatar_url: businessInfo.avatar_url.trim() || null
           })
           .eq('id', doctorProfileId);
       }
@@ -275,7 +323,9 @@ export function ConfigurationPage() {
             data={businessInfo}
             onChange={handleBusinessInfoChange}
             onLogoUpload={handleLogoUpload}
-            uploading={uploading}
+            onAvatarUpload={handleAvatarUpload}
+            uploadingLogo={uploadingLogo}
+            uploadingAvatar={uploadingAvatar}
           />
         </TabsContent>
 
