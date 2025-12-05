@@ -116,12 +116,13 @@ export function LeadsPage() {
 
     try {
       
-      // Fetch leads with explicit error handling
+      // Fetch leads with physician data
       const { data: leadsData, error: leadsError } = await supabase
         .from('quiz_leads')
         .select(`
           *,
-          doctor:doctor_profiles(first_name, last_name)
+          doctor:doctor_profiles(first_name, last_name),
+          physician:clinic_physicians(id, first_name, last_name, degree_type)
         `)
         .eq('doctor_id', doctorId)
         .order('submitted_at', { ascending: false });
