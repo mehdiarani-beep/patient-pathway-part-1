@@ -28,7 +28,7 @@ export function LocationsPage() {
   const [loading, setLoading] = useState(true);
   const [locations, setLocations] = useState<ClinicLocation[]>([]);
   const [clinicId, setClinicId] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<'owner' | 'manager' | 'staff'>('staff');
+  const [userRole, setUserRole] = useState<'owner' | 'staff'>('staff');
   
   // Add/Edit form states
   const [showForm, setShowForm] = useState(false);
@@ -200,8 +200,8 @@ export function LocationsPage() {
   };
 
   const handleSetPrimary = async (locationId: string) => {
-    if (userRole !== 'owner' && userRole !== 'manager') {
-      toast.error('Only owners and managers can set primary locations');
+    if (userRole !== 'owner') {
+      toast.error('Only owners can set primary locations');
       return;
     }
 
@@ -230,7 +230,7 @@ export function LocationsPage() {
     }
   };
 
-  const canManageLocations = userRole === 'owner' || userRole === 'manager';
+  const canManageLocations = userRole === 'owner';
 
   if (loading) {
     return (

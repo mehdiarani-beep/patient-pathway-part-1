@@ -49,8 +49,8 @@ export function DashboardHeader() {
 
       const userProfile = userProfiles[0];
       
-      // Check if user is staff or manager
-      if (userProfile.is_staff || userProfile.is_manager) {
+      // Check if user is staff
+      if (userProfile.is_staff) {
         setIsTeamMember(true);
         // If team member, fetch the main doctor's profile using doctor_id_clinic
         if (userProfile.doctor_id_clinic) {

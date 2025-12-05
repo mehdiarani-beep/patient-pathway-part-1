@@ -117,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Check if they already have a doctor profile
         const { data: existingProfile, error: profileError } = await supabase
           .from('doctor_profiles')
-          .select('id, doctor_id_clinic, is_staff, is_manager')
+          .select('id, doctor_id_clinic, is_staff')
           .eq('user_id', user.id)
           .single();
 

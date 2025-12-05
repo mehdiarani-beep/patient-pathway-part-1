@@ -55,7 +55,7 @@ const SocialMediaCreator = () => {
         const userProfile = userProfiles[0];
         
         // Check if user is staff or manager
-        if (userProfile.is_staff || userProfile.is_manager) {
+        if (userProfile.is_staff) {
           // If team member, fetch the main doctor's profile using doctor_id_clinic
           if (userProfile.doctor_id_clinic) {
             const { data: mainDoctorProfile, error: mainDoctorError } = await supabase

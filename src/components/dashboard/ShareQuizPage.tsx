@@ -83,6 +83,7 @@ export function ShareQuizPage() {
   const [sendingEmail, setSendingEmail] = useState(false);
 
   const doctorIdFromUrl = searchParams.get('doctor');
+  const physicianId = searchParams.get('physician');
   const heightFromUrl = searchParams.get('height');
 
   useEffect(() => {
@@ -142,7 +143,7 @@ export function ShareQuizPage() {
           const userProfile = userProfiles[0];
           
           // Check if user is staff or manager
-          if (userProfile.is_staff || userProfile.is_manager) {
+          if (userProfile.is_staff) {
             // If team member, fetch the main doctor's profile using doctor_id_clinic
             if (userProfile.doctor_id_clinic) {
               const { data: mainDoctorProfile, error: mainDoctorError } = await supabase
@@ -202,9 +203,10 @@ export function ShareQuizPage() {
     
     const trackingParams = new URLSearchParams();
     
-    // Add doctor ID if available
+    // Add doctor ID and physician if available (prefer explicit physicianId from URL)
     if (doctorProfile?.id) {
       trackingParams.set('doctor', doctorProfile.id);
+      trackingParams.set('physician', physicianId || doctorProfile.id);
     }
 
     // Add source tracking
@@ -215,8 +217,11 @@ export function ShareQuizPage() {
     trackingParams.set('utm_campaign', 'quiz_share');
 
     return `${baseQuizUrl}?${trackingParams.toString()}`;
-  }, [customQuizId, quizId, doctorProfile, webSource, baseUrl]);
-
+  }, [customQuizId, quizId, doctorProfile, webSource, baseUrl, physicianId]);
+  
+  
+  
+  
   const getChatFormatUrl = useCallback((source?: string) => {
     const baseQuizUrl = customQuizId
       ? `${baseUrl}/embed/custom/${customQuizId}`
@@ -224,9 +229,10 @@ export function ShareQuizPage() {
     
     const trackingParams = new URLSearchParams();
     
-    // Add doctor ID if available
+    // Add doctor ID and physician if available (prefer explicit physicianId from URL)
     if (doctorProfile?.id) {
       trackingParams.set('doctor', doctorProfile.id);
+      trackingParams.set('physician', physicianId || doctorProfile.id);
     }
 
     // Add source tracking
@@ -237,7 +243,7 @@ export function ShareQuizPage() {
     trackingParams.set('utm_campaign', 'quiz_share');
 
     return `${baseQuizUrl}?${trackingParams.toString()}`;
-  }, [customQuizId, quizId, doctorProfile, webSource, baseUrl]);
+  }, [customQuizId, quizId, doctorProfile, webSource, baseUrl, physicianId]);
 
   const getStandardFormatUrl = useCallback((source?: string) => {
     // For NOSE_SNOT, use the special /share route instead of /quiz
@@ -249,9 +255,10 @@ export function ShareQuizPage() {
     
     const trackingParams = new URLSearchParams();
     
-    // Add doctor ID if available
+    // Add doctor ID and physician if available (prefer explicit physicianId from URL)
     if (doctorProfile?.id) {
       trackingParams.set('doctor', doctorProfile.id);
+      trackingParams.set('physician', physicianId || doctorProfile.id);
     }
 
     // Add source tracking
@@ -296,31 +303,40 @@ const generateShortUrlForFormat = async (longUrl: string, key: string) => {
       return longUrl;
     }
 
-    // Generate a unique 6-character short ID
-    const shortId = nanoid(6);
-    
-    // Store in link_mappings table
-    const { error } = await supabase
-      .from('link_mappings')
-      .insert({
-        short_id: shortId,
-        doctor_id: doctorProfile.id,
-        quiz_type: customQuizId ? 'custom' : quizId?.toLowerCase(),
-        custom_quiz_id: customQuizId || null,
-        lead_source: webSource
-      });
+    // Resolve physician id: prefer explicit physicianId if it exists in doctor_profiles
+    let physicianToInsert = doctorProfile.id;
+    if (physicianId) {
+      try {
+        const { data: physData, error: physErr } = await supabase
+          .from('doctor_profiles')
+          .select('id')
+          .eq('id', physicianId)
+          .single();
+        if (!physErr && physData?.id) physicianToInsert = physicianId;
+      } catch (e) {
+        console.warn('Error validating physicianId:', e);
+      }
+    }
+
+    const session = await supabase.auth.getSession();
+    const { data, error } = await supabase.functions.invoke('custom-short-url', {
+      body: {
+        longUrl,
+        physicianId: physicianToInsert,
+      },
+      headers: {
+        Authorization: `Bearer ${session?.data.session?.access_token}`,
+      },
+    });
 
     if (error) {
-      console.error('Error inserting link mapping:', error);
       throw error;
     }
-    
-    // Return self-hosted short URL
-    const selfHostedShortUrl = `${baseUrl}/s/${shortId}`;
-    setShortUrls(prev => ({ ...prev, [key]: selfHostedShortUrl }));
+
+    const { shortUrl } = data;
+    setShortUrls(prev => ({ ...prev, [key]: shortUrl }));
     toast.success('Short URL generated successfully!');
-    
-    return selfHostedShortUrl;
+    return shortUrl;
   } catch (error) {
     console.error('Error generating short URL:', error);
     toast.error('Failed to generate short URL');
@@ -341,12 +357,14 @@ const generateShortUrl = async (source?: string) => {
     // Generate a unique 6-character short ID
     const shortId = nanoid(6);
     
-    // Store in link_mappings table
+    // Store in link_mappings table (include physician and resolved target_url)
     const { error } = await supabase
       .from('link_mappings')
       .insert({
         short_id: shortId,
         doctor_id: doctorProfile.id,
+        physician_id: physicianId || doctorProfile.id,
+        target_url: source ? getQuizUrl(source) : getQuizUrl(),
         quiz_type: customQuizId ? 'custom' : quizId?.toLowerCase(),
         custom_quiz_id: customQuizId || null,
         lead_source: source || webSource
@@ -390,12 +408,14 @@ const generateShortUrlWithRetry = async (source?: string, retries = 3) => {
       // Generate a unique 6-character short ID
       const shortId = nanoid(6);
       
-      // Store in link_mappings table
+      // Store in link_mappings table (include physician and resolved target_url)
       const { error } = await supabase
         .from('link_mappings')
         .insert({
           short_id: shortId,
           doctor_id: doctorProfile.id,
+          physician_id: physicianId || doctorProfile.id,
+          target_url: source ? getQuizUrl(source) : getQuizUrl(),
           quiz_type: customQuizId ? 'custom' : quizId?.toLowerCase(),
           custom_quiz_id: customQuizId || null,
           lead_source: source || webSource
@@ -448,9 +468,8 @@ const handleSocialShare = async (platform: string) => {
     switch (platform) {
       case 'facebook':
         try {
-          // Use shortened URL for Facebook sharing (Facebook can't access localhost)
-          const urlToShare = shortUrl || directLink;
-          socialUrl = `https://www.facebook.com/sharer.php?u=${encodeURIComponent(urlToShare)}`;
+          // Use direct link (includes physician param)
+          socialUrl = `https://www.facebook.com/sharer.php?u=${encodeURIComponent(directLink)}`;
           toast.info('Opening Facebook...');
         } catch (error) {
           console.error('Error generating Facebook URL:', error);
@@ -458,16 +477,13 @@ const handleSocialShare = async (platform: string) => {
         }
         break;
       case 'twitter':
-        const twitterUrl = shortUrl || directLink;
-        socialUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(twitterUrl)}&text=${message}&hashtags=health,assessment`;
+        socialUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(directLink)}&text=${message}&hashtags=health,assessment`;
         break;
       case 'email':
-        const emailUrl = shortUrl || directLink;
-        socialUrl = `mailto:?subject=${encodeURIComponent(quizInfo.title)}&body=${message}%0A%0A${encodeURIComponent(emailUrl)}`;
+        socialUrl = `mailto:?subject=${encodeURIComponent(quizInfo.title)}&body=${message}%0A%0A${encodeURIComponent(directLink)}`;
         break;
       case 'text':
-        const smsUrl = shortUrl || directLink;
-        socialUrl = `sms:?&body=${message}%0A%0A${encodeURIComponent(smsUrl)}`;
+        socialUrl = `sms:?&body=${message}%0A%0A${encodeURIComponent(directLink)}`;
         break;
       default:
         toast.error('Unsupported platform');
@@ -515,6 +531,7 @@ const getTrackedLink = (source: string, campaign?: string) => {
   
   if (doctorProfile?.id) {
     trackingParams.set('doctor', doctorProfile.id);
+    trackingParams.set('physician', physicianId || doctorProfile.id);
   }
 
   trackingParams.set('source', source);
@@ -646,9 +663,10 @@ const sendEmail = async () => {
     const url = new URL(`${baseUrl}/embed/${customQuizId || quizId}`);
     if (doctorProfile?.id) {
       url.searchParams.set('doctor', doctorProfile.id);
+      url.searchParams.set('physician', physicianId || doctorProfile.id);
     }
     return url.toString();
-  }, [baseUrl, customQuizId, quizId, doctorProfile?.id]);
+  }, [baseUrl, customQuizId, quizId, doctorProfile?.id, physicianId]);
 
   const shareUrl = useMemo(() => getQuizUrl(), [getQuizUrl]);
   const chatFormatUrl = useMemo(() => getChatFormatUrl(), [getChatFormatUrl]);
@@ -656,7 +674,7 @@ const sendEmail = async () => {
 
 
   const mailHtmlNOSE = useMemo(() => {
-    const noseUrl = `${baseUrl}/share/nose?doctor=${doctorProfile?.id || 'demo'}&utm_source=email`;
+    const noseUrl = `${baseUrl}/share/nose?doctor=${doctorProfile?.id || 'demo'}&physician=${physicianId || doctorProfile?.id || 'demo'}&utm_source=email`;
     const websiteLink = doctorProfile?.website
       ? `<a target="_blank" href="${doctorProfile.website}" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;text-decoration:underline;color:#1376C8;font-size:14px"><img src="${doctorProfile?.avatar_url || 'Your Website Image'}" alt="" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="200" height="47"></a>`
       : `<img src="https://cdn.prod.website-files.com/6213b8b7ae0610f9484d627a/63d85029011f18f6bfabf2f3_Exhale_Sinus_Horizontal_logo-p-800.png" alt="" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="200" height="47">`;
@@ -685,7 +703,7 @@ const sendEmail = async () => {
   }, [doctorProfile, baseUrl]);
 
   const mailHtmlSNOT12 = useMemo(() => {
-    const snot12Url = `${baseUrl}/share/snot12?doctor=${doctorProfile?.id || 'demo'}&utm_source=email`;
+    const snot12Url = `${baseUrl}/share/snot12?doctor=${doctorProfile?.id || 'demo'}&physician=${physicianId || doctorProfile?.id || 'demo'}&utm_source=email`;
     const websiteLink = doctorProfile?.website
       ? `<a target="_blank" href="${doctorProfile.website}" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;text-decoration:underline;color:#1376C8;font-size:14px"><img src="${doctorProfile?.avatar_url || 'Your Website Image'}" alt="" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="200" height="47"></a>`
       : `<img src="https://cdn.prod.website-files.com/6213b8b7ae0610f9484d627a/63d85029011f18f6bfabf2f3_Exhale_Sinus_Horizontal_logo-p-800.png" alt="" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="200" height="47">`;
@@ -713,7 +731,7 @@ const sendEmail = async () => {
   }, [doctorProfile, baseUrl]);
 
 const mailHtmlSNOT22 = useMemo(() => {
-      const snot22Url = `${baseUrl}/share/snot22?doctor=${doctorProfile?.id || 'demo'}&utm_source=email`;
+      const snot22Url = `${baseUrl}/share/snot22?doctor=${doctorProfile?.id || 'demo'}&physician=${physicianId || doctorProfile?.id || 'demo'}&utm_source=email`;
     const websiteLink = doctorProfile?.website
       ? `<a target="_blank" href="${doctorProfile.website}" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;text-decoration:underline;color:#1376C8;font-size:14px"><img src="${doctorProfile?.avatar_url || 'Your Website Image'}" alt="" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="200" height="47"></a>`
       : `<img src="https://cdn.prod.website-files.com/6213b8b7ae0610f9484d627a/63d85029011f18f6bfabf2f3_Exhale_Sinus_Horizontal_logo-p-800.png" alt="" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="200" height="47">`;
@@ -740,7 +758,7 @@ const mailHtmlSNOT22 = useMemo(() => {
 <td align="left" style="padding:0;Margin:0;padding-left:20px;padding-right:20px;padding-bottom:30px"><table width="100%" cellspacing="0" cellpadding="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px"><tr style="border-collapse:collapse"><td valign="top" align="center" style="padding:0;Margin:0;width:560px"><table width="100%" cellspacing="0" cellpadding="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px"><tr style="border-collapse:collapse"><td align="center" style="padding:0;Margin:0;display:none"></td> </tr></table></td></tr></table></td></tr></table></td></tr></table></td></tr></table></div></body></html>`;
   }, [doctorProfile, baseUrl]);
 const mailHtmlTNSS = useMemo(() => {
-      const tnssUrl = `${baseUrl}/share/tnss?doctor=${doctorProfile?.id || 'demo'}&utm_source=email`;
+      const tnssUrl = `${baseUrl}/share/tnss?doctor=${doctorProfile?.id || 'demo'}&physician=${physicianId || doctorProfile?.id || 'demo'}&utm_source=email`;
     const websiteLink = doctorProfile?.website
       ? `<a target="_blank" href="${doctorProfile.website}" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;text-decoration:underline;color:#1376C8;font-size:14px"><img src="${doctorProfile?.avatar_url || 'Your Website Image'}" alt="" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="200" height="47"></a>`
       : `<img src="https://cdn.prod.website-files.com/6213b8b7ae0610f9484d627a/63d85029011f18f6bfabf2f3_Exhale_Sinus_Horizontal_logo-p-800.png" alt="" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="200" height="47">`;
@@ -979,8 +997,12 @@ const mailHtmlTNSS = useMemo(() => {
   };
 
   
-  const doctorLandingUrl = doctorProfile?.id ? `${baseUrl}/share/${quizId}/${doctorProfile.id}` : `${baseUrl}/share/${quizId}/demo`;
-  const doctorEditingUrl = doctorProfile?.id ? `${baseUrl}/${quizId}-editor/${doctorProfile.id}` : `${baseUrl}/share/${quizId}/demo`;
+  const doctorLandingUrl = doctorProfile?.id
+    ? `${baseUrl}/share/${quizId}/${doctorProfile.id}?physician=${physicianId || doctorProfile.id}`
+    : `${baseUrl}/share/${quizId}/demo?physician=demo`;
+  const doctorEditingUrl = doctorProfile?.id
+    ? `${baseUrl}/${quizId}-editor/${doctorProfile.id}?physician=${physicianId || doctorProfile.id}`
+    : `${baseUrl}/share/${quizId}/demo?physician=demo`;
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
@@ -1062,7 +1084,7 @@ const mailHtmlTNSS = useMemo(() => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(doctorLandingUrl, '_blank')}
+                        onClick={() => window.open(shareUrl, '_blank')}
                         title="Open Landing Page"
                       >
                         <ExternalLink className="w-3 h-3" />
@@ -1119,7 +1141,7 @@ const mailHtmlTNSS = useMemo(() => {
                       {showQrCode ? (
                         <>
                           <div id="landing-qr" className="bg-white p-2 rounded-lg border border-gray-200">
-                            <QRCodeSVG value={doctorLandingUrl} size={100} />
+                            <QRCodeSVG value={shareUrl} size={100} />
                           </div>
                           <Button 
                             variant="outline" 

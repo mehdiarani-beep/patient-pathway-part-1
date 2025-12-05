@@ -26,8 +26,6 @@ export function ConfigurationPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [clinicId, setClinicId] = useState<string | null>(null);
   const [doctorProfileId, setDoctorProfileId] = useState<string | null>(null);
   
@@ -50,60 +48,85 @@ export function ConfigurationPage() {
 
   const fetchClinicData = async () => {
     if (!user) return;
-    
+  
     setLoading(true);
     try {
-      // Get doctor profile with clinic info
-      const { data: profile, error: profileError } = await supabase
-        .from('doctor_profiles')
-        .select('id, clinic_id, clinic_name, phone, website, logo_url, avatar_url')
-        .eq('user_id', user.id)
-        .single();
-
-      if (profileError && profileError.code !== 'PGRST116') {
-        throw profileError;
-      }
-
-      if (profile) {
-        setDoctorProfileId(profile.id);
-        setClinicId(profile.clinic_id);
-
-        // If clinic exists, fetch clinic profile data
-        if (profile.clinic_id) {
-          const { data: clinic, error: clinicError } = await supabase
-            .from('clinic_profiles')
-            .select('*')
-            .eq('id', profile.clinic_id)
-            .single();
-
-          if (!clinicError && clinic) {
-            setBusinessInfo({
-              clinic_name: clinic.clinic_name || '',
-              website: clinic.website || '',
-              phone: clinic.phone || '',
-              owner_name: clinic.owner_name || '',
-              owner_mobile: clinic.owner_mobile || '',
-              owner_email: clinic.owner_email || '',
-              logo_url: clinic.logo_url || '',
-              avatar_url: clinic.avatar_url || ''
-            });
-          }
-        } else {
-          // Use doctor profile data if no clinic
+      const physicianID = new URLSearchParams(window.location.search).get('physicianID');
+      const doctorIdparam = new URLSearchParams(window.location.search).get('id');
+  
+      if (physicianID === doctorIdparam) {
+        // The user is a physician, so fetch their data from the clinic_physicians table
+        const { data: physician, error: physicianError } = await supabase
+          .from('clinic_physicians')
+          .select('*')
+          .eq('id', physicianID)
+          .single();
+  
+        if (physicianError) throw physicianError;
+  
+        if (physician) {
           setBusinessInfo({
-            clinic_name: profile.clinic_name || '',
-            website: profile.website || '',
-            phone: profile.phone || '',
+            clinic_name: physician.full_name || '',
+            website: physician.website || '',
+            phone: physician.phone || '',
             owner_name: '',
             owner_mobile: '',
-            owner_email: user.email || '',
-            logo_url: profile.logo_url || '',
-            avatar_url: profile.avatar_url || ''
+            owner_email: physician.email || '',
+            logo_url: physician.avatar_url || '',
+            avatar_url: physician.avatar_url || ''
           });
+        }
+      } else {
+        // The user is a clinic, so fetch their data from the clinic_profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('doctor_profiles')
+          .select('id, clinic_id, clinic_name, phone, website, logo_url, avatar_url')
+          .eq('user_id', user.id)
+          .single();
+  
+        if (profileError && profileError.code !== 'PGRST116') {
+          throw profileError;
+        }
+  
+        if (profile) {
+          setDoctorProfileId(profile.id);
+          setClinicId(profile.clinic_id);
+  
+          if (profile.clinic_id) {
+            const { data: clinic, error: clinicError } = await supabase
+              .from('clinic_profiles')
+              .select('*')
+              .eq('id', profile.clinic_id)
+              .single();
+  
+            if (!clinicError && clinic) {
+              setBusinessInfo({
+                clinic_name: clinic.clinic_name || '',
+                website: clinic.website || '',
+                phone: clinic.phone || '',
+                owner_name: clinic.owner_name || '',
+                owner_mobile: clinic.owner_mobile || '',
+                owner_email: clinic.owner_email || '',
+                logo_url: clinic.logo_url || '',
+                avatar_url: clinic.avatar_url || ''
+              });
+            }
+          } else {
+            setBusinessInfo({
+              clinic_name: profile.clinic_name || '',
+              website: profile.website || '',
+              phone: profile.phone || '',
+              owner_name: '',
+              owner_mobile: '',
+              owner_email: user.email || '',
+              logo_url: profile.logo_url || '',
+              avatar_url: profile.avatar_url || ''
+            });
+          }
         }
       }
     } catch (error) {
-      console.error('Error fetching clinic data:', error);
+      console.error('Error fetching data:', error);
       toast.error('Failed to load configuration');
     } finally {
       setLoading(false);
@@ -114,85 +137,6 @@ export function ConfigurationPage() {
     setBusinessInfo(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
-      return;
-    }
-
-    setUploadingLogo(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `logo-${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `logos/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('profiles')
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from('profiles')
-        .getPublicUrl(filePath);
-
-      setBusinessInfo(prev => ({ ...prev, logo_url: urlData.publicUrl }));
-      toast.success('Logo uploaded!');
-    } catch (error: any) {
-      console.error('Error uploading logo:', error);
-      toast.error('Failed to upload logo');
-    } finally {
-      setUploadingLogo(false);
-    }
-  };
-
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
-      return;
-    }
-
-    setUploadingAvatar(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `avatar-${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('profiles')
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from('profiles')
-        .getPublicUrl(filePath);
-
-      setBusinessInfo(prev => ({ ...prev, avatar_url: urlData.publicUrl }));
-      toast.success('Avatar uploaded!');
-    } catch (error: any) {
-      console.error('Error uploading avatar:', error);
-      toast.error('Failed to upload avatar');
-    } finally {
-      setUploadingAvatar(false);
-    }
-  };
 
   const handleSaveBusinessInfo = async () => {
     if (!user || !businessInfo.clinic_name.trim()) {
@@ -322,10 +266,6 @@ export function ConfigurationPage() {
           <BusinessInfoSection
             data={businessInfo}
             onChange={handleBusinessInfoChange}
-            onLogoUpload={handleLogoUpload}
-            onAvatarUpload={handleAvatarUpload}
-            uploadingLogo={uploadingLogo}
-            uploadingAvatar={uploadingAvatar}
           />
         </TabsContent>
 

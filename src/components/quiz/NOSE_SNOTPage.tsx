@@ -24,6 +24,9 @@ import sinusProblemTissue from "@/assets/sinus-problem-tissue.jpg";
 import sinusPressure from "@/assets/sinus-pressure.jpg";
 import sinusRelief from "@/assets/sinus-relief.jpg";
 import { NOSESNOTPage } from "./NOSESNOTPage";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Template5Props {
   doctorName: string;
@@ -33,15 +36,18 @@ interface Template5Props {
 
 type TestType = 'nose' | 'snot' | null;
 
-export const NOSE_SNOT = ({ doctorName, doctorImage, doctorId }: Template5Props) => {
+export const NOSE_SNOT = ( physicianId, doctorIdparam ) => {
   const [selectedTest, setSelectedTest] = useState<TestType>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  
+
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [clinicId, setClinicId] = useState<string | null>(null);
+  const [doctorProfileId, setDoctorProfileId] = useState<string | null>(null);
   // Build dynamic URLs
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const quizParams = `doctor=${doctorId}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share`;
+  const quizParams = `doctor=${doctorIdparam}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share`;
 
-  // Detect mobile and update on resize
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -99,7 +105,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorId }: Template5Props)
     const testElement = document.getElementById('test-section');
     if (testElement) {
       testElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+          }
   };
 
   const handleTestSelection = (type: TestType) => {
@@ -174,7 +180,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorId }: Template5Props)
               </Button>
             </div>
             <div className="bg-card/50 backdrop-blur-sm rounded-lg border border-border/20 overflow-hidden mt-4 md:mt-0 min-h-[400px] md:min-h-[480px]">
-              <NOSESNOTPage doctorId={doctorId} />
+              <NOSESNOTPage doctorId={doctorIdparam} />
             </div>
           </div>
         </div>
@@ -625,7 +631,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorId }: Template5Props)
                 </p>
                 <p className="text-center text-muted-foreground mt-4 sm:mt-6 text-sm sm:text-base">
                   If you're experiencing symptoms from both categories, start with the test that best matches 
-                  your <em>most bothersome</em> symptoms. Dr. {doctorName} will review your results and help 
+                  your <em>most bothersome</em> symptoms. Dr. Vaughn will review your results and help 
                   determine if you need additional evaluation.
                 </p>
               </CardContent>
@@ -1063,9 +1069,9 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorId }: Template5Props)
                   <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3 sm:mb-4">
                     <span className="text-xl sm:text-2xl font-bold text-primary">2</span>
                   </div>
-                  <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">Dr. {doctorName} Reviews</h3>
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">Dr. Vaughn Reviews</h3>
                   <p className="text-muted-foreground text-xs sm:text-sm md:text-base">
-                    Your results are sent directly to Dr. {doctorName}, who will personally review your symptoms.
+                    Your results are sent directly to Dr. Vaughn, who will personally review your symptoms.
                   </p>
                 </CardContent>
               </Card>
@@ -1221,7 +1227,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorId }: Template5Props)
                   <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
                     No. The NOSE and SNOT-12 assessments are screening tools that help quantify your symptoms. 
                     They are widely used in clinical practice but do not replace a thorough evaluation by 
-                    Dr. {doctorName}. Your test results will guide the consultation and help determine if 
+                    Dr. Vaughn. Your test results will guide the consultation and help determine if 
                     further imaging or examination is needed.
                   </AccordionContent>
                 </AccordionItem>
@@ -1320,7 +1326,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorId }: Template5Props)
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
                     This is very common! Many patients have both structural nasal issues and chronic sinusitis. 
-                    Dr. {doctorName} will perform a comprehensive evaluation to identify all contributing factors 
+                    Dr. Vaughn will perform a comprehensive evaluation to identify all contributing factors 
                     and may recommend combined treatments to address multiple issues simultaneously.
                   </AccordionContent>
                 </AccordionItem>

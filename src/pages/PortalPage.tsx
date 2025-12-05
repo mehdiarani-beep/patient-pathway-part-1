@@ -51,7 +51,7 @@ export default function PortalPage() {
       // Check for doctor profiles (includes both doctors and team members)
       const { data: doctorProfiles, error: doctorError } = await supabase
         .from('doctor_profiles')
-        .select('id, access_control, first_name, last_name, email, is_staff, is_manager, doctor_id_clinic')
+        .select('id, access_control, first_name, last_name, email, is_staff, doctor_id_clinic')
         .eq('user_id', userId);
 
       if (doctorError) {
@@ -64,7 +64,7 @@ export default function PortalPage() {
         
         if (profilesWithAccess.length > 0) {
           console.log('Access granted via doctor profile!');
-          console.log('User type:', profilesWithAccess[0].is_staff ? 'Staff' : profilesWithAccess[0].is_manager ? 'Manager' : 'Doctor');
+          console.log('User type:', profilesWithAccess[0].is_staff ? 'Staff' : 'Doctor');
           setHasAccess(true);
           return;
         }

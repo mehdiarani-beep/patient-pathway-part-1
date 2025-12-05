@@ -95,8 +95,10 @@ export function useClinicPhysicians() {
   }, [clinicId]);
 
   useEffect(() => {
-    fetchPhysicians();
-  }, [fetchPhysicians]);
+    if (clinicId) {
+      fetchPhysicians();
+    }
+  }, [clinicId]);
 
   // Add physician
   const addPhysician = async (formData: PhysicianFormData): Promise<ClinicPhysician | null> => {

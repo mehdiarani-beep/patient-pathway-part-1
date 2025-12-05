@@ -61,7 +61,7 @@ export function TrendsPage() {
         const userProfile = userProfiles[0];
         
         // Check if user is staff or manager
-        if (userProfile.is_staff || userProfile.is_manager) {
+        if (userProfile.is_staff) {
           // If team member, use the main doctor's ID from doctor_id_clinic
           if (userProfile.doctor_id_clinic) {
             doctorId = userProfile.doctor_id_clinic;

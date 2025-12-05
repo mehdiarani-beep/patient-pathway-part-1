@@ -59,7 +59,7 @@ export default function TeamMemberLandingPage() {
       // Check if they already have a proper doctor profile
       const { data: existingProfile, error: profileError } = await supabase
         .from('doctor_profiles')
-        .select('id, doctor_id_clinic, is_staff, is_manager, clinic_name')
+        .select('id, doctor_id_clinic, is_staff, clinic_name')
         .eq('user_id', user.id)
         .single();
 

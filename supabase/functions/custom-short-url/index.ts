@@ -26,12 +26,13 @@ serve(async (req) => {
   try {
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     );
 
     // Handle URL creation
     if (req.method === 'POST') {
-      const { longUrl } = await req.json();
+      const { longUrl, physicianId } = await req.json();
 
       if (!longUrl) {
         throw new Error('Missing longUrl parameter');
@@ -83,7 +84,8 @@ serve(async (req) => {
           short_code: shortCode,
           long_url: longUrl,
           created_at: new Date().toISOString(),
-          click_count: 0
+          click_count: 0,
+          physician_id: physicianId
         }])
         .select()
         .single();

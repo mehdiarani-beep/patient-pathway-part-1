@@ -9,15 +9,16 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, UserPlus, Users, Mail, Shield, Settings, Trash2, Crown, UserCheck } from 'lucide-react';
+import { useClinicPhysicians } from '@/hooks/useClinicPhysicians';
+import { Loader2, UserPlus, Users, Mail, Shield, Settings, Trash2, Crown, UserCheck, Stethoscope } from 'lucide-react';
 
 interface ClinicMember {
   id: string;
   email: string;
   first_name: string | null;
   last_name: string | null;
-  role: 'owner' | 'manager' | 'staff';
-  permissions: {
+  role: 'owner' | 'staff' | 'physician';
+  permissions?: {
     leads: boolean;
     content: boolean;
     payments: boolean;
@@ -25,7 +26,9 @@ interface ClinicMember {
   };
   status: 'pending' | 'active' | 'inactive';
   created_at: string;
-  accepted_at: string | null;
+  accepted_at?: string | null;
+  avatar_url?: string | null;
+  headshot_url?: string | null;
 }
 
 interface ClinicLocation {
@@ -42,14 +45,16 @@ export function TeamManagementPage() {
   const [teamMembers, setTeamMembers] = useState<ClinicMember[]>([]);
   const [locations, setLocations] = useState<ClinicLocation[]>([]);
   const [clinicId, setClinicId] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<'owner' | 'manager' | 'staff'>('staff');
+  const [userRole, setUserRole] = useState<'owner' | 'staff'>('staff');
   const [userPermissions, setUserPermissions] = useState<any>(null);
+  const { physicians, loading: physiciansLoading } = useClinicPhysicians();
+  const [combinedMembers, setCombinedMembers] = useState<ClinicMember[]>([]);
   
   // Invite form states
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteFirstName, setInviteFirstName] = useState('');
   const [inviteLastName, setInviteLastName] = useState('');
-  const [inviteRole, setInviteRole] = useState<'manager' | 'staff'>('staff');
+  const [inviteRole, setInviteRole] = useState<'staff'>('staff');
   const [invitePermissions, setInvitePermissions] = useState({
     leads: true,
     content: true,
@@ -126,6 +131,24 @@ export function TeamManagementPage() {
     }
   };
 
+  useEffect(() => {
+    const physicianMembers: ClinicMember[] = physicians.map(p => ({
+      id: p.id,
+      email: p.email || 'No Email Provided',
+      first_name: p.first_name,
+      last_name: p.last_name,
+      role: 'physician',
+      status: p.is_active ? 'active' : 'inactive',
+      created_at: p.created_at,
+      headshot_url: p.headshot_url,
+    }));
+
+    const allMembers = [...teamMembers, ...physicianMembers]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    
+    setCombinedMembers(allMembers);
+  }, [teamMembers, physicians]);
+
   const handleInviteTeamMember = async () => {
     if (!inviteEmail || !clinicId) {
       toast.error('Please enter an email address');
@@ -190,7 +213,7 @@ export function TeamManagementPage() {
     }
   };
 
-  const handleUpdateMemberRole = async (memberId: string, newRole: 'manager' | 'staff') => {
+  const handleUpdateMemberRole = async (memberId: string, newRole: 'staff') => {
     if (userRole !== 'owner') {
       toast.error('Only clinic owners can change member roles');
       return;
@@ -204,8 +227,8 @@ export function TeamManagementPage() {
           permissions: {
             leads: true,
             content: true,
-            payments: newRole === 'manager',
-            team: newRole === 'manager'
+            payments: false,
+            team: false
           }
         })
         .eq('id', memberId);
@@ -245,7 +268,7 @@ export function TeamManagementPage() {
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'owner': return <Crown className="w-4 h-4" />;
-      case 'manager': return <Shield className="w-4 h-4" />;
+      case 'physician': return <Stethoscope className="w-4 h-4" />;
       default: return <Users className="w-4 h-4" />;
     }
   };
@@ -253,12 +276,12 @@ export function TeamManagementPage() {
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'owner': return 'bg-yellow-100 text-yellow-800';
-      case 'manager': return 'bg-blue-100 text-blue-800';
+      case 'physician': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  if (loading) {
+  if (loading || physiciansLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="w-8 h-8 animate-spin" />
@@ -266,7 +289,7 @@ export function TeamManagementPage() {
     );
   }
 
-  const canManageTeam = userRole === 'owner' || (userRole === 'manager' && userPermissions?.team);
+  const canManageTeam = userRole === 'owner';
 
   return (
     <div className="space-y-6">
@@ -288,17 +311,25 @@ export function TeamManagementPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5" />
-            Team Members ({teamMembers.length})
+            Team Members ({combinedMembers.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {teamMembers.map((member) => (
+            {combinedMembers.map((member) => (
               <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                    <UserCheck className="w-5 h-5 text-gray-600" />
-                  </div>
+                  {member.avatar_url || member.headshot_url ? (
+                    <img
+                      src={member.avatar_url || member.headshot_url}
+                      alt={`${member.first_name} ${member.last_name}`}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                      <UserCheck className="w-5 h-5 text-gray-600" />
+                    </div>
+                  )}
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-medium">
@@ -319,34 +350,37 @@ export function TeamManagementPage() {
                     </div>
                     <p className="text-sm text-gray-600">{member.email}</p>
                     <div className="flex items-center gap-4 mt-1">
-                      <span className={`text-xs ${member.permissions.leads ? 'text-green-600' : 'text-gray-400'}`}>
-                        Leads
-                      </span>
-                      <span className={`text-xs ${member.permissions.content ? 'text-green-600' : 'text-gray-400'}`}>
-                        Content
-                      </span>
-                      <span className={`text-xs ${member.permissions.payments ? 'text-green-600' : 'text-gray-400'}`}>
-                        Payments
-                      </span>
-                      <span className={`text-xs ${member.permissions.team ? 'text-green-600' : 'text-gray-400'}`}>
-                        Team
-                      </span>
+                      {member.permissions && (
+                        <>
+                          <span className={`text-xs ${member.permissions.leads ? 'text-green-600' : 'text-gray-400'}`}>
+                            Leads
+                          </span>
+                          <span className={`text-xs ${member.permissions.content ? 'text-green-600' : 'text-gray-400'}`}>
+                            Content
+                          </span>
+                          <span className={`text-xs ${member.permissions.payments ? 'text-green-600' : 'text-gray-400'}`}>
+                            Payments
+                          </span>
+                          <span className={`text-xs ${member.permissions.team ? 'text-green-600' : 'text-gray-400'}`}>
+                            Team
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
                 
-                {canManageTeam && member.role !== 'owner' && (
+                {canManageTeam && member.role !== 'owner' && member.role !== 'physician' && (
                   <div className="flex items-center gap-2">
                     <Select
                       value={member.role}
-                      onValueChange={(value: 'manager' | 'staff') => handleUpdateMemberRole(member.id, value)}
+                      onValueChange={(value: 'staff') => handleUpdateMemberRole(member.id, value)}
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="staff">Staff</SelectItem>
-                        <SelectItem value="manager">Manager</SelectItem>
                       </SelectContent>
                     </Select>
                     
@@ -362,7 +396,7 @@ export function TeamManagementPage() {
               </div>
             ))}
             
-            {teamMembers.length === 0 && (
+            {combinedMembers.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                 <p>No team members yet</p>
@@ -422,13 +456,12 @@ export function TeamManagementPage() {
 
             <div>
               <Label htmlFor="role">Role</Label>
-              <Select value={inviteRole} onValueChange={(value: 'manager' | 'staff') => setInviteRole(value)}>
+              <Select value={inviteRole} onValueChange={(value: 'staff') => setInviteRole(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="staff">Staff</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -452,26 +485,7 @@ export function TeamManagementPage() {
                     onCheckedChange={(checked) => setInvitePermissions(prev => ({ ...prev, content: checked }))}
                   />
                 </div>
-                {inviteRole === 'manager' && (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="payments" className="text-sm">View Payments</Label>
-                      <Switch
-                        id="payments"
-                        checked={invitePermissions.payments}
-                        onCheckedChange={(checked) => setInvitePermissions(prev => ({ ...prev, payments: checked }))}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="team" className="text-sm">Manage Team</Label>
-                      <Switch
-                        id="team"
-                        checked={invitePermissions.team}
-                        onCheckedChange={(checked) => setInvitePermissions(prev => ({ ...prev, team: checked }))}
-                      />
-                    </div>
-                  </>
-                )}
+                {/* Manager role removed — managers are treated as staff now. */}
               </div>
             </div>
 

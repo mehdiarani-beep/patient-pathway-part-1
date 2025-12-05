@@ -129,12 +129,12 @@ export const AnimatedSidebar: React.FC<AnimatedSidebarProps> = ({ currentPage, o
     try {
       const { data: userProfiles, error } = await supabase
         .from('doctor_profiles')
-        .select('is_staff, is_manager, clinic_id')
+        .select('is_staff, clinic_id')
         .eq('user_id', user.id)
         .single();
 
       if (!error && userProfiles) {
-        setIsTeamMember(userProfiles.is_staff || userProfiles.is_manager);
+        setIsTeamMember(Boolean(userProfiles.is_staff));
       }
     } catch (error) {
       console.error('Error checking team member status:', error);

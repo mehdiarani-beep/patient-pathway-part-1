@@ -2830,12 +2830,12 @@ export function EnhancedAdminDashboard() {
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Users className="w-5 h-5" />
                     Team Members
-                    <Badge variant="secondary" className="ml-auto">
-                      {teamMembers.filter(m => m.role === 'staff' || m.role === 'manager' || m.role === 'owner').length}
+                      <Badge variant="secondary" className="ml-auto">
+                      {teamMembers.filter(m => m.role === 'staff' || m.role === 'owner').length}
                     </Badge>
                   </CardTitle>
                   <CardDescription>
-                    Staff and managers associated with this profile
+                    Staff associated with this profile
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -2849,8 +2849,8 @@ export function EnhancedAdminDashboard() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {teamMembers
-                        .filter(member => member.role === 'staff' || member.role === 'manager' || member.role === 'owner')
+                        {teamMembers
+                        .filter(member => member.role === 'staff' || member.role === 'owner')
                         .slice(0, 3)
                         .map((member) => (
                           <div 
@@ -2873,8 +2873,6 @@ export function EnhancedAdminDashboard() {
                                   className={`text-xs ${
                                     member.role === 'owner' 
                                       ? 'bg-purple-50 text-purple-700 border-purple-200' 
-                                      : member.role === 'manager'
-                                      ? 'bg-blue-50 text-blue-700 border-blue-200'
                                       : 'bg-gray-50 text-gray-700 border-gray-200'
                                   }`}
                                 >
@@ -2898,20 +2896,20 @@ export function EnhancedAdminDashboard() {
                           </div>
                         ))}
                       
-                      {teamMembers.filter(m => m.role === 'staff' || m.role === 'manager' || m.role === 'owner').length > 3 && (
+                      {teamMembers.filter(m => m.role === 'staff' || m.role === 'owner').length > 3 && (
                         <Button 
                           variant="outline" 
                           size="sm" 
                           className="w-full"
                           onClick={() => setDoctorDetailsTab('team')}
                         >
-                          View all {teamMembers.filter(m => m.role === 'staff' || m.role === 'manager' || m.role === 'owner').length} members
+                            View all {teamMembers.filter(m => m.role === 'staff' || m.role === 'owner').length} members
                         </Button>
                       )}
                       
-                      {teamMembers.filter(m => m.role === 'staff' || m.role === 'manager' || m.role === 'owner').length === 0 && (
+                      {teamMembers.filter(m => m.role === 'staff' || m.role === 'owner').length === 0 && (
                         <div className="text-center py-4 text-gray-500 text-sm">
-                          No staff or manager members found
+                          No staff members found
                         </div>
                       )}
                     </div>
@@ -3003,7 +3001,7 @@ export function EnhancedAdminDashboard() {
                       ) : (
                         <div className="space-y-4">
                           {teamMembers
-                            .filter(member => member.role === 'staff' || member.role === 'manager' || member.role === 'owner')
+                            .filter(member => member.role === 'staff' || member.role === 'owner')
                             .map((member) => (
                               <div 
                                 key={member.id} 
@@ -3022,12 +3020,10 @@ export function EnhancedAdminDashboard() {
                                         }
                                       </h4>
                                       <Badge 
-                                        variant={member.role === 'owner' ? 'default' : member.role === 'manager' ? 'secondary' : 'outline'}
+                                        variant={member.role === 'owner' ? 'default' : 'outline'}
                                         className={
                                           member.role === 'owner' 
                                             ? 'bg-purple-100 text-purple-800' 
-                                            : member.role === 'manager'
-                                            ? 'bg-blue-100 text-blue-800'
                                             : 'bg-gray-100 text-gray-800'
                                         }
                                       >
@@ -3082,10 +3078,10 @@ export function EnhancedAdminDashboard() {
                               </div>
                             ))}
                           
-                          {teamMembers.filter(member => member.role === 'staff' || member.role === 'manager' || member.role === 'owner').length === 0 && (
+                          {teamMembers.filter(member => member.role === 'staff' || member.role === 'owner').length === 0 && (
                             <div className="text-center py-8 text-gray-500">
                               <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                              <p className="text-sm">No staff or manager members found</p>
+                              <p className="text-sm">No staff members found</p>
                               <p className="text-xs text-gray-400 mt-1">Team members with other roles are not displayed</p>
                             </div>
                           )}

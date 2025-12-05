@@ -21,6 +21,10 @@ import {
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getOrCreateDoctorProfile, DoctorProfile } from '@/lib/profileUtils';
+import { useClinicPhysicians, ClinicPhysician, PhysicianFormData } from '@/hooks/useClinicPhysicians';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function ProfilePage() {
   const { user } = useAuth();
@@ -45,6 +49,10 @@ export function ProfilePage() {
   });
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [physicianProfile, setPhysicianProfile] = useState<ClinicPhysician | null>(null);
+  const { updatePhysician, emptyForm } = useClinicPhysicians();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [physicianFormData, setPhysicianFormData] = useState<PhysicianFormData>(emptyForm);
 
   useEffect(() => {
     if (user) {
@@ -83,10 +91,10 @@ export function ProfilePage() {
       } else {
         userProfile = userProfiles[0];
         
-        // Check if user is staff or manager
-        if (userProfile.is_staff || userProfile.is_manager) {
+        // Check if user is staff
+        if (userProfile.is_staff) {
           setIsTeamMember(true);
-          setUserRole(userProfile.is_manager ? 'manager' : 'staff');
+          setUserRole('staff');
           // If team member, fetch the main doctor's profile using doctor_id_clinic
           if (userProfile.doctor_id_clinic) {
             const { data: mainDoctorProfile, error: mainDoctorError } = await supabase
@@ -125,13 +133,37 @@ export function ProfilePage() {
         
         if (clinicMember?.role) {
           setUserRole(clinicMember.role);
+          if (clinicMember.role === 'physician') {
+            // Fetch physician-specific profile
+            const { data: physicianData, error: physicianError } = await supabase
+              .from('clinic_physicians')
+              .select('*')
+              .eq('email', user.email)
+              .single();
+
+            if (physicianError) {
+              console.error('Error fetching physician profile:', physicianError);
+            } else {
+              setPhysicianProfile(physicianData);
+              setPhysicianFormData({
+                first_name: physicianData.first_name,
+                last_name: physicianData.last_name,
+                degree_type: physicianData.degree_type,
+                credentials: (physicianData.credentials || []).join(', '),
+                mobile: physicianData.mobile || '',
+                email: physicianData.email || '',
+                bio: physicianData.bio || '',
+                headshot_url: physicianData.headshot_url || ''
+              });
+            }
+          }
         }
       }
       
       if (profile) {
         setDoctorProfile(profile);
         
-        if (userProfile?.is_staff || userProfile?.is_manager) {
+        if (userProfile?.is_staff) {
           // For team members, separate personal data from clinic data
           setFormData({
             first_name: userProfile.first_name || '', // Personal data
@@ -201,251 +233,176 @@ export function ProfilePage() {
 
   const handleSave = async () => {
     if (!user) return;
-    
-    // Validate team member data
-    if (isTeamMember) {
-      if (!teamMemberData.first_name.trim() || !teamMemberData.last_name.trim()) {
-        toast.error('Please enter both first name and last name');
-        return;
+
+    if (userRole === 'physician') {
+      if (!physicianProfile) return;
+      setSaving(true);
+      try {
+        await updatePhysician(physicianProfile.id, physicianFormData);
+        setDialogOpen(false);
+        await fetchDoctorProfile();
+      } catch (error) {
+        console.error('Error updating physician profile:', error);
+      } finally {
+        setSaving(false);
       }
+      return;
     }
     
+    // Validate names
+    if (!formData.first_name.trim() || !formData.last_name.trim()) {
+      toast.error('Please enter both first name and last name');
+      return;
+    }
+
     setSaving(true);
     try {
-      if (isTeamMember) {
-        // For team members, only update their personal name in their own profile
-        console.log('Updating team member profile:', {
-          userId: user.id,
-          teamMemberData,
-          isTeamMember
-        });
+      // Unified update for non-physician users: allow owner/staff to update the displayed clinic/doctor profile
+      let finalAvatarUrl = formData.avatar_url;
 
-        // Check current session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        console.log('Current session:', session);
-        if (sessionError) {
-          console.error('Session error:', sessionError);
-        }
+      // If there's a selected file, upload it first
+      if (selectedFile) {
+        setUploading(true);
+        try {
+          const fileExt = selectedFile.name.split('.').pop();
+          const fileName = `avatar-${user.id}-${Date.now()}.${fileExt}`;
+          const filePath = `avatars/${fileName}`;
 
-        const { data: existingProfiles, error: fetchError } = await supabase
-          .from('doctor_profiles')
-          .select('id, user_id, first_name, last_name')
-          .eq('user_id', user.id);
-        
-        console.log('Existing profiles found:', existingProfiles);
-        
-        if (fetchError) {
-          console.error('Error fetching existing profiles:', fetchError);
-          throw fetchError;
-        }
-
-        if (existingProfiles && existingProfiles.length > 0) {
-          console.log('Updating profile with data:', {
-            first_name: teamMemberData.first_name,
-            last_name: teamMemberData.last_name
-          });
-
-          // Update only first_name and last_name for team members
-          try {
-            const { data: updateResult, error } = await supabase
-              .from('doctor_profiles')
-              .update({
-                first_name: teamMemberData.first_name,
-                last_name: teamMemberData.last_name,
-                updated_at: new Date().toISOString()
-              })
-              .eq('user_id', user.id)
-              .select();
-
-            console.log('Update result:', updateResult);
-
-            if (error) {
-              console.error('Error updating team member profile:', error);
-              
-              // Check if it's an API key error
-              if (error.message?.includes('API key') || error.message?.includes('apikey')) {
-                console.error('API key error detected. Checking session...');
-                
-                // Try to refresh the session
-                const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-                console.log('Session refresh result:', refreshData, refreshError);
-                
-                if (refreshData?.session) {
-                  // Retry the update after session refresh
-                  console.log('Retrying update after session refresh...');
-                  const { data: retryResult, error: retryError } = await supabase
-                    .from('doctor_profiles')
-                    .update({
-                      first_name: teamMemberData.first_name,
-                      last_name: teamMemberData.last_name,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('user_id', user.id)
-                    .select();
-
-                  console.log('Retry result:', retryResult);
-                  
-                  if (retryError) {
-                    console.error('Retry also failed:', retryError);
-                    throw retryError;
-                  }
-                } else {
-                  throw error;
-                }
-              } else {
-                throw error;
+          // Delete old avatar if exists on the displayed profile
+          if (doctorProfile?.avatar_url && !doctorProfile.avatar_url.startsWith('blob:')) {
+            try {
+              const urlParts = doctorProfile.avatar_url.split('/');
+              const oldFileName = urlParts[urlParts.length - 1];
+              if (oldFileName && oldFileName.includes('avatar-')) {
+                await supabase.storage
+                  .from('profiles')
+                  .remove([`avatars/${oldFileName}`]);
               }
+            } catch (error) {
+              console.warn('Could not delete old avatar:', error);
             }
-
-            console.log('Successfully updated team member profile');
-          } catch (updateError) {
-            console.error('Update failed completely:', updateError);
-            throw updateError;
           }
-        } else {
-          console.error('No existing profile found for team member');
-          toast.error('No profile found to update');
-          return;
-        }
 
-        toast.success('Personal information updated successfully!', {
-          description: 'Your name has been saved.',
-          duration: 3000
-        });
-      } else {
-        // For regular doctors, handle full profile update with image upload
-        let finalAvatarUrl = formData.avatar_url;
-        
-        // If there's a selected file, upload it first
-        if (selectedFile) {
-          setUploading(true);
-          try {
-            // Create a unique file name
-            const fileExt = selectedFile.name.split('.').pop();
-            const fileName = `avatar-${user.id}-${Date.now()}.${fileExt}`;
-            const filePath = `avatars/${fileName}`;
-
-            // Delete old avatar if exists
-            if (doctorProfile?.avatar_url && !doctorProfile.avatar_url.startsWith('blob:')) {
-              try {
-                const urlParts = doctorProfile.avatar_url.split('/');
-                const oldFileName = urlParts[urlParts.length - 1];
-                if (oldFileName && oldFileName.includes('avatar-')) {
-                  await supabase.storage
-                    .from('profiles')
-                    .remove([`avatars/${oldFileName}`]);
-                }
-              } catch (error) {
-                console.warn('Could not delete old avatar:', error);
-              }
-            }
-
-            // Upload to Supabase Storage
-            const { data: uploadData, error: uploadError } = await supabase.storage
-              .from('profiles')
-              .upload(filePath, selectedFile, {
-                cacheControl: '3600',
-                upsert: true
-              });
-
-            if (uploadError) {
-              console.error('Upload error details:', uploadError);
-              throw uploadError;
-            }
-
-            // Get the public URL
-            const { data: urlData } = supabase.storage
-              .from('profiles')
-              .getPublicUrl(filePath);
-
-            finalAvatarUrl = urlData.publicUrl;
-            
-            // Clean up the preview URL
-            if (formData.avatar_url.startsWith('blob:')) {
-              URL.revokeObjectURL(formData.avatar_url);
-            }
-            
-          } catch (error: any) {
-            console.error('Error uploading image:', error);
-            toast.error('Failed to upload profile picture', {
-              description: error.message || 'Please try again later'
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('profiles')
+            .upload(filePath, selectedFile, {
+              cacheControl: '3600',
+              upsert: true
             });
-            setUploading(false);
-            setSaving(false);
-            return;
-          } finally {
-            setUploading(false);
+
+          if (uploadError) {
+            console.error('Upload error details:', uploadError);
+            throw uploadError;
           }
+
+          const { data: urlData } = supabase.storage
+            .from('profiles')
+            .getPublicUrl(filePath);
+
+          finalAvatarUrl = urlData.publicUrl;
+
+          if (formData.avatar_url.startsWith('blob:')) {
+            URL.revokeObjectURL(formData.avatar_url);
+          }
+        } catch (error: any) {
+          console.error('Error uploading image:', error);
+          toast.error('Failed to upload profile picture', {
+            description: error.message || 'Please try again later'
+          });
+          setUploading(false);
+          setSaving(false);
+          return;
+        } finally {
+          setUploading(false);
         }
+      }
 
-        const profileData = {
-          user_id: user.id,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          email: formData.email,
-          phone: formData.phone,
-          avatar_url: finalAvatarUrl,
-          doctor_id: formData.doctor_id || generateDoctorId(),
-          updated_at: new Date().toISOString()
-        };
+      const profileData = {
+        user_id: user.id,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        phone: formData.phone,
+        avatar_url: finalAvatarUrl,
+        doctor_id: formData.doctor_id || generateDoctorId(),
+        updated_at: new Date().toISOString()
+      };
 
-        // Check if profile exists
+      // Update the displayed doctor profile (which may be the clinic/main doctor for team members)
+      if (doctorProfile?.id) {
+        const { error } = await supabase
+          .from('doctor_profiles')
+          .update(profileData)
+          .eq('id', doctorProfile.id);
+
+        if (error) throw error;
+      } else {
+        // Fallback: update/create a doctor_profile tied to this user if no displayed profile
         const { data: existingProfiles, error: fetchError } = await supabase
           .from('doctor_profiles')
           .select('id')
           .eq('user_id', user.id);
-        
+
         if (fetchError) throw fetchError;
 
         if (existingProfiles && existingProfiles.length > 0) {
-          // Update existing profile
           const { error } = await supabase
             .from('doctor_profiles')
             .update(profileData)
             .eq('id', existingProfiles[0].id);
-
           if (error) throw error;
         } else {
-          // Create new profile
           const { data, error } = await supabase
             .from('doctor_profiles')
             .insert([profileData])
             .select();
-
           if (error) throw error;
           if (data && data.length > 0) {
             setDoctorProfile(data[0]);
           }
         }
+      }
 
-        // Store whether we had a file to upload before clearing it
-        const hadFileToUpload = !!selectedFile;
-        
-        // Update form data and clear selected file
-        setFormData(prev => ({ ...prev, avatar_url: finalAvatarUrl }));
-        setSelectedFile(null);
+      // Also update the personal profile record for the user (first/last) if present
+      try {
+        const { data: personalProfiles } = await supabase
+          .from('doctor_profiles')
+          .select('id')
+          .eq('user_id', user.id);
 
-        setSuccessMessage('Profile updated successfully! All changes have been saved.');
-        
-        // Show different success messages based on what was updated
-        if (hadFileToUpload) {
-          toast.success('Profile updated successfully!', {
-            description: 'Your profile information and profile picture have been saved.',
-            duration: 3000
-          });
-        } else {
-          toast.success('Profile updated successfully!', {
-            description: 'Your profile information has been saved.',
-            duration: 3000
-          });
+        if (personalProfiles && personalProfiles.length > 0) {
+          await supabase
+            .from('doctor_profiles')
+            .update({ first_name: formData.first_name, last_name: formData.last_name, updated_at: new Date().toISOString() })
+            .eq('user_id', user.id);
         }
+      } catch (err) {
+        console.warn('Could not update personal profile record:', err);
+      }
+
+      const hadFileToUpload = !!selectedFile;
+      setFormData(prev => ({ ...prev, avatar_url: finalAvatarUrl }));
+      setSelectedFile(null);
+
+      setSuccessMessage('Profile updated successfully! All changes have been saved.');
+      if (hadFileToUpload) {
+        toast.success('Profile updated successfully!', {
+          description: 'Your profile information and profile picture have been saved.',
+          duration: 3000
+        });
+      } else {
+        toast.success('Profile updated successfully!', {
+          description: 'Your profile information has been saved.',
+          duration: 3000
+        });
       }
       
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(null), 3000);
-      
-      // Refresh doctor profile
-      await fetchDoctorProfile();
+    
+    // Clear success message after 3 seconds
+    setTimeout(() => setSuccessMessage(null), 3000);
+    
+    // Refresh doctor profile
+    await fetchDoctorProfile();
     } catch (error) {
       console.error('Error saving profile:', error);
       toast.error('Failed to update profile');
@@ -477,7 +434,6 @@ export function ProfilePage() {
   const getRoleDisplayName = () => {
     const roleMap: Record<string, string> = {
       owner: 'Owner',
-      manager: 'Manager',
       staff: 'Staff',
       physician: 'Physician'
     };
@@ -565,7 +521,6 @@ export function ProfilePage() {
                   {getInitials()}
                 </AvatarFallback>
               </Avatar>
-              {!isTeamMember && (
                 <button 
                   type="button"
                   onClick={() => {
@@ -577,7 +532,6 @@ export function ProfilePage() {
                 >
                   {uploading ? <Upload className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
                 </button>
-              )}
               <input
                 id="avatar-upload"
                 type="file"
@@ -600,23 +554,6 @@ export function ProfilePage() {
                 ID: {formData.doctor_id}
               </Badge>
             )}
-            
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center gap-3 text-gray-600">
-                <Mail className="w-4 h-4" />
-                <span className="text-sm">{formData.email}</span>
-              </div>
-              {formData.phone && (
-                <div className="flex items-center gap-3 text-gray-600">
-                  <Phone className="w-4 h-4" />
-                  <span className="text-sm">{formData.phone}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-3 text-gray-600">
-                <Calendar className="w-4 h-4" />
-                <span className="text-sm">Joined {new Date(doctorProfile?.created_at || Date.now()).toLocaleDateString()}</span>
-              </div>
-            </div>
           </CardContent>
         </Card>
 
@@ -670,7 +607,7 @@ export function ProfilePage() {
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   className="rounded-2xl"
-                  disabled={isTeamMember}
+                  disabled={saving || uploading}
                 />
               </div>
               
@@ -682,29 +619,55 @@ export function ProfilePage() {
                   value={formData.phone}
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   className="rounded-2xl"
-                  disabled={isTeamMember}
+                  disabled={saving || uploading}
                 />
               </div>
+
+              {userRole === 'physician' && physicianProfile && (
+                <>
+                  <div>
+                    <Label htmlFor="degree_type">Degree Type</Label>
+                    <Input id="degree_type" value={physicianProfile.degree_type} disabled />
+                  </div>
+                  <div>
+                    <Label htmlFor="credentials">Credentials</Label>
+                    <Input id="credentials" value={physicianProfile.credentials.join(', ')} disabled />
+                  </div>
+                  <div>
+                    <Label htmlFor="bio">Bio</Label>
+                    <Input id="bio" value={physicianProfile.bio || ''} disabled />
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 
-          <Button 
-            onClick={handleSave}
-            disabled={saving || uploading}
-            className="w-full py-4 bg-gradient-to-r from-[#0E7C9D] to-[#FD904B] hover:from-[#0E7C9D]/90 hover:to-[#FD904B]/90 rounded-2xl text-lg font-semibold shadow-lg"
-          >
-            {saving ? (
-              <div className="flex items-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Saving...
-              </div>
-            ) : (
-              <>
-                <Save className="w-5 h-5 mr-2" />
-                {isTeamMember ? "Save Personal Information" : "Save Profile"}
-              </>
-            )}
-          </Button>
+          {userRole === 'physician' ? (
+            <Button
+              onClick={() => setDialogOpen(true)}
+              className="w-full py-4 bg-gradient-to-r from-[#0E7C9D] to-[#FD904B] hover:from-[#0E7C9D]/90 hover:to-[#FD904B]/90 rounded-2xl text-lg font-semibold shadow-lg"
+            >
+              Edit Physician Details
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSave}
+              disabled={saving || uploading}
+              className="w-full py-4 bg-gradient-to-r from-[#0E7C9D] to-[#FD904B] hover:from-[#0E7C9D]/90 hover:to-[#FD904B]/90 rounded-2xl text-lg font-semibold shadow-lg"
+            >
+              {saving ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Saving...
+                </div>
+              ) : (
+                <>
+                  <Save className="w-5 h-5 mr-2" />
+                  {isTeamMember ? "Save Personal Information" : "Save Profile"}
+                </>
+              )}
+            </Button>
+          )}
           
           {isTeamMember && (
             <div className="w-full py-3 bg-blue-50 border border-blue-200 rounded-2xl text-center text-blue-700 text-sm font-medium">
@@ -714,6 +677,121 @@ export function ProfilePage() {
           )}
         </div>
       </div>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Physician Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Headshot */}
+            <div className="flex items-center gap-4">
+              <Avatar className="w-20 h-20">
+                <AvatarImage src={physicianFormData.headshot_url} />
+                <AvatarFallback>
+                  {physicianFormData.first_name.charAt(0)}{physicianFormData.last_name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <Label>Headshot URL</Label>
+                <Input
+                  value={physicianFormData.headshot_url}
+                  onChange={(e) => setPhysicianFormData(p => ({ ...p, headshot_url: e.target.value }))}
+                  placeholder="https://example.com/headshot.jpg"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upload images in the Assets Library and paste the URL here
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>First Name *</Label>
+                <Input
+                  value={physicianFormData.first_name}
+                  onChange={(e) => setPhysicianFormData(p => ({ ...p, first_name: e.target.value }))}
+                  placeholder="Ryan"
+                />
+              </div>
+              <div>
+                <Label>Last Name *</Label>
+                <Input
+                  value={physicianFormData.last_name}
+                  onChange={(e) => setPhysicianFormData(p => ({ ...p, last_name: e.target.value }))}
+                  placeholder="Vaughn"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Degree Type</Label>
+                <Select
+                  value={physicianFormData.degree_type}
+                  onValueChange={(v) => setPhysicianFormData(p => ({ ...p, degree_type: v as 'MD' | 'DO' }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MD">MD (Doctor of Medicine)</SelectItem>
+                    <SelectItem value="DO">DO (Doctor of Osteopathic Medicine)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Credentials</Label>
+                <Input
+                  value={physicianFormData.credentials}
+                  onChange={(e) => setPhysicianFormData(p => ({ ...p, credentials: e.target.value }))}
+                  placeholder="FACS, FAAO (comma-separated)"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Mobile</Label>
+                <Input
+                  value={physicianFormData.mobile}
+                  onChange={(e) => setPhysicianFormData(p => ({ ...p, mobile: e.target.value }))}
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={physicianFormData.email}
+                  onChange={(e) => setPhysicianFormData(p => ({ ...p, email: e.target.value }))}
+                  placeholder="dr.vaughn@clinic.com"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label>Bio</Label>
+              <Textarea
+                value={physicianFormData.bio}
+                onChange={(e) => setPhysicianFormData(p => ({ ...p, bio: e.target.value }))}
+                placeholder="Dr. Vaughn specializes in..."
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button
+              onClick={handleSave}
+              disabled={saving || !physicianFormData.first_name.trim() || !physicianFormData.last_name.trim()}
+            >
+              {saving && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>}
+              Update Physician
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
