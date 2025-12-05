@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Phone, MapPin, CheckCircle2, AlertCircle } from "lucide-react";
+import { Phone, MapPin, CheckCircle2, AlertCircle, Pencil, Upload, Loader2 } from "lucide-react";
 import heroImage from "@/assets/hero-nasal-new.jpg";
 import exhaleLogo from "@/assets/exhale-logo.png";
 import nasalAirwayImage from "@/assets/nasal-airway.jpg";
@@ -57,8 +57,19 @@ interface PhysicianData {
   credentials: string[] | null;
   bio: string | null;
   headshot_url: string | null;
+  note_image_url: string | null;
   email: string | null;
   mobile: string | null;
+}
+
+interface ClinicLocation {
+  id: string;
+  name: string;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zip_code: string | null;
+  phone: string | null;
 }
 
 export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId }: Template5Props) => {
@@ -71,7 +82,11 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
   const [doctorProfileId, setDoctorProfileId] = useState<string | null>(null);
   const [clinicData, setClinicData] = useState<ClinicData | null>(null);
   const [physicianData, setPhysicianData] = useState<PhysicianData | null>(null);
+  const [allPhysicians, setAllPhysicians] = useState<PhysicianData[]>([]);
+  const [clinicLocations, setClinicLocations] = useState<ClinicLocation[]>([]);
   const [isClinicLevel, setIsClinicLevel] = useState<boolean>(true);
+  const [isUploadingNoteImage, setIsUploadingNoteImage] = useState(false);
+  const noteImageInputRef = useRef<HTMLInputElement>(null);
   
   // Build dynamic URLs
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -85,35 +100,65 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
       const isClinic = !physicianId || physicianId === doctorIdparam;
       setIsClinicLevel(isClinic);
       
-      if (isClinic) {
-        // Fetch clinic data from clinic_profiles via doctor_profiles
-        const { data: doctorProfile, error: doctorError } = await supabase
-          .from('doctor_profiles')
-          .select('clinic_id')
-          .eq('id', doctorIdparam)
+      // First get clinic_id from doctor_profiles
+      const { data: doctorProfile, error: doctorError } = await supabase
+        .from('doctor_profiles')
+        .select('clinic_id')
+        .eq('id', doctorIdparam)
+        .maybeSingle();
+      
+      if (doctorError) {
+        console.error('Error fetching doctor profile:', doctorError);
+        setLoading(false);
+        return;
+      }
+      
+      const fetchedClinicId = doctorProfile?.clinic_id;
+      setClinicId(fetchedClinicId);
+      
+      // Fetch clinic data
+      if (fetchedClinicId) {
+        const { data: clinic, error: clinicError } = await supabase
+          .from('clinic_profiles')
+          .select('clinic_name, logo_url, avatar_url, phone, website, address, city, state, zip_code')
+          .eq('id', fetchedClinicId)
           .maybeSingle();
         
-        if (doctorError) {
-          console.error('Error fetching doctor profile:', doctorError);
-          return;
+        if (!clinicError && clinic) {
+          setClinicData(clinic);
         }
         
-        if (doctorProfile?.clinic_id) {
-          const { data: clinic, error: clinicError } = await supabase
-            .from('clinic_profiles')
-            .select('clinic_name, logo_url, avatar_url, phone, website, address, city, state, zip_code')
-            .eq('id', doctorProfile.clinic_id)
-            .maybeSingle();
+        // Fetch clinic locations
+        const { data: locations, error: locationsError } = await supabase
+          .from('clinic_locations')
+          .select('id, name, address, city, state, zip_code, phone')
+          .eq('clinic_id', fetchedClinicId)
+          .order('is_primary', { ascending: false });
+        
+        if (!locationsError && locations) {
+          setClinicLocations(locations);
+        }
+        
+        // Fetch all physicians for clinic-level view
+        if (isClinic) {
+          const { data: physicians, error: physiciansError } = await supabase
+            .from('clinic_physicians')
+            .select('id, first_name, last_name, degree_type, credentials, bio, headshot_url, note_image_url, email, mobile')
+            .eq('clinic_id', fetchedClinicId)
+            .eq('is_active', true)
+            .order('display_order', { ascending: true });
           
-          if (!clinicError && clinic) {
-            setClinicData(clinic);
+          if (!physiciansError && physicians) {
+            setAllPhysicians(physicians as PhysicianData[]);
           }
         }
-      } else {
-        // Fetch physician data from clinic_physicians
+      }
+      
+      if (!isClinic && physicianId) {
+        // Fetch specific physician data from clinic_physicians
         const { data: physician, error: physicianError } = await supabase
           .from('clinic_physicians')
-          .select('id, first_name, last_name, degree_type, credentials, bio, headshot_url, email, mobile')
+          .select('id, first_name, last_name, degree_type, credentials, bio, headshot_url, note_image_url, email, mobile')
           .eq('id', physicianId)
           .eq('is_active', true)
           .maybeSingle();
@@ -133,26 +178,65 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
   
   // Get display values based on whether it's clinic or physician level
   const displayName = isClinicLevel 
-    ? doctorName 
+    ? (clinicData?.clinic_name || doctorName)
     : physicianData?.last_name || doctorName;
   const displayFullName = isClinicLevel 
-    ? `Ryan C. Vaughn` 
+    ? (clinicData?.clinic_name || 'Our Practice')
     : `${physicianData?.first_name || ''} ${physicianData?.last_name || ''}`.trim();
   const displayDegree = isClinicLevel 
-    ? 'MD' 
+    ? '' 
     : physicianData?.degree_type || 'MD';
   const displayCredentials = isClinicLevel 
-    ? 'Board-Certified ENT • Nasal & Sinus Specialist • 20+ Years Experience' 
+    ? 'Board-Certified ENT • Nasal & Sinus Specialist' 
     : (physicianData?.credentials?.join(' • ') || 'ENT Specialist');
   const displayBio = isClinicLevel 
-    ? 'Dr. Vaughn has helped thousands of patients overcome nasal and sinus conditions through comprehensive, minimally-invasive ENT treatments. His expertise spans from conservative management to advanced surgical interventions across the Chicagoland area.'
+    ? 'Our team has helped thousands of patients overcome nasal and sinus conditions through comprehensive, minimally-invasive ENT treatments.'
     : (physicianData?.bio || 'Experienced ENT specialist dedicated to helping patients breathe better.');
   const displayHeadshot = isClinicLevel 
     ? drVaughnProfessional 
     : (physicianData?.headshot_url || drVaughnProfessional);
   const displayNoteImage = isClinicLevel 
     ? drVaughnBlack 
-    : (physicianData?.headshot_url || drVaughnBlack);
+    : (physicianData?.note_image_url || physicianData?.headshot_url || drVaughnBlack);
+
+  // Handle note image upload
+  const handleNoteImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !physicianId || isClinicLevel) return;
+    
+    setIsUploadingNoteImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `note-${physicianId}-${Date.now()}.${fileExt}`;
+      const filePath = `physician-notes/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('clinic-assets')
+        .upload(filePath, file);
+      
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('clinic-assets')
+        .getPublicUrl(filePath);
+      
+      // Update physician's note_image_url
+      const { error: updateError } = await supabase
+        .from('clinic_physicians')
+        .update({ note_image_url: publicUrl })
+        .eq('id', physicianId);
+      
+      if (updateError) throw updateError;
+      
+      setPhysicianData(prev => prev ? { ...prev, note_image_url: publicUrl } : null);
+      toast.success('Note image updated successfully');
+    } catch (error) {
+      console.error('Error uploading note image:', error);
+      toast.error('Failed to upload image');
+    } finally {
+      setIsUploadingNoteImage(false);
+    }
+  };
 
   useEffect(() => {
     const checkMobile = () => {
@@ -292,7 +376,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
         </div>
       </section>
 
-      {/* Note from Dr. Vaughn Section */}
+      {/* Note Section */}
       <section className="py-8 sm:py-10 md:py-12 lg:py-16 bg-background">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
           <div className="max-w-6xl mx-auto">
@@ -301,16 +385,44 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
               <div className="relative order-2 md:order-1">
                 <img 
                   src={displayNoteImage}
-                  alt={`Dr. ${displayName}`}
+                  alt={isClinicLevel ? (clinicData?.clinic_name || 'Our Practice') : `Dr. ${displayName}`}
                   className="w-full max-w-md mx-auto md:max-w-full rounded-lg shadow-xl"
                   loading="lazy"
                 />
+                {/* Edit button for logged-in users (physician level only) */}
+                {user && !isClinicLevel && physicianId && (
+                  <div className="absolute top-2 right-2 md:right-auto md:left-2">
+                    <input
+                      type="file"
+                      ref={noteImageInputRef}
+                      onChange={handleNoteImageUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="bg-white/90 hover:bg-white shadow-md"
+                      onClick={() => noteImageInputRef.current?.click()}
+                      disabled={isUploadingNoteImage}
+                    >
+                      {isUploadingNoteImage ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Pencil className="w-3.5 h-3.5 mr-1.5" />
+                          Edit
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Right Column - Note */}
               <div className="order-1 md:order-2">
                 <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6">
-                  A Note from Dr. {displayName}
+                  A Note from {isClinicLevel ? (clinicData?.clinic_name || 'Our Practice') : `Dr. ${displayName}`}
                 </h2>
                 <div className="space-y-2 sm:space-y-3 md:space-y-4 text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed">
                   <p>
@@ -318,20 +430,22 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                     These symptoms can stem from two common but very different issues: nasal airway obstruction (NAO) or chronic sinus inflammation.
                   </p>
                   <p>
-                    To help you understand what's going on — and what to do next — I've created a quick self-assessment that asks just one question 
+                    To help you understand what's going on — and what to do next — {isClinicLevel ? "we've" : "I've"} created a quick self-assessment that asks just one question 
                     to point you in the right direction. From there, you'll take either the NOSE test (for nasal blockage) or the SNOT-12 test 
                     (for sinus-related symptoms).
                   </p>
                   <p>
-                    Once you complete the quiz, I'll personally review your score and offer a free phone consultation to go over treatment options — 
+                    Once you complete the quiz, {isClinicLevel ? "our team will" : "I'll"} personally review your score and offer a free phone consultation to go over treatment options — 
                     from medications to minimally invasive in-office procedures.
                   </p>
                   <p className="font-semibold text-foreground">
                     Let's get you breathing better again.
                   </p>
-                  <p className="italic">
-                    — Dr. {displayName}
-                  </p>
+                  {!isClinicLevel && (
+                    <p className="italic">
+                      — Dr. {displayName}
+                    </p>
+                  )}
                 </div>
                 <Button 
                   size="lg" 
@@ -1175,9 +1289,11 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                   <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3 sm:mb-4">
                     <span className="text-xl sm:text-2xl font-bold text-primary">2</span>
                   </div>
-                  <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">Dr. {displayName} Reviews</h3>
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">
+                    {isClinicLevel ? 'Our Team' : `Dr. ${displayName}`} Reviews
+                  </h3>
                   <p className="text-muted-foreground text-xs sm:text-sm md:text-base">
-                    Your results are sent directly to Dr. {displayName}, who will personally review your symptoms.
+                    Your results are sent directly to {isClinicLevel ? 'our team' : `Dr. ${displayName}`}, who will personally review your symptoms.
                   </p>
                 </CardContent>
               </Card>
@@ -1189,7 +1305,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                   </div>
                   <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">Schedule a Consultation</h3>
                   <p className="text-muted-foreground text-xs sm:text-sm md:text-base">
-                    Virtual or in-person appointment with Dr. {displayName}
+                    Virtual or in-person appointment with {isClinicLevel ? 'our specialists' : `Dr. ${displayName}`}
                   </p>
                 </CardContent>
               </Card>
@@ -1216,12 +1332,12 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
 
 
 
-      {/* Why Choose Dr. */}
+      {/* Why Choose Section */}
       <section className="py-8 sm:py-10 md:py-12 lg:py-16 xl:py-20 bg-muted/30">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 sm:mb-8 text-center">
-              Why Choose Dr. {displayName} for Your Nasal & Sinus Health
+              Why Choose {isClinicLevel ? (clinicData?.clinic_name || 'Our Practice') : `Dr. ${displayName}`} for Your Nasal & Sinus Health
             </h2>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8 md:mb-10">
@@ -1271,47 +1387,96 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
               </Card>
             </div>
 
-            <Card className="bg-primary/5 border-primary/20">
-              <CardContent className="p-4 sm:p-6 md:p-8">
-                <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
-                  <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full overflow-hidden shadow-lg flex-shrink-0">
-                    <img 
-                      src={displayHeadshot}
-                      alt={`${displayFullName}, ${displayDegree}`}
-                      className="w-full h-full object-cover"
-                      style={{ objectPosition: '50% 45%', transform: isClinicLevel ? 'scale(1.35)' : 'scale(1)' }}
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="text-center md:text-left">
-                    <div className="flex items-center justify-center md:justify-start gap-2 mb-1.5 sm:mb-2">
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold">{displayFullName}, {displayDegree}</h3>
-                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            {/* Physician Cards - Show all for clinic level, or single for physician level */}
+            {isClinicLevel && allPhysicians.length > 0 ? (
+              <div className="space-y-4 sm:space-y-6">
+                {allPhysicians.map((physician) => (
+                  <Card key={physician.id} className="bg-primary/5 border-primary/20">
+                    <CardContent className="p-4 sm:p-6 md:p-8">
+                      <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
+                        <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full overflow-hidden shadow-lg flex-shrink-0">
+                          <img 
+                            src={physician.headshot_url || drVaughnProfessional}
+                            alt={`${physician.first_name} ${physician.last_name}, ${physician.degree_type}`}
+                            className="w-full h-full object-cover"
+                            style={{ objectPosition: '50% 45%' }}
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="text-center md:text-left flex-1">
+                          <div className="flex items-center justify-center md:justify-start gap-2 mb-1.5 sm:mb-2">
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold">
+                              {physician.first_name} {physician.last_name}, {physician.degree_type || 'MD'}
+                            </h3>
+                            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                          </div>
+                          <p className="text-primary font-semibold mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
+                            {physician.credentials?.join(' • ') || 'ENT Specialist'}
+                          </p>
+                          <p className="text-muted-foreground mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
+                            {physician.bio || 'Experienced ENT specialist dedicated to helping patients breathe better.'}
+                          </p>
+                          <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm">
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                              <span>Nasal Obstruction Expert</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                              <span>Chronic Sinusitis Specialist</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-4 sm:p-6 md:p-8">
+                  <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
+                    <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full overflow-hidden shadow-lg flex-shrink-0">
+                      <img 
+                        src={displayHeadshot}
+                        alt={`${displayFullName}${displayDegree ? `, ${displayDegree}` : ''}`}
+                        className="w-full h-full object-cover"
+                        style={{ objectPosition: '50% 45%', transform: isClinicLevel ? 'scale(1.35)' : 'scale(1)' }}
+                        loading="lazy"
+                      />
                     </div>
-                    <p className="text-primary font-semibold mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
-                      {displayCredentials}
-                    </p>
-                    <p className="text-muted-foreground mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
-                      {displayBio}
-                    </p>
-                    <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
-                        <span>Nasal Obstruction Expert</span>
+                    <div className="text-center md:text-left">
+                      <div className="flex items-center justify-center md:justify-start gap-2 mb-1.5 sm:mb-2">
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold">
+                          {displayFullName}{displayDegree ? `, ${displayDegree}` : ''}
+                        </h3>
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                       </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
-                        <span>Chronic Sinusitis Specialist</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
-                        <span>Minimally Invasive Procedures</span>
+                      <p className="text-primary font-semibold mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
+                        {displayCredentials}
+                      </p>
+                      <p className="text-muted-foreground mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
+                        {displayBio}
+                      </p>
+                      <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                          <span>Nasal Obstruction Expert</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                          <span>Chronic Sinusitis Specialist</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                          <span>Minimally Invasive Procedures</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </section>
@@ -1333,7 +1498,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                   <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
                     No. The NOSE and SNOT-12 assessments are screening tools that help quantify your symptoms. 
                     They are widely used in clinical practice but do not replace a thorough evaluation by 
-                    Dr. {displayName}. Your test results will guide the consultation and help determine if 
+                    {isClinicLevel ? ' our specialists' : ` Dr. ${displayName}`}. Your test results will guide the consultation and help determine if 
                     further imaging or examination is needed.
                   </AccordionContent>
                 </AccordionItem>
@@ -1544,38 +1709,70 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 max-w-6xl mx-auto">
             {/* Logo and Brand */}
             <div className="sm:col-span-2 md:col-span-1">
-              <img 
-                src={exhaleLogo} 
-                alt="Exhale Sinus" 
-                className="h-12 sm:h-14 md:h-16 mb-3 sm:mb-4 brightness-0 invert"
-                loading="lazy"
-              />
+              {clinicData?.logo_url ? (
+                <img 
+                  src={clinicData.logo_url} 
+                  alt={clinicData?.clinic_name || 'Clinic Logo'} 
+                  className="h-12 sm:h-14 md:h-16 mb-3 sm:mb-4 brightness-0 invert"
+                  loading="lazy"
+                />
+              ) : (
+                <img 
+                  src={exhaleLogo} 
+                  alt="Exhale Sinus" 
+                  className="h-12 sm:h-14 md:h-16 mb-3 sm:mb-4 brightness-0 invert"
+                  loading="lazy"
+                />
+              )}
               <h3 className="text-base sm:text-lg font-semibold mb-1.5 sm:mb-2">
-                Exhale Sinus, TMJ, Headache & Sleep
+                {clinicData?.clinic_name || 'Exhale Sinus, TMJ, Headache & Sleep'}
               </h3>
               <p className="text-xs sm:text-sm text-background/70">
-                Expert care for nasal obstruction, chronic sinus infections, and ENT conditions in Schaumburg, Illinois.
+                Expert care for nasal obstruction, chronic sinus infections, and ENT conditions.
               </p>
             </div>
 
-            {/* Location */}
+            {/* Locations */}
             <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Location</h4>
+              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+                {clinicLocations.length > 1 ? 'Locations' : 'Location'}
+              </h4>
               <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm">
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-1 flex-shrink-0" />
-                  <div>
-                    <div>814 E Woodfield</div>
-                    <div>Schaumburg, IL 60173</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-1 flex-shrink-0" />
-                  <div>
-                    <div>735 N. Perryville Rd. Suite 4</div>
-                    <div>Rockford, IL 61107</div>
-                  </div>
-                </div>
+                {clinicLocations.length > 0 ? (
+                  clinicLocations.map((location) => (
+                    <div key={location.id} className="flex items-start gap-2">
+                      <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-1 flex-shrink-0" />
+                      <div>
+                        {location.address && <div>{location.address}</div>}
+                        <div>
+                          {[location.city, location.state, location.zip_code].filter(Boolean).join(', ')}
+                        </div>
+                        {location.phone && (
+                          <a href={`tel:${location.phone}`} className="hover:text-primary transition-colors">
+                            {location.phone}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-1 flex-shrink-0" />
+                      <div>
+                        <div>814 E Woodfield</div>
+                        <div>Schaumburg, IL 60173</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-1 flex-shrink-0" />
+                      <div>
+                        <div>735 N. Perryville Rd. Suite 4</div>
+                        <div>Rockford, IL 61107</div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -1583,28 +1780,52 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
             <div>
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Links</h4>
               <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
-                <a 
-                  href="https://www.exhalesinus.com/request-an-appointment" 
-                  className="block hover:text-primary transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Request an Appointment
-                </a>
-                <a 
-                  href="https://www.exhalesinus.com/" 
-                  className="block hover:text-primary transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Exhale Sinus Website
-                </a>
+                {clinicData?.website && (
+                  <>
+                    <a 
+                      href={clinicData.website.includes('http') ? clinicData.website : `https://${clinicData.website}`}
+                      className="block hover:text-primary transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Request an Appointment
+                    </a>
+                    <a 
+                      href={clinicData.website.includes('http') ? clinicData.website : `https://${clinicData.website}`}
+                      className="block hover:text-primary transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {clinicData?.clinic_name || 'Clinic'} Website
+                    </a>
+                  </>
+                )}
+                {!clinicData?.website && (
+                  <>
+                    <a 
+                      href="https://www.exhalesinus.com/request-an-appointment" 
+                      className="block hover:text-primary transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Request an Appointment
+                    </a>
+                    <a 
+                      href="https://www.exhalesinus.com/" 
+                      className="block hover:text-primary transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Exhale Sinus Website
+                    </a>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
           <div className="border-t border-background/20 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-xs sm:text-sm text-background/70">
-            <p>&copy; {new Date().getFullYear()} Exhale Sinus, TMJ, Headache & Sleep. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} {clinicData?.clinic_name || 'Exhale Sinus, TMJ, Headache & Sleep'}. All rights reserved.</p>
           </div>
         </div>
       </footer>

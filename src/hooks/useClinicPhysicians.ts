@@ -14,6 +14,7 @@ export interface ClinicPhysician {
   email: string | null;
   bio: string | null;
   headshot_url: string | null;
+  note_image_url: string | null;
   is_active: boolean;
   display_order: number;
   created_at: string;
