@@ -1039,9 +1039,10 @@ const mailHtmlTNSS = useMemo(() => {
               <Maximize className="w-4 h-4" />
               Full Page
             </TabsTrigger>
-            <TabsTrigger value="embed" className="flex items-center gap-2">
+            <TabsTrigger value="embed" className="flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
               <Globe className="w-4 h-4" />
               Embed
+              <span className="text-xs text-muted-foreground">(Coming Soon)</span>
             </TabsTrigger>
           </TabsList>
 
