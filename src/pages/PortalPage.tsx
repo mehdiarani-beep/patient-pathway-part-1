@@ -14,7 +14,6 @@ import { SocialMediaManager } from '@/components/dashboard/SocialMediaManager';
 import { AutomationPage } from '@/components/dashboard/AutomationPage';
 import { SymptomChecker } from '@/components/dashboard/SymptomChecker';
 import { EmailConfigurationPage } from '@/components/dashboard/EmailConfigurationPage';
-import { AssetsLibraryPage } from '@/components/dashboard/AssetsLibraryPage';
 import { toast } from 'sonner';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { PageLoader } from '@/components/ui/PageLoader';
@@ -213,8 +212,6 @@ export default function PortalPage() {
         return <ProfilePage />;
       case 'configuration':
         return <ConfigurationPage />;
-      case 'assets':
-        return <AssetsLibraryPage />;
       case 'settings':
         return <SettingsPage />;
       case 'support':
@@ -262,7 +259,6 @@ export default function PortalPage() {
                     {currentPage === 'email' && 'Email Automation'}
                     {currentPage === 'profile' && 'Profile'}
                     {currentPage === 'configuration' && 'Configuration'}
-                    {currentPage === 'assets' && 'Assets Library'}
                     {currentPage === 'settings' && 'Settings'}
                     {currentPage === 'support' && 'Support'}
                     {currentPage === 'contacts' && 'Contacts'}
@@ -279,8 +275,7 @@ export default function PortalPage() {
                     {currentPage === 'symptom-checker' && 'Conversational assessment tool'}
                     {currentPage === 'email' && 'Connect email accounts and send quiz invitations'}
                     {currentPage === 'profile' && 'Manage your account information'}
-                    {currentPage === 'configuration' && 'Manage your clinic information and settings'}
-                    {currentPage === 'assets' && 'Manage your clinic images, documents, and media files'}
+                    {currentPage === 'configuration' && 'Manage your clinic information, locations, physicians, and assets'}
                     {currentPage === 'settings' && 'Configure your preferences'}
                     {currentPage === 'support' && 'Get help and support'}
                     {currentPage === 'contacts' && 'Manage your contacts'}
