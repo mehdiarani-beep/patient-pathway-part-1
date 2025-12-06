@@ -450,7 +450,9 @@ export function NOSESNOTPage({ doctorId: propDoctorId, physicianId: propPhysicia
     const maxScore = quizType === 'NOSE' ? 100 : 60;
 
     return (
-      <div className="h-full w-full bg-white py-6 px-4 overflow-y-auto">
+      <>
+        {seoHead}
+        <div className="h-full w-full bg-white py-6 px-4 overflow-y-auto">
         <div className="max-w-lg mx-auto">
           {/* Title */}
           <h1 className="text-base font-bold text-center text-slate-800 mb-2">
@@ -524,7 +526,7 @@ export function NOSESNOTPage({ doctorId: propDoctorId, physicianId: propPhysicia
             </div>
           </div>
         </div>
-      </div>
+        </div>
       </>
     );
   }
