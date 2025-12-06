@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.send-patient-confirmation]
 verify_jwt = false
+
+[functions.update-leads-physician]
+verify_jwt = false

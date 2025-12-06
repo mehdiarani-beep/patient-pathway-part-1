@@ -40,6 +40,7 @@ interface QuizAnswer {
 interface EmbeddedChatBotProps {
   quizType: string;
   doctorId?: string;
+  physicianId?: string;
   customQuiz?: any;
   quizData?: any;
   doctorAvatarUrl?: string;
@@ -49,7 +50,7 @@ interface EmbeddedChatBotProps {
   compact?: boolean;
 }
 
-export function EmbeddedChatBot({ quizType, doctorId, customQuiz, quizData, doctorAvatarUrl, chatbotColors, utm_source, shareKey, compact = false }: EmbeddedChatBotProps) {
+export function EmbeddedChatBot({ quizType, doctorId, physicianId, customQuiz, quizData, doctorAvatarUrl, chatbotColors, utm_source, shareKey, compact = false }: EmbeddedChatBotProps) {
   const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -394,6 +395,7 @@ export function EmbeddedChatBot({ quizType, doctorId, customQuiz, quizData, doct
       try {
         await supabase.from('quiz_leads').insert({
           doctor_id: doctorId,
+          physician_id: physicianId || doctorId,
           quiz_type: quizType,
           name: 'Partial Submission',
           score: 0,
@@ -639,6 +641,7 @@ export function EmbeddedChatBot({ quizType, doctorId, customQuiz, quizData, doct
         lead_source: source || 'chatbot_page',
         lead_status: 'NEW',
         doctor_id: finalDoctorId,
+        physician_id: physicianId || finalDoctorId,
         incident_source: 'default',
         submitted_at: new Date().toISOString()
       };

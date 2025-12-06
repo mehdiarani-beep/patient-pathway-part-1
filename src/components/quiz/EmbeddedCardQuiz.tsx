@@ -30,12 +30,13 @@ interface DoctorProfile {
 interface EmbeddedCardQuizProps {
   quizType: QuizType;
   doctorId?: string;
+  physicianId?: string;
   utm_source?: string | null;
   compact?: boolean;
   autoStart?: boolean;
 }
 
-export function EmbeddedCardQuiz({ quizType, doctorId, utm_source, compact = false, autoStart = false }: EmbeddedCardQuizProps) {
+export function EmbeddedCardQuiz({ quizType, doctorId, physicianId, utm_source, compact = false, autoStart = false }: EmbeddedCardQuizProps) {
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
@@ -102,6 +103,7 @@ export function EmbeddedCardQuiz({ quizType, doctorId, utm_source, compact = fal
       try {
         await supabase.from('quiz_leads').insert({
           doctor_id: doctorId,
+          physician_id: physicianId || doctorId,
           quiz_type: quizType,
           name: 'Partial Submission',
           score: 0,
@@ -177,6 +179,7 @@ export function EmbeddedCardQuiz({ quizType, doctorId, utm_source, compact = fal
         lead_source: utm_source || 'landing_page',
         lead_status: 'NEW',
         doctor_id: doctorId,
+        physician_id: physicianId || doctorId,
         share_key: null,
         submitted_at: new Date().toISOString()
       };
