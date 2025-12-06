@@ -20,6 +20,13 @@ import migraineDistressed from "@/assets/migraine-distressed.png";
 import migraineMan from "@/assets/migraine-man.png";
 import migraineHomeOffice from "@/assets/migraine-home-office.png";
 import { supabase } from "@/integrations/supabase/client";
+import { SEOHead } from "@/components/seo/SEOHead";
+import {
+  generateMedicalWebPageSchema,
+  generateMedicalTestSchema,
+  generateFAQSchema,
+  generatePhysicianSchema,
+} from "@/components/seo/schemas/medicalSchemas";
 
 interface Template6Props {
   doctorName: string;
@@ -167,50 +174,86 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
     };
   }, []);
 
+  // Generate SEO structured data
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const seoTitle = isClinicLevel 
+    ? `Migraine Assessment (MSQ) | Free Migraine Impact Questionnaire`
+    : `Migraine Assessment (MSQ) | Dr. ${displayFullName}, ${displayDegree} | Headache Specialist`;
+  const seoDescription = `Take the free Migraine-Specific Quality of Life Questionnaire (MSQ) to measure how migraines affect your daily life. Board-certified ENT Dr. ${displayName} specializes in comprehensive migraine treatment.`;
+  
+  const structuredData = [
+    generateMedicalWebPageSchema({
+      name: seoTitle,
+      description: seoDescription,
+      url: currentUrl,
+      specialty: 'Headache Medicine',
+      physician: { name: `Dr. ${displayFullName}`, credentials: displayCredentials },
+    }),
+    generateMedicalTestSchema({
+      name: 'Migraine-Specific Quality of Life Questionnaire (MSQ)',
+      description: 'A validated assessment tool measuring how migraines impact daily activities, work productivity, and quality of life.',
+      url: currentUrl,
+      usedToDiagnose: ['Migraine', 'Chronic Migraine', 'Tension Headache', 'Cluster Headache'],
+    }),
+    generateFAQSchema([
+      { question: 'What is the MSQ assessment?', answer: 'The Migraine-Specific Quality of Life Questionnaire (MSQ) is a clinically-validated tool that measures how migraines affect your daily functioning, work, and social activities.' },
+      { question: 'What does my MSQ score mean?', answer: 'Higher scores indicate greater migraine impact on quality of life. A score of 0-7 is minimal impact, 8-14 is mild, 15-21 is moderate, and 22-28 indicates severe migraine impact requiring treatment.' },
+      { question: 'When should I see a doctor for migraines?', answer: 'You should consult a doctor if you experience frequent headaches, migraines that interfere with daily activities, or headaches accompanied by vision changes, numbness, or severe symptoms.' },
+    ]),
+  ];
+
   return (
-    <div 
-      className="min-h-screen midas-custom-theme font-sans"
-      style={{
-        // Custom color overrides for MIDAS page only (from Exhale Sinus design system)
-        '--primary': '191 100% 40%',
-        '--primary-foreground': '0 0% 100%',
-        '--secondary': '191 100% 50%',
-        '--secondary-foreground': '0 0% 100%',
-        '--accent': '191 100% 40%',
-        '--accent-foreground': '0 0% 100%',
-        '--muted': '210 40% 96%',
-        '--muted-foreground': '210 16% 45%',
-        '--ring': '203 89% 20%',
-        '--background': '0 0% 100%',
-        '--foreground': '210 24% 16%',
-        '--card': '0 0% 100%',
-        '--card-foreground': '210 24% 16%',
-        '--border': '210 25% 88%',
-        '--destructive': '0 84% 60%',
-        '--destructive-foreground': '0 0% 100%',
-        // Custom gradients
-        '--gradient-hero': 'linear-gradient(135deg, hsl(191 100% 40%) 0%, hsl(191 100% 50%) 100%)',
-        '--gradient-cta': 'linear-gradient(135deg, hsl(191 100% 40%) 0%, hsl(191 100% 35%) 100%)',
-        '--gradient-hero-overlay': 'linear-gradient(135deg, rgba(0, 169, 206, 0.85) 0%, rgba(0, 169, 206, 0.90) 100%)',
-        // Custom shadows
-        '--shadow-soft': '0 4px 24px -4px hsl(203 89% 20% / 0.12)',
-        '--shadow-card': '0 8px 32px -8px hsl(203 89% 20% / 0.18)',
-        // Transitions
-        '--transition-smooth': 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        // Font family
-        fontFamily: 'Inter, sans-serif',
-      } as React.CSSProperties}
-    >
-      {/* Hero Section */}
-      <section 
-        className="relative min-h-[400px] sm:min-h-[500px] md:min-h-[600px] flex items-center py-4 sm:py-6 md:py-8 lg:py-12"
-        style={{ 
-          backgroundImage: `url(${heroMigraine})`,
-          backgroundSize: 'cover',
-          backgroundPosition: window.innerWidth < 768 ? 'center' : 'center',
-        }}
+    <>
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        canonicalUrl={currentUrl}
+        keywords="migraine assessment, MSQ questionnaire, migraine impact test, headache evaluation, chronic migraine screening, migraine specialist ENT"
+        structuredData={structuredData}
+      />
+      <div 
+        className="min-h-screen midas-custom-theme font-sans"
+        style={{
+          // Custom color overrides for MIDAS page only (from Exhale Sinus design system)
+          '--primary': '191 100% 40%',
+          '--primary-foreground': '0 0% 100%',
+          '--secondary': '191 100% 50%',
+          '--secondary-foreground': '0 0% 100%',
+          '--accent': '191 100% 40%',
+          '--accent-foreground': '0 0% 100%',
+          '--muted': '210 40% 96%',
+          '--muted-foreground': '210 16% 45%',
+          '--ring': '203 89% 20%',
+          '--background': '0 0% 100%',
+          '--foreground': '210 24% 16%',
+          '--card': '0 0% 100%',
+          '--card-foreground': '210 24% 16%',
+          '--border': '210 25% 88%',
+          '--destructive': '0 84% 60%',
+          '--destructive-foreground': '0 0% 100%',
+          // Custom gradients
+          '--gradient-hero': 'linear-gradient(135deg, hsl(191 100% 40%) 0%, hsl(191 100% 50%) 100%)',
+          '--gradient-cta': 'linear-gradient(135deg, hsl(191 100% 40%) 0%, hsl(191 100% 35%) 100%)',
+          '--gradient-hero-overlay': 'linear-gradient(135deg, rgba(0, 169, 206, 0.85) 0%, rgba(0, 169, 206, 0.90) 100%)',
+          // Custom shadows
+          '--shadow-soft': '0 4px 24px -4px hsl(203 89% 20% / 0.12)',
+          '--shadow-card': '0 8px 32px -8px hsl(203 89% 20% / 0.18)',
+          // Transitions
+          '--transition-smooth': 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          // Font family
+          fontFamily: 'Inter, sans-serif',
+        } as React.CSSProperties}
       >
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(0, 169, 206, 0.65) 0%, rgba(0, 169, 206, 0.70) 100%)' }} />
+        {/* Hero Section */}
+        <section 
+          className="relative min-h-[400px] sm:min-h-[500px] md:min-h-[600px] flex items-center py-4 sm:py-6 md:py-8 lg:py-12"
+          style={{ 
+            backgroundImage: `url(${heroMigraine})`,
+            backgroundSize: 'cover',
+            backgroundPosition: window.innerWidth < 768 ? 'center' : 'center',
+          }}
+        >
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(0, 169, 206, 0.65) 0%, rgba(0, 169, 206, 0.70) 100%)' }} />
         <div className="relative z-10 container mx-auto px-3 sm:px-4 md:px-6">
           <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-center max-w-7xl mx-auto">
             <div className="space-y-3 sm:space-y-4 md:space-y-6">
@@ -986,6 +1029,7 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 };

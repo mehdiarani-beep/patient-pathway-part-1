@@ -19,6 +19,13 @@ import sleepTiredDriver from "@/assets/sleep-tired-driver.jpg";
 import sleepTiredOffice from "@/assets/sleep-tired-office.jpg";
 import sleepTiredLaptop from "@/assets/sleep-tired-laptop.jpg";
 import { supabase } from "@/integrations/supabase/client";
+import { SEOHead } from "@/components/seo/SEOHead";
+import {
+  generateMedicalWebPageSchema,
+  generateMedicalTestSchema,
+  generateFAQSchema,
+  generatePhysicianSchema,
+} from "@/components/seo/schemas/medicalSchemas";
 
 interface Template7Props {
   doctorName: string;
@@ -164,43 +171,79 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
+  // Generate SEO structured data
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const seoTitle = isClinicLevel 
+    ? `Epworth Sleepiness Scale Test | Free Online Sleep Assessment`
+    : `Epworth Sleepiness Scale | Dr. ${displayFullName}, ${displayDegree} | Sleep Assessment`;
+  const seoDescription = `Take the free Epworth Sleepiness Scale test to evaluate daytime sleepiness and potential sleep disorders. Board-certified ENT specialist Dr. ${displayName} offers comprehensive sleep apnea treatment.`;
+  
+  const structuredData = [
+    generateMedicalWebPageSchema({
+      name: seoTitle,
+      description: seoDescription,
+      url: currentUrl,
+      specialty: 'Sleep Medicine',
+      physician: { name: `Dr. ${displayFullName}`, credentials: displayCredentials },
+    }),
+    generateMedicalTestSchema({
+      name: 'Epworth Sleepiness Scale (ESS)',
+      description: 'A validated questionnaire measuring daytime sleepiness to identify potential sleep disorders including obstructive sleep apnea.',
+      url: currentUrl,
+      usedToDiagnose: ['Obstructive Sleep Apnea', 'Excessive Daytime Sleepiness', 'Sleep Disorders', 'Narcolepsy'],
+    }),
+    generateFAQSchema([
+      { question: 'What is the Epworth Sleepiness Scale?', answer: 'The Epworth Sleepiness Scale (ESS) is a validated questionnaire that measures your general level of daytime sleepiness by asking how likely you are to doze off in 8 different situations.' },
+      { question: 'What does my Epworth score mean?', answer: 'A score of 0-10 is normal, 11-14 indicates mild sleepiness, 15-17 indicates moderate sleepiness, and 18-24 indicates severe sleepiness that may require medical attention.' },
+      { question: 'Can this test diagnose sleep apnea?', answer: 'The Epworth Scale is a screening tool that indicates if further evaluation for sleep apnea is needed. A formal sleep study is required for diagnosis.' },
+    ]),
+  ];
+
   return (
-    <div 
-      className="min-h-screen epworth-custom-theme font-sans"
-      style={{
-        '--primary': '191 100% 40%',
-        '--primary-foreground': '0 0% 100%',
-        '--secondary': '191 100% 50%',
-        '--secondary-foreground': '0 0% 100%',
-        '--accent': '191 100% 40%',
-        '--accent-foreground': '0 0% 100%',
-        '--muted': '210 40% 96%',
-        '--muted-foreground': '210 16% 45%',
-        '--ring': '203 89% 20%',
-        '--background': '0 0% 100%',
-        '--foreground': '210 24% 16%',
-        '--card': '0 0% 100%',
-        '--card-foreground': '210 24% 16%',
-        '--border': '210 25% 88%',
-        '--destructive': '0 84% 60%',
-        '--destructive-foreground': '0 0% 100%',
-        // Custom gradients
-        '--gradient-hero': 'linear-gradient(135deg, hsl(191 100% 40%) 0%, hsl(191 100% 50%) 100%)',
-        '--gradient-cta': 'linear-gradient(135deg, hsl(191 100% 40%) 0%, hsl(191 100% 35%) 100%)',
-        '--gradient-hero-overlay': 'linear-gradient(135deg, rgba(0, 169, 206, 0.85) 0%, rgba(0, 169, 206, 0.90) 100%)',
-        // Custom shadows
-        '--shadow-soft': '0 4px 24px -4px hsl(203 89% 20% / 0.12)',
-        '--shadow-card': '0 8px 32px -8px hsl(203 89% 20% / 0.18)',
-        // Transitions
-        '--transition-smooth': 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        // Font family
-        fontFamily: 'Inter, sans-serif',
-      } as React.CSSProperties}
-    >
-      {/* Mobile Sticky CTA */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 p-2.5 sm:p-3 bg-background/98 backdrop-blur-md border-t border-primary/20 shadow-2xl z-50">
-        <Button size="lg" className="w-full text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all" onClick={handleTestClick}>
-          Take your Sleepiness Assessment →
+    <>
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        canonicalUrl={currentUrl}
+        keywords="epworth sleepiness scale, sleep apnea test, daytime sleepiness assessment, ESS score, sleep disorder screening, ENT sleep specialist"
+        structuredData={structuredData}
+      />
+      <div 
+        className="min-h-screen epworth-custom-theme font-sans"
+        style={{
+          '--primary': '191 100% 40%',
+          '--primary-foreground': '0 0% 100%',
+          '--secondary': '191 100% 50%',
+          '--secondary-foreground': '0 0% 100%',
+          '--accent': '191 100% 40%',
+          '--accent-foreground': '0 0% 100%',
+          '--muted': '210 40% 96%',
+          '--muted-foreground': '210 16% 45%',
+          '--ring': '203 89% 20%',
+          '--background': '0 0% 100%',
+          '--foreground': '210 24% 16%',
+          '--card': '0 0% 100%',
+          '--card-foreground': '210 24% 16%',
+          '--border': '210 25% 88%',
+          '--destructive': '0 84% 60%',
+          '--destructive-foreground': '0 0% 100%',
+          // Custom gradients
+          '--gradient-hero': 'linear-gradient(135deg, hsl(191 100% 40%) 0%, hsl(191 100% 50%) 100%)',
+          '--gradient-cta': 'linear-gradient(135deg, hsl(191 100% 40%) 0%, hsl(191 100% 35%) 100%)',
+          '--gradient-hero-overlay': 'linear-gradient(135deg, rgba(0, 169, 206, 0.85) 0%, rgba(0, 169, 206, 0.90) 100%)',
+          // Custom shadows
+          '--shadow-soft': '0 4px 24px -4px hsl(203 89% 20% / 0.12)',
+          '--shadow-card': '0 8px 32px -8px hsl(203 89% 20% / 0.18)',
+          // Transitions
+          '--transition-smooth': 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          // Font family
+          fontFamily: 'Inter, sans-serif',
+        } as React.CSSProperties}
+      >
+        {/* Mobile Sticky CTA */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 p-2.5 sm:p-3 bg-background/98 backdrop-blur-md border-t border-primary/20 shadow-2xl z-50">
+          <Button size="lg" className="w-full text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all" onClick={handleTestClick}>
+            Take your Sleepiness Assessment →
         </Button>
         <p className="text-xs text-center text-muted-foreground mt-1.5">HIPAA-compliant • Board-certified ENT</p>
       </div>
@@ -1100,6 +1143,7 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 };
