@@ -1,0 +1,59 @@
+# Patient Pathway - Robots.txt
+# https://patientpathway.ai
+
+User-agent: *
+
+# Allow public assessment landing pages
+Allow: /share/
+Allow: /s/
+
+# Disallow private/authenticated areas
+Disallow: /portal/
+Disallow: /auth
+Disallow: /admin-portal
+Disallow: /master
+Disallow: /master-login
+Disallow: /embed/
+Disallow: /quiz/
+Disallow: /team-signup
+
+# Disallow API and function routes
+Disallow: /api/
+Disallow: /functions/
+
+# Allow all search engine crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+# AI Search Crawlers
+User-agent: GPTBot
+Allow: /share/
+Disallow: /portal/
+Disallow: /auth
+
+User-agent: Google-Extended
+Allow: /share/
+Disallow: /portal/
+Disallow: /auth
+
+User-agent: anthropic-ai
+Allow: /share/
+Disallow: /portal/
+Disallow: /auth
+
+User-agent: PerplexityBot
+Allow: /share/
+Disallow: /portal/
+Disallow: /auth
+
+# Sitemap location
+Sitemap: https://patientpathway.ai/sitemap.xml

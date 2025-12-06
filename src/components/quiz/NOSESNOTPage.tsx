@@ -11,6 +11,14 @@ import { calculateQuizScore } from '@/utils/quizScoring';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, Mail, Phone, User } from 'lucide-react';
 import { quizzes } from '@/data/quizzes';
+import { SEOHead } from '@/components/seo/SEOHead';
+import {
+  generateMedicalWebPageSchema,
+  generateMedicalTestSchema,
+  generateFAQSchema,
+  generatePhysicianSchema,
+  generateMedicalClinicSchema,
+} from '@/components/seo/schemas/medicalSchemas';
 
 interface QuizAnswer {
   questionIndex: number;
@@ -270,9 +278,44 @@ export function NOSESNOTPage({ doctorId: propDoctorId, physicianId: propPhysicia
   const quiz = quizType ? quizzes[quizType] : null;
   const progress = quiz ? ((currentQuestion + 1) / quiz.questions.length) * 100 : 0;
 
+  // SEO Data
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const physicianName = physicianData ? `${physicianData.first_name} ${physicianData.last_name}` : 'Our ENT Specialist';
+  const seoTitle = isClinicQuiz 
+    ? `Nasal & Sinus Assessment | Free NOSE & SNOT-12 Test`
+    : `Nasal Assessment | Dr. ${physicianName} | Free Breathing Evaluation`;
+  const seoDescription = `Take the free nasal assessment to evaluate breathing difficulties, nasal congestion, and sinus symptoms. Clinically-validated NOSE and SNOT-12 screening tools.`;
+
+  const structuredData = [
+    generateMedicalWebPageSchema({
+      name: seoTitle,
+      description: seoDescription,
+      url: currentUrl,
+      specialty: 'Otolaryngology',
+    }),
+    generateMedicalTestSchema({
+      name: 'Nasal Assessment (NOSE & SNOT-12)',
+      description: 'A combined screening tool using NOSE (Nasal Obstruction Symptom Evaluation) and SNOT-12 (Sinonasal Outcome Test) to assess nasal and sinus symptoms.',
+      url: currentUrl,
+      usedToDiagnose: ['Nasal Obstruction', 'Chronic Rhinosinusitis', 'Deviated Septum', 'Nasal Congestion'],
+    }),
+  ];
+
+  const seoHead = (
+    <SEOHead
+      title={seoTitle}
+      description={seoDescription}
+      canonicalUrl={currentUrl}
+      keywords="nasal obstruction test, NOSE score, SNOT-12, sinus assessment, nasal congestion evaluation, ENT screening, breathing difficulty test"
+      structuredData={structuredData}
+    />
+  );
+
   if (stage === 'triage') {
     return (
-      <div className="h-full w-full bg-white py-6 px-4 overflow-y-auto">
+      <>
+        {seoHead}
+        <div className="h-full w-full bg-white py-6 px-4 overflow-y-auto">
         <div className="max-w-2xl mx-auto">
           <h3 className="text-sm sm:text-base md:text-lg font-medium text-center text-slate-800 mb-6 leading-relaxed">
             Is your breathing difficulty mainly due to nasal blockage or stuffiness, or do you also have other symptoms like facial pressure, headaches, postnasal drip, or a reduced sense of smell?
@@ -320,6 +363,7 @@ export function NOSESNOTPage({ doctorId: propDoctorId, physicianId: propPhysicia
           </div>
         </div>
       </div>
+      </>
     );
   }
 
@@ -330,6 +374,8 @@ export function NOSESNOTPage({ doctorId: propDoctorId, physicianId: propPhysicia
     const totalQuestions = quiz.questions.length;
 
     return (
+      <>
+        {seoHead}
       <div className="h-full w-full bg-white py-6 px-4 overflow-y-auto">
         <div className="max-w-2xl mx-auto">
           <h3 className="text-sm sm:text-base md:text-lg font-semibold text-center text-slate-800 mb-6">
@@ -378,21 +424,25 @@ export function NOSESNOTPage({ doctorId: propDoctorId, physicianId: propPhysicia
           </div>
         </div>
       </div>
+      </>
     );
   }
 
   if (stage === 'results') {
     if (leadSubmitted) {
       return (
-        <div className="h-full w-full bg-white py-6 px-4 overflow-y-auto">
-          <div className="max-w-lg mx-auto text-center">
-            <CheckCircle className="w-12 h-12 text-[#0796cc] mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-slate-800 mb-2">Thank You!</h2>
-            <p className="text-slate-600 text-sm">
-              Your results have been sent. {doctorProfile?.clinic_name || 'Our team'} will contact you soon to discuss your assessment.
-            </p>
+        <>
+          {seoHead}
+          <div className="h-full w-full bg-white py-6 px-4 overflow-y-auto">
+            <div className="max-w-lg mx-auto text-center">
+              <CheckCircle className="w-12 h-12 text-[#0796cc] mx-auto mb-4" />
+              <h2 className="text-xl font-bold text-slate-800 mb-2">Thank You!</h2>
+              <p className="text-slate-600 text-sm">
+                Your results have been sent. {doctorProfile?.clinic_name || 'Our team'} will contact you soon to discuss your assessment.
+              </p>
+            </div>
           </div>
-        </div>
+        </>
       );
     }
 
@@ -475,6 +525,7 @@ export function NOSESNOTPage({ doctorId: propDoctorId, physicianId: propPhysicia
           </div>
         </div>
       </div>
+      </>
     );
   }
 
