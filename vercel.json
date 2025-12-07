@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/sitemap.xml", "destination": "https://drvitjhhggcywuepyncx.supabase.co/functions/v1/generate-sitemap?baseUrl=https://patientpathway.ai" },
     { "source": "/:path*", "destination": "/index.html" }
   ],
   "headers": [

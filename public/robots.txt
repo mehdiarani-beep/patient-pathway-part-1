@@ -55,5 +55,5 @@ Allow: /share/
 Disallow: /portal/
 Disallow: /auth
 
-# Sitemap location
+# Sitemap location (served via Vercel rewrite to Supabase edge function)
 Sitemap: https://patientpathway.ai/sitemap.xml
