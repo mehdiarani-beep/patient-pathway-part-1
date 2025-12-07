@@ -4,11 +4,14 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Content-Type": "application/xml",
+  "Content-Type": "application/xml; charset=utf-8",
 };
 
+// Helper to format URL entry without extra whitespace
+const formatUrl = (loc: string, lastmod: string, changefreq: string, priority: string): string =>
+  `<url><loc>${loc}</loc><lastmod>${lastmod}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`;
+
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -18,49 +21,36 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get base URL from request or default
     const url = new URL(req.url);
     const baseUrl = url.searchParams.get("baseUrl") || "https://patientpathway.ai";
     
     const today = new Date().toISOString().split("T")[0];
 
-    // Fetch all active doctor profiles for landing page URLs
+    // Only fetch doctor profiles that have an active clinic
     const { data: doctors, error: doctorsError } = await supabase
       .from("doctor_profiles")
-      .select("id, clinic_name, updated_at")
+      .select(`
+        id, 
+        clinic_name, 
+        updated_at,
+        clinic_id,
+        clinic_profiles!inner(id, clinic_name)
+      `)
       .not("clinic_id", "is", null);
 
     if (doctorsError) {
       console.error("Error fetching doctors:", doctorsError);
     }
 
-    // Fetch active short URLs
-    const { data: shortLinks, error: linksError } = await supabase
-      .from("link_mappings")
-      .select("short_id, quiz_type, created_at")
-      .order("created_at", { ascending: false })
-      .limit(500);
-
-    if (linksError) {
-      console.error("Error fetching short links:", linksError);
-    }
-
-    // Quiz types available
+    // Active quiz types with landing pages
     const quizTypes = ["nose_snot", "epworth", "midas"];
 
-    // Build sitemap URLs
-    let urls: string[] = [];
+    const urls: string[] = [];
 
-    // Static pages
-    urls.push(`
-    <url>
-      <loc>${baseUrl}/</loc>
-      <lastmod>${today}</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>1.0</priority>
-    </url>`);
+    // Static homepage
+    urls.push(formatUrl(baseUrl + "/", today, "weekly", "1.0"));
 
-    // Landing pages for each doctor and quiz type
+    // Landing pages for each active doctor and quiz type
     if (doctors && doctors.length > 0) {
       for (const doctor of doctors) {
         for (const quizType of quizTypes) {
@@ -68,44 +58,26 @@ serve(async (req) => {
             ? new Date(doctor.updated_at).toISOString().split("T")[0] 
             : today;
           
-          urls.push(`
-    <url>
-      <loc>${baseUrl}/share/${quizType}/${doctor.id}</loc>
-      <lastmod>${lastmod}</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.9</priority>
-    </url>`);
+          urls.push(formatUrl(
+            `${baseUrl}/share/${quizType}/${doctor.id}`,
+            lastmod,
+            "weekly",
+            "0.9"
+          ));
         }
       }
     }
 
-    // Short URL redirects
-    if (shortLinks && shortLinks.length > 0) {
-      for (const link of shortLinks) {
-        const lastmod = link.created_at 
-          ? new Date(link.created_at).toISOString().split("T")[0] 
-          : today;
-        
-        urls.push(`
-    <url>
-      <loc>${baseUrl}/s/${link.short_id}</loc>
-      <lastmod>${lastmod}</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.7</priority>
-    </url>`);
-      }
-    }
+    // NOTE: Short URL redirects (/s/:shortId) are intentionally excluded
+    // Google recommends not including redirect URLs in sitemaps
 
-    // Build complete sitemap XML
+    // Build complete sitemap XML (compact format)
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-${urls.join("")}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join("\n")}
 </urlset>`;
 
-    console.log(`Generated sitemap with ${urls.length} URLs`);
+    console.log(`Generated sitemap with ${urls.length} URLs (excluding redirects)`);
 
     return new Response(sitemap, {
       headers: corsHeaders,
