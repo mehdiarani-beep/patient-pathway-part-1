@@ -100,10 +100,10 @@ export default function PhysicianProfilePage() {
     }
   };
 
-  // Track page view
+  // Track page view - must be called unconditionally at top level
   usePageTracking({
     pageType: 'physician_profile',
-    pageName: 'Physician Profile',
+    pageName: physician ? `Dr. ${physician.first_name} ${physician.last_name}` : 'Physician Profile',
     doctorId: doctorId || undefined,
     physicianId: physicianId,
     clinicId: clinic?.id,

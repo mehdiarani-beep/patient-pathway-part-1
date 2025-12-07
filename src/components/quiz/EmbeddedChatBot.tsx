@@ -13,6 +13,7 @@ import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Profileimage from '/src/assets/doctor.png';
+import { usePageTracking } from '@/hooks/usePageTracking';
 const defaultChatbotColors = {
   primary: '#2563eb',
   background: '#ffffff',
@@ -52,6 +53,14 @@ interface EmbeddedChatBotProps {
 
 export function EmbeddedChatBot({ quizType, doctorId, physicianId, customQuiz, quizData, doctorAvatarUrl, chatbotColors, utm_source, shareKey, compact = false }: EmbeddedChatBotProps) {
   const [searchParams] = useSearchParams();
+
+  // Track page view
+  usePageTracking({
+    pageType: 'quiz_chat',
+    pageName: customQuiz?.title || quizData?.title || quizType,
+    doctorId: doctorId,
+    physicianId: physicianId || doctorId
+  });
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);

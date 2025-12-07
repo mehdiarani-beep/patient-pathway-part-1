@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { nanoid } from "https://esm.sh/nanoid@5";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,70 +19,58 @@ serve(async (req) => {
       throw new Error('Method not allowed');
     }
 
-    const { longUrl } = await req.json();
+    const { longUrl, doctorId, quizType, physicianId, customQuizId, leadSource, urlType } = await req.json();
 
     if (!longUrl) {
       throw new Error('Missing longUrl parameter');
     }
 
-    // Try multiple URL shortening services with fallbacks
-    let shortUrl = null;
-    let errorMessage = '';
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Try is.gd first (direct redirect, no preview page)
-    try {
-      const isGdResponse = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
-      if (isGdResponse.ok) {
-        const isGdData = await isGdResponse.json();
-        if (isGdData && isGdData.shorturl) {
-          shortUrl = isGdData.shorturl;
-        }
-      }
-    } catch (error: any) {
-      errorMessage += `is.gd failed: ${error.message}; `;
+    // Generate a short ID
+    const shortId = nanoid(6);
+
+    // Determine target_url based on urlType
+    let targetUrl = longUrl;
+    if (urlType === 'profile' && physicianId) {
+      // For physician profile pages, construct the profile URL
+      targetUrl = `/physician/${physicianId}`;
     }
 
-    // Try v.gd if is.gd failed (also direct redirect)
-    if (!shortUrl) {
-      try {
-        const vGdResponse = await fetch(`https://v.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
-        if (vGdResponse.ok) {
-          const vGdData = await vGdResponse.json();
-          if (vGdData && vGdData.shorturl) {
-            shortUrl = vGdData.shorturl;
-          }
-        }
-      } catch (error: any) {
-        errorMessage += `v.gd failed: ${error.message}; `;
-      }
+    // Store the mapping in database
+    const { error: insertError } = await supabase
+      .from('link_mappings')
+      .insert({
+        short_id: shortId,
+        doctor_id: doctorId,
+        quiz_type: urlType === 'profile' ? 'PROFILE' : quizType,
+        physician_id: physicianId,
+        custom_quiz_id: customQuizId,
+        lead_source: leadSource,
+        target_url: targetUrl,
+        click_count: 0
+      });
+
+    if (insertError) {
+      console.error('Error inserting link mapping:', insertError);
+      throw new Error('Failed to create short URL mapping');
     }
 
-    // Try TinyURL as last resort (has preview page with 5-second wait)
-    if (!shortUrl) {
-      try {
-        const tinyUrlResponse = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
-        if (tinyUrlResponse.ok) {
-          const tinyUrl = await tinyUrlResponse.text();
-          if (tinyUrl && tinyUrl.startsWith('http')) {
-            shortUrl = tinyUrl;
-          }
-        }
-      } catch (error: any) {
-        errorMessage += `TinyURL failed: ${error.message}; `;
-      }
-    }
+    // Construct the short URL using the app's domain
+    const appUrl = req.headers.get('origin') || 'https://patient-pathway.lovable.app';
+    const shortUrl = `${appUrl}/s/${shortId}`;
 
-    // If all services fail, return the original URL
-    if (!shortUrl) {
-      console.warn('All URL shortening services failed, returning original URL:', errorMessage);
-      shortUrl = longUrl;
-    }
+    console.log('Generated short URL:', { shortId, shortUrl, targetUrl, urlType });
 
     return new Response(
       JSON.stringify({
         success: true,
         shortUrl: shortUrl,
-        message: shortUrl === longUrl ? 'URL shortening services unavailable, using original URL' : 'Short URL generated successfully'
+        shortId: shortId,
+        message: 'Short URL generated successfully'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
