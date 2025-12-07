@@ -18,7 +18,7 @@ export default function ShortLinkRedirect() {
       // Fetch the link mapping
       const { data, error: fetchError } = await supabase
         .from('link_mappings')
-        .select('doctor_id, quiz_type, custom_quiz_id, lead_source')
+        .select('doctor_id, quiz_type, custom_quiz_id, lead_source, physician_id, target_url')
         .eq('short_id', shortId)
         .single();
 
@@ -38,11 +38,15 @@ export default function ShortLinkRedirect() {
       let redirectUrl: string;
       const source = data.lead_source || 'shortlink';
       
-      if (data.custom_quiz_id) {
+      // Handle profile URLs
+      if (data.quiz_type === 'PROFILE' && data.target_url) {
+        redirectUrl = data.target_url;
+      } else if (data.custom_quiz_id) {
         redirectUrl = `/custom-quiz/${data.custom_quiz_id}?doctor=${data.doctor_id}&source=${source}`;
       } else {
         const quizType = data.quiz_type || 'nose';
-        redirectUrl = `/share/${quizType}/${data.doctor_id}?source=${source}`;
+        const physicianParam = data.physician_id ? `&physician=${data.physician_id}` : '';
+        redirectUrl = `/share/${quizType}/${data.doctor_id}?source=${source}${physicianParam}`;
       }
       
       navigate(redirectUrl, { replace: true });

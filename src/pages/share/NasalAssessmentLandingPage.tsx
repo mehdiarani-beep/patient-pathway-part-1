@@ -1,6 +1,7 @@
 import { useParams, useSearchParams } from "react-router-dom";
 import { NOSE_SNOT } from "@/components/quiz/NOSE_SNOTPage";
 import doctorImage from "@/assets/dr-vaughn.png";
+import { usePageTracking } from "@/hooks/usePageTracking";
 
 const NasalAssessmentLandingPage = () => {
   const { doctorId } = useParams<{ doctorId: string }>();
@@ -13,6 +14,14 @@ const NasalAssessmentLandingPage = () => {
   const effectiveDoctorId = doctorId || "192eedfe-92fd-4306-a272-4c06c01604cf";
   // If no explicit physicianId, use the doctorId (clinic-level quiz)
   const effectivePhysicianId = physicianId || effectiveDoctorId;
+
+  // Track page view
+  usePageTracking({
+    pageType: 'landing_page',
+    pageName: 'Nasal Assessment',
+    doctorId: effectiveDoctorId,
+    physicianId: effectivePhysicianId
+  });
   
   return (
     <NOSE_SNOT 

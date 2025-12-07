@@ -12,6 +12,7 @@ import { calculateQuizScore } from '@/utils/quizScoring';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, ChevronRight, Loader2, Mail, Phone, User } from 'lucide-react';
 import Profileimage from '/src/assets/doctor.png';
+import { usePageTracking } from '@/hooks/usePageTracking';
 interface QuizAnswer {
   questionIndex: number;
   answerIndex: number;
@@ -57,6 +58,14 @@ export function CardQuiz() {
   const physicianId = searchParams.get('physician');
   const quizType = quizId?.toUpperCase() as QuizType;
   const quiz = quizType ? quizzes[quizType] : null;
+
+  // Track page view
+  usePageTracking({
+    pageType: 'quiz_standard',
+    pageName: quiz?.title || quizId || 'Quiz',
+    doctorId: doctorId || undefined,
+    physicianId: physicianId || doctorId || undefined
+  });
 
   useEffect(() => {
     const fetchDoctorProfile = async () => {

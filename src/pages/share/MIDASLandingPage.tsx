@@ -1,6 +1,7 @@
 import { useParams, useSearchParams } from "react-router-dom";
 import { MIDAS } from "@/components/quiz/MIDAS_Page";
 import doctorImage from "@/assets/dr-vaughn.png";
+import { usePageTracking } from "@/hooks/usePageTracking";
 
 const MIDASLandingPage = () => {
   const { doctorId } = useParams<{ doctorId: string }>();
@@ -12,6 +13,14 @@ const MIDASLandingPage = () => {
   // Default to Dr. Vaughn's ID if not provided
   const effectiveDoctorId = doctorId || "192eedfe-92fd-4306-a272-4c06c01604cf";
   const effectivePhysicianId = physicianId || effectiveDoctorId;
+
+  // Track page view
+  usePageTracking({
+    pageType: 'landing_page',
+    pageName: 'MSQ Assessment',
+    doctorId: effectiveDoctorId,
+    physicianId: effectivePhysicianId
+  });
   
   return (
     <MIDAS 
