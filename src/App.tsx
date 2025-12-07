@@ -35,6 +35,7 @@ import TeamSignupPage from './pages/TeamSignupPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import TeamMemberLandingPage from './pages/TeamMemberLandingPage';
 import NOSESNOTQuizPage from './pages/NOSESNOTQuizPage';
+import PhysicianProfilePage from './pages/PhysicianProfilePage';
 const queryClient = new QueryClient();
 function App() {
   return (
@@ -73,6 +74,7 @@ function App() {
               <Route path="/social-accounts" element={<SocialAccountsPage />} />
               <Route path="/nose-editor/:doctorId" element={<NoseEditorPage />} />
               <Route path="/s/:shortId" element={<ShortLinkRedirect />} />
+              <Route path="/physician/:physicianId" element={<PhysicianProfilePage />} />
               <Route path="/embed/chatbot/:quizId" element={<EmbeddedChatbotPage />} />
               <Route path="/embed/custom/:quizId" element={<Embed />} />
               <Route path="/embed/:quizId" element={<Embed />} />

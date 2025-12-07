@@ -4,7 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TrendingUp, TrendingDown, ArrowUp, ArrowDown, Users, Calendar, BarChart3, PieChart, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowUp, ArrowDown, Users, BarChart3, PieChart, Activity } from 'lucide-react';
+import { TrafficAnalytics } from './TrafficAnalytics';
 
 interface TrendData {
   period: string;
@@ -394,41 +395,8 @@ export function TrendsPage() {
         </div>
       )}
 
-      {/* Weekly Breakdown */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Weekly Breakdown
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-          {trendsData.map((week, index) => (
-              <div key={week.period} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4">
-                <div className="flex-1">
-                  <h3 className="font-medium mb-3">{week.period}</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="text-blue-600 border-blue-200">
-                      New: {week.newLeads}
-                    </Badge>
-                    <Badge variant="outline" className="text-yellow-600 border-yellow-200">
-                      Contacted: {week.contacted}
-                    </Badge>
-                    <Badge variant="outline" className="text-green-600 border-green-200">
-                      Scheduled: {week.scheduled}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="text-right sm:text-right text-left shrink-0">
-                  <div className="text-lg font-bold">{week.total}</div>
-                  <div className="text-sm text-gray-500">total leads</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Traffic Analytics */}
+      <TrafficAnalytics />
     </div>
   );
 }

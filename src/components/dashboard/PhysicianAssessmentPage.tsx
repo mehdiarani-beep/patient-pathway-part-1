@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Share2, User } from 'lucide-react';
+import { Share2, User, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { quizzes } from '@/data/quizzes';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
 
 // Only these quizzes are currently active
 const ACTIVE_QUIZ_IDS = ['NOSE_SNOT', 'EPWORTH', 'MIDAS'];
@@ -115,6 +116,18 @@ export function PhysicianAssessmentPage({ physicianId }: PhysicianAssessmentPage
             Share assessments for this physician
           </p>
         </div>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => {
+            const profileUrl = `${window.location.origin}/physician/${physicianId}`;
+            navigator.clipboard.writeText(profileUrl);
+            toast.success('Profile link copied!');
+          }}
+        >
+          <ExternalLink className="w-4 h-4 mr-2" />
+          Share Profile
+        </Button>
       </div>
 
       {/* Quiz Categories */}

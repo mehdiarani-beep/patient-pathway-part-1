@@ -1365,6 +1365,94 @@ export type Database = {
           },
         ]
       }
+      page_views: {
+        Row: {
+          browser: string | null
+          clinic_id: string | null
+          created_at: string | null
+          device_type: string | null
+          doctor_id: string | null
+          id: string
+          is_unique: boolean | null
+          page_name: string
+          page_type: string
+          page_url: string | null
+          physician_id: string | null
+          referrer_url: string | null
+          session_id: string | null
+          traffic_source: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          viewed_at: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          clinic_id?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          doctor_id?: string | null
+          id?: string
+          is_unique?: boolean | null
+          page_name: string
+          page_type: string
+          page_url?: string | null
+          physician_id?: string | null
+          referrer_url?: string | null
+          session_id?: string | null
+          traffic_source?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          viewed_at?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          clinic_id?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          doctor_id?: string | null
+          id?: string
+          is_unique?: boolean | null
+          page_name?: string
+          page_type?: string
+          page_url?: string | null
+          physician_id?: string | null
+          referrer_url?: string | null
+          session_id?: string | null
+          traffic_source?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          viewed_at?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_views_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_views_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_views_physician_id_fkey"
+            columns: ["physician_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_physicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_incidents: {
         Row: {
           clinic_id: string | null
