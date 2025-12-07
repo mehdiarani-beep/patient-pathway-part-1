@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -107,7 +107,7 @@ const bottomMenuItems = [
   }
 ];
 
-export const AnimatedSidebar: React.FC<AnimatedSidebarProps> = ({ currentPage, onPageChange, onSignOut }) => {
+export const AnimatedSidebar = ({ currentPage, onPageChange, onSignOut }: AnimatedSidebarProps) => {
   const { user } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
