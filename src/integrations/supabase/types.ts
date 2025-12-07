@@ -649,6 +649,7 @@ export type Database = {
           first_name: string | null
           id: string
           is_admin: boolean
+          is_manager: boolean | null
           is_staff: boolean | null
           last_name: string | null
           location: string | null
@@ -679,6 +680,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           is_admin?: boolean
+          is_manager?: boolean | null
           is_staff?: boolean | null
           last_name?: string | null
           location?: string | null
@@ -709,6 +711,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           is_admin?: boolean
+          is_manager?: boolean | null
           is_staff?: boolean | null
           last_name?: string | null
           location?: string | null
