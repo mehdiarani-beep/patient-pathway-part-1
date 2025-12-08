@@ -6,6 +6,7 @@ User-agent: *
 # Allow public assessment landing pages
 Allow: /share/
 Allow: /s/
+Allow: /physician/
 
 # Disallow private/authenticated areas
 Disallow: /portal/
@@ -37,23 +38,27 @@ Allow: /
 # AI Search Crawlers
 User-agent: GPTBot
 Allow: /share/
+Allow: /physician/
 Disallow: /portal/
 Disallow: /auth
 
 User-agent: Google-Extended
 Allow: /share/
+Allow: /physician/
 Disallow: /portal/
 Disallow: /auth
 
 User-agent: anthropic-ai
 Allow: /share/
+Allow: /physician/
 Disallow: /portal/
 Disallow: /auth
 
 User-agent: PerplexityBot
 Allow: /share/
+Allow: /physician/
 Disallow: /portal/
 Disallow: /auth
 
-# Sitemap location (served via Vercel rewrite to Supabase edge function)
-Sitemap: https://patientpathway.ai/sitemap.xml
+# Sitemap location
+Sitemap: https://drvitjhhggcywuepyncx.supabase.co/functions/v1/generate-sitemap?baseUrl=https://patientpathway.ai
