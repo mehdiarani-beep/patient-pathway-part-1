@@ -42,6 +42,16 @@ serve(async (req) => {
       console.error("Error fetching doctors:", doctorsError);
     }
 
+    // Fetch active physicians for profile pages
+    const { data: physicians, error: physiciansError } = await supabase
+      .from("clinic_physicians")
+      .select("id, first_name, last_name, updated_at")
+      .eq("is_active", true);
+
+    if (physiciansError) {
+      console.error("Error fetching physicians:", physiciansError);
+    }
+
     // Active quiz types with landing pages
     const quizTypes = ["nose_snot", "epworth", "midas"];
 
@@ -68,6 +78,22 @@ serve(async (req) => {
       }
     }
 
+    // Physician profile pages
+    if (physicians && physicians.length > 0) {
+      for (const physician of physicians) {
+        const lastmod = physician.updated_at 
+          ? new Date(physician.updated_at).toISOString().split("T")[0] 
+          : today;
+        
+        urls.push(formatUrl(
+          `${baseUrl}/physician/${physician.id}`,
+          lastmod,
+          "weekly",
+          "0.8"
+        ));
+      }
+    }
+
     // NOTE: Short URL redirects (/s/:shortId) are intentionally excluded
     // Google recommends not including redirect URLs in sitemaps
 
@@ -77,7 +103,7 @@ serve(async (req) => {
 ${urls.join("\n")}
 </urlset>`;
 
-    console.log(`Generated sitemap with ${urls.length} URLs (excluding redirects)`);
+    console.log(`Generated sitemap with ${urls.length} URLs (${physicians?.length || 0} physician profiles, excluding redirects)`);
 
     return new Response(sitemap, {
       headers: corsHeaders,

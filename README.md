@@ -262,7 +262,11 @@ https://drvitjhhggcywuepyncx.supabase.co/functions/v1/generate-sitemap?baseUrl=h
 4. Enter the full edge function URL above
 5. Click Submit
 
-**Note:** The `robots.txt` file references this direct edge function URL. Do not use `/sitemap.xml` as Lovable hosting doesn't support server-side rewrites.
+**Sitemap Structure:**
+- **Primary (dynamic):** Edge function URL above - submit this to Google Search Console
+- **Fallback (static):** `/sitemap.xml` - A sitemap index file that references the edge function, so crawlers hitting this path get valid XML
+
+**Note:** The `robots.txt` file references the direct edge function URL.
 
 ---
 
