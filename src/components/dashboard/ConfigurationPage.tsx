@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Building, MapPin, Stethoscope, Users, FolderOpen, Save } from 'lucide-react';
+import { Loader2, Building, MapPin, Stethoscope, Users, FolderOpen, Save, Palette } from 'lucide-react';
 import { BusinessInfoSection } from './config/BusinessInfoSection';
 import { LocationsSection } from './config/LocationsSection';
 import { PhysiciansSection } from './config/PhysiciansSection';
 import { TeamManagementPage } from './TeamManagementPage';
 import { AssetsLibraryPage } from './AssetsLibraryPage';
+import { BrandKitSection } from './config/BrandKitSection';
 
 interface BusinessInfo {
   clinic_name: string;
@@ -20,6 +21,17 @@ interface BusinessInfo {
   owner_email: string;
   logo_url: string;
   avatar_url: string;
+}
+
+interface BrandKitInfo {
+  primary_color: string;
+  secondary_color: string;
+  accent_color: string;
+  background_color: string;
+  heading_font: string;
+  body_font: string;
+  tagline: string;
+  logo_icon_url: string;
 }
 
 export function ConfigurationPage() {
@@ -40,6 +52,17 @@ export function ConfigurationPage() {
     owner_email: '',
     logo_url: '',
     avatar_url: ''
+  });
+
+  const [brandKit, setBrandKit] = useState<BrandKitInfo>({
+    primary_color: '#0063A0',
+    secondary_color: '#0796CC',
+    accent_color: '#F7904F',
+    background_color: '#FFFFFF',
+    heading_font: 'Inter',
+    body_font: 'Inter',
+    tagline: '',
+    logo_icon_url: ''
   });
 
   useEffect(() => {
@@ -112,6 +135,16 @@ export function ConfigurationPage() {
                 logo_url: clinic.logo_url || '',
                 avatar_url: clinic.avatar_url || ''
               });
+              setBrandKit({
+                primary_color: clinic.primary_color || '#0063A0',
+                secondary_color: clinic.secondary_color || '#0796CC',
+                accent_color: clinic.accent_color || '#F7904F',
+                background_color: clinic.background_color || '#FFFFFF',
+                heading_font: clinic.heading_font || 'Inter',
+                body_font: clinic.body_font || 'Inter',
+                tagline: clinic.tagline || '',
+                logo_icon_url: clinic.logo_icon_url || ''
+              });
             }
           } else {
             setBusinessInfo({
@@ -137,6 +170,10 @@ export function ConfigurationPage() {
 
   const handleBusinessInfoChange = (field: keyof BusinessInfo, value: string) => {
     setBusinessInfo(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleBrandKitChange = (field: keyof BrandKitInfo, value: string) => {
+    setBrandKit(prev => ({ ...prev, [field]: value }));
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,7 +243,7 @@ export function ConfigurationPage() {
     setSaving(true);
     try {
       if (clinicId) {
-        // Update existing clinic profile
+        // Update existing clinic profile with business info and brand kit
         const { error } = await supabase
           .from('clinic_profiles')
           .update({
@@ -217,7 +254,15 @@ export function ConfigurationPage() {
             owner_mobile: businessInfo.owner_mobile.trim() || null,
             owner_email: businessInfo.owner_email.trim() || null,
             logo_url: businessInfo.logo_url.trim() || null,
-            avatar_url: businessInfo.avatar_url.trim() || null
+            avatar_url: businessInfo.avatar_url.trim() || null,
+            primary_color: brandKit.primary_color || null,
+            secondary_color: brandKit.secondary_color || null,
+            accent_color: brandKit.accent_color || null,
+            background_color: brandKit.background_color || null,
+            heading_font: brandKit.heading_font || null,
+            body_font: brandKit.body_font || null,
+            tagline: brandKit.tagline?.trim() || null,
+            logo_icon_url: brandKit.logo_icon_url || null
           })
           .eq('id', clinicId);
 
@@ -298,10 +343,14 @@ export function ConfigurationPage() {
       </div>
 
       <Tabs defaultValue="business" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="business" className="gap-2">
             <Building className="w-4 h-4" />
             <span className="hidden sm:inline">Business</span>
+          </TabsTrigger>
+          <TabsTrigger value="brandkit" className="gap-2">
+            <Palette className="w-4 h-4" />
+            <span className="hidden sm:inline">Brand Kit</span>
           </TabsTrigger>
           <TabsTrigger value="locations" className="gap-2">
             <MapPin className="w-4 h-4" />
@@ -329,6 +378,18 @@ export function ConfigurationPage() {
             onAvatarUpload={handleAvatarUpload}
             uploadingLogo={uploadingLogo}
             uploadingAvatar={uploadingAvatar}
+          />
+        </TabsContent>
+
+        <TabsContent value="brandkit">
+          <BrandKitSection
+            data={{
+              ...brandKit,
+              logo_url: businessInfo.logo_url,
+              avatar_url: businessInfo.avatar_url
+            }}
+            onChange={handleBrandKitChange}
+            clinicId={clinicId}
           />
         </TabsContent>
 

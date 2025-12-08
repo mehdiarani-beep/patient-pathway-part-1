@@ -382,8 +382,11 @@ export type Database = {
       }
       clinic_profiles: {
         Row: {
+          accent_color: string | null
           address: string | null
           avatar_url: string | null
+          background_color: string | null
+          body_font: string | null
           city: string | null
           clinic_name: string
           clinic_slug: string | null
@@ -392,7 +395,9 @@ export type Database = {
           created_by: string
           description: string | null
           email: string | null
+          heading_font: string | null
           id: string
+          logo_icon_url: string | null
           logo_url: string | null
           owner_email: string | null
           owner_mobile: string | null
@@ -401,13 +406,17 @@ export type Database = {
           primary_color: string | null
           secondary_color: string | null
           state: string | null
+          tagline: string | null
           updated_at: string
           website: string | null
           zip_code: string | null
         }
         Insert: {
+          accent_color?: string | null
           address?: string | null
           avatar_url?: string | null
+          background_color?: string | null
+          body_font?: string | null
           city?: string | null
           clinic_name: string
           clinic_slug?: string | null
@@ -416,7 +425,9 @@ export type Database = {
           created_by: string
           description?: string | null
           email?: string | null
+          heading_font?: string | null
           id?: string
+          logo_icon_url?: string | null
           logo_url?: string | null
           owner_email?: string | null
           owner_mobile?: string | null
@@ -425,13 +436,17 @@ export type Database = {
           primary_color?: string | null
           secondary_color?: string | null
           state?: string | null
+          tagline?: string | null
           updated_at?: string
           website?: string | null
           zip_code?: string | null
         }
         Update: {
+          accent_color?: string | null
           address?: string | null
           avatar_url?: string | null
+          background_color?: string | null
+          body_font?: string | null
           city?: string | null
           clinic_name?: string
           clinic_slug?: string | null
@@ -440,7 +455,9 @@ export type Database = {
           created_by?: string
           description?: string | null
           email?: string | null
+          heading_font?: string | null
           id?: string
+          logo_icon_url?: string | null
           logo_url?: string | null
           owner_email?: string | null
           owner_mobile?: string | null
@@ -449,6 +466,7 @@ export type Database = {
           primary_color?: string | null
           secondary_color?: string | null
           state?: string | null
+          tagline?: string | null
           updated_at?: string
           website?: string | null
           zip_code?: string | null
