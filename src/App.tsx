@@ -36,7 +36,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import TeamMemberLandingPage from './pages/TeamMemberLandingPage';
 import NOSESNOTQuizPage from './pages/NOSESNOTQuizPage';
 import PhysicianProfilePage from './pages/PhysicianProfilePage';
-import SitemapRedirect from './pages/SitemapRedirect';
+
 const queryClient = new QueryClient();
 function App() {
   return (
@@ -79,7 +79,7 @@ function App() {
               <Route path="/embed/chatbot/:quizId" element={<EmbeddedChatbotPage />} />
               <Route path="/embed/custom/:quizId" element={<Embed />} />
               <Route path="/embed/:quizId" element={<Embed />} />
-              <Route path="/sitemap.xml" element={<SitemapRedirect />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
