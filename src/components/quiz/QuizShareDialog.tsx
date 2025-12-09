@@ -145,23 +145,22 @@ export function QuizShareDialog({ isOpen, onClose, quizType, customQuizId }: Qui
 
   const generateShortUrl = async (longUrl: string) => {
     try {
-      // Use your own backend function which prioritizes direct redirect services
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-short-url`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({ longUrl }),
+      const { data, error } = await supabase.functions.invoke('generate-short-url', {
+        body: {
+          longUrl,
+          doctorId: profile?.id,
+          quizType: quizType,
+          customQuizId: customQuizId,
+          leadSource: 'share_dialog'
+        }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        return data.shortUrl || longUrl;
-      } else {
-        console.error('Backend URL shortening failed, using original URL');
+      if (error) {
+        console.error('Backend URL shortening failed:', error);
         return longUrl;
       }
+
+      return data?.shortUrl || longUrl;
     } catch (error) {
       console.error('Error generating short URL:', error);
       return longUrl;

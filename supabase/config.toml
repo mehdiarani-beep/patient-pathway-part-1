@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.track-page-view]
 verify_jwt = false
+
+[functions.generate-short-url]
+verify_jwt = false
