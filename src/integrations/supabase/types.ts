@@ -335,6 +335,7 @@ export type Database = {
           mobile: string | null
           note_image_url: string | null
           short_bio: string | null
+          slug: string | null
           updated_at: string | null
         }
         Insert: {
@@ -353,6 +354,7 @@ export type Database = {
           mobile?: string | null
           note_image_url?: string | null
           short_bio?: string | null
+          slug?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -371,6 +373,7 @@ export type Database = {
           mobile?: string | null
           note_image_url?: string | null
           short_bio?: string | null
+          slug?: string | null
           updated_at?: string | null
         }
         Relationships: [
