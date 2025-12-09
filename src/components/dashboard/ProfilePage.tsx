@@ -153,6 +153,7 @@ export function ProfilePage() {
                 mobile: physicianData.mobile || '',
                 email: physicianData.email || '',
                 bio: physicianData.bio || '',
+                short_bio: physicianData.short_bio || '',
                 headshot_url: physicianData.headshot_url || ''
               });
             }

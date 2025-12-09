@@ -43,7 +43,25 @@ interface PhysicianData {
   degree_type: string;
   credentials: string[] | null;
   bio: string | null;
+  short_bio: string | null;
   headshot_url: string | null;
+}
+
+interface ClinicData {
+  clinic_name: string;
+  logo_url: string | null;
+  phone: string | null;
+  website: string | null;
+}
+
+interface ClinicLocation {
+  id: string;
+  name: string;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zip_code: string | null;
+  phone: string | null;
 }
 
 export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Template7Props) => {
@@ -51,6 +69,8 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
   const [iframeHeight, setIframeHeight] = useState<number>(480);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [physicianData, setPhysicianData] = useState<PhysicianData | null>(null);
+  const [clinicData, setClinicData] = useState<ClinicData | null>(null);
+  const [clinicLocations, setClinicLocations] = useState<ClinicLocation[]>([]);
   const [isClinicLevel, setIsClinicLevel] = useState<boolean>(true);
   const [isUploadingNoteImage, setIsUploadingNoteImage] = useState(false);
   const noteImageInputRef = useRef<HTMLInputElement>(null);
@@ -60,16 +80,48 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
   const physicianParam = physicianId && physicianId !== doctorId ? `&physician=${physicianId}` : '';
   const quizParams = `doctor=${doctorId || '192eedfe-92fd-4306-a272-4c06c01604cf'}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share${physicianParam}`;
 
-  // Fetch physician data
+  // Fetch physician and clinic data
   useEffect(() => {
     const fetchData = async () => {
       const isClinic = !physicianId || physicianId === doctorId;
       setIsClinicLevel(isClinic);
       
+      // First get clinic_id from doctor_profiles
+      const { data: doctorProfile, error: doctorError } = await supabase
+        .from('doctor_profiles')
+        .select('clinic_id')
+        .eq('id', doctorId || '192eedfe-92fd-4306-a272-4c06c01604cf')
+        .maybeSingle();
+      
+      if (!doctorError && doctorProfile?.clinic_id) {
+        // Fetch clinic data
+        const { data: clinic, error: clinicError } = await supabase
+          .from('clinic_profiles')
+          .select('clinic_name, logo_url, phone, website')
+          .eq('id', doctorProfile.clinic_id)
+          .maybeSingle();
+        
+        if (!clinicError && clinic) {
+          setClinicData(clinic);
+        }
+        
+        // Fetch clinic locations
+        const { data: locations, error: locationsError } = await supabase
+          .from('clinic_locations')
+          .select('id, name, address, city, state, zip_code, phone')
+          .eq('clinic_id', doctorProfile.clinic_id)
+          .order('is_primary', { ascending: false });
+        
+        if (!locationsError && locations) {
+          setClinicLocations(locations);
+        }
+      }
+      
+      // Fetch physician data if physician-level
       if (!isClinic && physicianId) {
         const { data: physician, error } = await supabase
           .from('clinic_physicians')
-          .select('id, first_name, last_name, degree_type, credentials, bio, headshot_url')
+          .select('id, first_name, last_name, degree_type, credentials, bio, short_bio, headshot_url')
           .eq('id', physicianId)
           .eq('is_active', true)
           .maybeSingle();
@@ -1151,38 +1203,70 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 max-w-6xl mx-auto">
             {/* Logo and Brand */}
             <div className="sm:col-span-2 md:col-span-1">
-              <img 
-                src={exhaleLogo} 
-                alt="Exhale Sinus" 
-                className="h-12 sm:h-14 md:h-16 mb-3 sm:mb-4 brightness-0 invert"
-                loading="lazy"
-              />
+              {clinicData?.logo_url ? (
+                <img 
+                  src={clinicData.logo_url} 
+                  alt={clinicData?.clinic_name || 'Clinic Logo'} 
+                  className="h-12 sm:h-14 md:h-16 mb-3 sm:mb-4 brightness-0 invert"
+                  loading="lazy"
+                />
+              ) : (
+                <img 
+                  src={exhaleLogo} 
+                  alt="Exhale Sinus" 
+                  className="h-12 sm:h-14 md:h-16 mb-3 sm:mb-4 brightness-0 invert"
+                  loading="lazy"
+                />
+              )}
               <h3 className="text-base sm:text-lg font-semibold mb-1.5 sm:mb-2">
-                Exhale Sinus, TMJ, Headache & Sleep
+                {clinicData?.clinic_name || 'Exhale Sinus, TMJ, Headache & Sleep'}
               </h3>
               <p className="text-xs sm:text-sm text-background/70">
-                Expert care for nasal obstruction, chronic sinus infections, and ENT conditions in Schaumburg, Illinois.
+                Expert care for sleep disorders, nasal obstruction, and ENT conditions.
               </p>
             </div>
 
-            {/* Location */}
+            {/* Locations */}
             <div>
-              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Location</h4>
+              <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+                {clinicLocations.length > 1 ? 'Locations' : 'Location'}
+              </h4>
               <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm">
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-1 flex-shrink-0" />
-                  <div>
-                    <div>814 E Woodfield</div>
-                    <div>Schaumburg, IL 60173</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-1 flex-shrink-0" />
-                  <div>
-                    <div>735 N. Perryville Rd. Suite 4</div>
-                    <div>Rockford, IL 61107</div>
-                  </div>
-                </div>
+                {clinicLocations.length > 0 ? (
+                  clinicLocations.map((location) => (
+                    <div key={location.id} className="flex items-start gap-2">
+                      <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-1 flex-shrink-0" />
+                      <div>
+                        {location.address && <div>{location.address}</div>}
+                        <div>
+                          {[location.city, location.state, location.zip_code].filter(Boolean).join(', ')}
+                        </div>
+                        {location.phone && (
+                          <a href={`tel:${location.phone}`} className="hover:text-primary transition-colors">
+                            {location.phone}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-1 flex-shrink-0" />
+                      <div>
+                        <div>814 E Woodfield</div>
+                        <div>Schaumburg, IL 60173</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-1 flex-shrink-0" />
+                      <div>
+                        <div>735 N. Perryville Rd. Suite 4</div>
+                        <div>Rockford, IL 61107</div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -1190,28 +1274,52 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
             <div>
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Links</h4>
               <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
-                <a 
-                  href="https://www.exhalesinus.com/request-an-appointment" 
-                  className="block hover:text-primary transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Request an Appointment
-                </a>
-                <a 
-                  href="https://www.exhalesinus.com/" 
-                  className="block hover:text-primary transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Exhale Sinus Website
-                </a>
+                {clinicData?.website && (
+                  <>
+                    <a 
+                      href={clinicData.website.includes('http') ? clinicData.website : `https://${clinicData.website}`}
+                      className="block hover:text-primary transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Request an Appointment
+                    </a>
+                    <a 
+                      href={clinicData.website.includes('http') ? clinicData.website : `https://${clinicData.website}`}
+                      className="block hover:text-primary transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {clinicData?.clinic_name || 'Clinic'} Website
+                    </a>
+                  </>
+                )}
+                {!clinicData?.website && (
+                  <>
+                    <a 
+                      href="https://www.exhalesinus.com/request-an-appointment" 
+                      className="block hover:text-primary transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Request an Appointment
+                    </a>
+                    <a 
+                      href="https://www.exhalesinus.com/" 
+                      className="block hover:text-primary transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Exhale Sinus Website
+                    </a>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
           <div className="border-t border-background/20 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-xs sm:text-sm text-background/70">
-            <p>&copy; {new Date().getFullYear()} Exhale Sinus, TMJ, Headache & Sleep. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} {clinicData?.clinic_name || 'Exhale Sinus, TMJ, Headache & Sleep'}. All rights reserved.</p>
           </div>
         </div>
       </footer>
