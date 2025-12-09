@@ -198,7 +198,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
     : (physicianData?.credentials?.join(' • ') || 'ENT Specialist');
   const displayBio = isClinicLevel 
     ? `${clinicName} has helped thousands of patients overcome nasal and sinus conditions through comprehensive, minimally-invasive ENT treatments.`
-    : (physicianData?.bio || 'Experienced ENT specialist dedicated to helping patients breathe better.');
+    : (physicianData?.short_bio || physicianData?.bio || 'Experienced ENT specialist dedicated to helping patients breathe better.');
   // For clinic level, use first physician's headshot or logo, for physician use their specific headshot
   const displayHeadshot = isClinicLevel 
     ? (allPhysicians[0]?.headshot_url || clinicData?.logo_url || drVaughnProfessional)

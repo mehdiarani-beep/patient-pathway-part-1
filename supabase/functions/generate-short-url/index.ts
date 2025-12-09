@@ -86,6 +86,8 @@ serve(async (req) => {
     }
 
     // Store the mapping in database
+    // NOTE: physician_id FK references doctor_profiles, not clinic_physicians
+    // So we don't store clinic_physicians IDs in physician_id column
     const insertData: Record<string, any> = {
       short_id: shortId,
       doctor_id: finalDoctorId,
@@ -93,11 +95,6 @@ serve(async (req) => {
       target_url: targetUrl,
       click_count: 0
     };
-
-    // Only add physician_id if it's provided
-    if (physicianId) {
-      insertData.physician_id = physicianId;
-    }
 
     // Only add custom_quiz_id if it's provided
     if (customQuizId) {

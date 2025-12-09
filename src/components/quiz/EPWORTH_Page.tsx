@@ -144,7 +144,7 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
     : (physicianData?.credentials?.join(' • ') || 'ENT Specialist');
   const displayBio = isClinicLevel 
     ? 'Dr. Vaughn has helped hundreds of patients overcome sleep apnea and reclaim their energy through comprehensive, minimally-invasive ENT treatments. His expertise spans from conservative management to advanced surgical interventions.'
-    : (physicianData?.bio || 'Experienced ENT specialist dedicated to helping patients sleep better.');
+    : (physicianData?.short_bio || physicianData?.bio || 'Experienced ENT specialist dedicated to helping patients sleep better.');
   const displayHeadshot = isClinicLevel ? drVaughnProfessional : (physicianData?.headshot_url || drVaughnProfessional);
   const displayNoteImage = isClinicLevel ? drVaughnBlack : (physicianData?.headshot_url || drVaughnBlack);
 
