@@ -384,7 +384,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
               </Button>
             </div>
             <div className="bg-card/50 backdrop-blur-sm rounded-lg border border-border/20 overflow-hidden mt-4 md:mt-0 min-h-[400px] md:min-h-[480px]">
-              <NOSESNOTPage doctorId={doctorIdparam} />
+              <NOSESNOTPage doctorId={doctorIdparam} physicianId={physicianId} />
             </div>
           </div>
         </div>

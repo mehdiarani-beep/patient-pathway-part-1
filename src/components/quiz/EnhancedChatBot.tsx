@@ -979,7 +979,9 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId, phys
                 <CheckCircle className="w-5 h-5" />
                 <span className="font-semibold">{quizData.title.toUpperCase()} Assessment Complete!</span>
               </div>
-              <p className="text-sm text-gray-600">Your Result has been successfully submitted to Dr. {doctorProfile?.first_name} {doctorProfile?.last_name}.</p>
+              <p className="text-sm text-gray-600">Your Result has been successfully submitted to {isClinicLevel 
+                ? (clinicName || 'the healthcare provider')
+                : (physicianLastName ? `Dr. ${physicianLastName}` : 'the healthcare provider')}.</p>
             </div>
           )}
         </motion.div>
