@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MapPin, CheckCircle2, AlertCircle, Moon, Coffee, Car, Brain, Award, Shield } from "lucide-react";
+import { MapPin, CheckCircle2, AlertCircle, Moon, Coffee, Car, Brain, Award, Shield, Loader2, Pencil } from "lucide-react";
 import exhaleLogo from "@/assets/exhale-logo.png";
 import drVaughnProfessional from "@/assets/dr-vaughn-professional.png";
 import drVaughnCasual from "@/assets/dr-vaughn-casual.png";
@@ -26,6 +26,8 @@ import {
   generateFAQSchema,
   generatePhysicianSchema,
 } from "@/components/seo/schemas/medicalSchemas";
+import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Template7Props {
   doctorName: string;
@@ -45,10 +47,13 @@ interface PhysicianData {
 }
 
 export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Template7Props) => {
+  const { user } = useAuth();
   const [iframeHeight, setIframeHeight] = useState<number>(480);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [physicianData, setPhysicianData] = useState<PhysicianData | null>(null);
   const [isClinicLevel, setIsClinicLevel] = useState<boolean>(true);
+  const [isUploadingNoteImage, setIsUploadingNoteImage] = useState(false);
+  const noteImageInputRef = useRef<HTMLInputElement>(null);
 
   // Build dynamic URLs
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -94,6 +99,44 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
   const handleTestClick = () => {
     window.open(`${baseUrl}/embed/epworth?${quizParams}`, '_blank');
   };
+    // Handle note image upload
+    const handleNoteImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file || !physicianId || isClinicLevel) return;
+      
+      setIsUploadingNoteImage(true);
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `note-${physicianId}-${Date.now()}.${fileExt}`;
+        const filePath = `physician-notes/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('clinic-assets')
+          .upload(filePath, file);
+        
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('clinic-assets')
+          .getPublicUrl(filePath);
+        
+        // Update physician's note_image_url
+        const { error: updateError } = await supabase
+          .from('clinic_physicians')
+          .update({ note_image_url: publicUrl })
+          .eq('id', physicianId);
+        
+        if (updateError) throw updateError;
+        
+        setPhysicianData(prev => prev ? { ...prev, note_image_url: publicUrl } : null);
+        toast.success('Note image updated successfully');
+      } catch (error) {
+        console.error('Error uploading note image:', error);
+        toast.error('Failed to upload image');
+      } finally {
+        setIsUploadingNoteImage(false);
+      }
+    };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -293,17 +336,46 @@ export const EPWORTH = ({ doctorName, doctorImage, doctorId, physicianId }: Temp
       </section>
 
       {/* Doctor Note */}
-      <section className="py-8 sm:py-10 md:py-12 lg:py-16 xl:py-20 bg-muted/30">
+      <section className="py-8 sm:py-10 md:py-12 lg:py-16 bg-background">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
           <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
-              <div className="order-2 md:order-1">
-                <img
+            <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
+              {/* Left Column - Doctor Image */}
+              <div className="relative order-2 md:order-1">
+                <img 
                   src={displayNoteImage}
-                  alt={`Dr. ${displayName}, Board-Certified ENT and Sleep Specialist`}
-                  className="w-full max-w-md mx-auto md:max-w-full rounded-lg shadow-lg"
+                  alt={`Dr. ${displayName}`}
+                  className="w-full max-w-md mx-auto md:max-w-full rounded-lg shadow-xl"
                   loading="lazy"
                 />
+                {/* Edit button for logged-in users (physician level only) */}
+                {user && !isClinicLevel && physicianId && (
+                  <div className="absolute top-2 right-2 md:right-auto md:left-2">
+                    <input
+                      type="file"
+                      ref={noteImageInputRef}
+                      onChange={handleNoteImageUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <Button
+                      size="sm"
+                      variant="dark"
+                      className="bg-white/90 hover:bg-white shadow-md"
+                      onClick={() => noteImageInputRef.current?.click()}
+                      disabled={isUploadingNoteImage}
+                    >
+                      {isUploadingNoteImage ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Pencil className="w-3.5 h-3.5 mr-1.5" />
+                          Edit
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="order-1 md:order-2 space-y-2 sm:space-y-3 md:space-y-4">
                 <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold">

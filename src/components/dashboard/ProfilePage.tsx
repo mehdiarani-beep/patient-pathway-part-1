@@ -489,14 +489,17 @@ export function ProfilePage() {
         )}
       </AnimatePresence>
 
-      <div className="text-center">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#0E7C9D] to-[#FD904B] bg-clip-text text-transparent mb-4">
-          {getRoleDisplayName()} Profile
+      <div className="flex items-center justify-center bg-background">
+      <div className="text-left">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#0E7C9D] to-[#FD904B] bg-clip-text text-transparent mb-1">
+               {getRoleDisplayName()} Profile
         </h1>
         <p className="text-gray-600 text-lg">
           Manage your professional information and account settings
         </p>
       </div>
+    </div>
+  
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Card className="rounded-3xl shadow-lg border-0 bg-gradient-to-br from-white to-blue-50">

@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Phone, Calendar, Brain, Lightbulb, AlertCircle, CheckCircle2, MapPin, Award, Shield } from "lucide-react";
+import { Phone, Calendar, Brain, Lightbulb, AlertCircle, CheckCircle2, MapPin, Award, Shield, Loader2,Pencil } from "lucide-react";
 import exhaleLogo from "@/assets/exhale-logo.png";
 import drVaughnCasual from "@/assets/dr-vaughn-casual.png";
 import drVaughnBlack from "@/assets/dr-vaughn-black.png";
@@ -18,6 +18,7 @@ import migraineForehead from "@/assets/migraine-forehead.png";
 import migraineCloseup from "@/assets/migraine-closeup.png";
 import migraineDistressed from "@/assets/migraine-distressed.png";
 import migraineMan from "@/assets/migraine-man.png";
+import { useAuth } from "@/hooks/useAuth";
 import migraineHomeOffice from "@/assets/migraine-home-office.png";
 import { supabase } from "@/integrations/supabase/client";
 import { SEOHead } from "@/components/seo/SEOHead";
@@ -27,6 +28,7 @@ import {
   generateFAQSchema,
   generatePhysicianSchema,
 } from "@/components/seo/schemas/medicalSchemas";
+import { toast } from "sonner";
 
 interface Template6Props {
   doctorName: string;
@@ -47,6 +49,9 @@ interface PhysicianData {
 
 export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Template6Props) => {
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const { user } = useAuth();
+  const [isUploadingNoteImage, setIsUploadingNoteImage] = useState(false);
+  const noteImageInputRef = useRef<HTMLInputElement>(null);
   const [iframeHeight, setIframeHeight] = useState<number>(480);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [physicianData, setPhysicianData] = useState<PhysicianData | null>(null);
@@ -104,6 +109,44 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
     
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+ // Handle note image upload
+ const handleNoteImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file || !physicianId || isClinicLevel) return;
+  
+  setIsUploadingNoteImage(true);
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `note-${physicianId}-${Date.now()}.${fileExt}`;
+    const filePath = `physician-notes/${fileName}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('clinic-assets')
+      .upload(filePath, file);
+    
+    if (uploadError) throw uploadError;
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from('clinic-assets')
+      .getPublicUrl(filePath);
+    
+    // Update physician's note_image_url
+    const { error: updateError } = await supabase
+      .from('clinic_physicians')
+      .update({ note_image_url: publicUrl })
+      .eq('id', physicianId);
+    
+    if (updateError) throw updateError;
+    
+    setPhysicianData(prev => prev ? { ...prev, note_image_url: publicUrl } : null);
+    toast.success('Note image updated successfully');
+  } catch (error) {
+    console.error('Error uploading note image:', error);
+    toast.error('Failed to upload image');
+  } finally {
+    setIsUploadingNoteImage(false);
+  }
+};
 
   // Dynamic iframe height adjustment
   useEffect(() => {
@@ -249,8 +292,9 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
           className="relative min-h-[400px] sm:min-h-[500px] md:min-h-[600px] flex items-center py-4 sm:py-6 md:py-8 lg:py-12"
           style={{ 
             backgroundImage: `url(${heroMigraine})`,
-            backgroundSize: 'cover',
-            backgroundPosition: window.innerWidth < 768 ? 'center' : 'center',
+            backgroundSize: '60%',  // or try '70%', '60%' for more zoom out
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
           }}
         >
           <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(0, 169, 206, 0.65) 0%, rgba(0, 169, 206, 0.70) 100%)' }} />
@@ -314,6 +358,34 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
                   className="w-full max-w-md mx-auto md:max-w-full rounded-lg shadow-xl"
                   loading="lazy"
                 />
+                {/* Edit button for logged-in users (physician level only) */}
+                {user && !isClinicLevel && physicianId && (
+                  <div className="absolute top-2 right-2 md:right-auto md:left-2">
+                    <input
+                      type="file"
+                      ref={noteImageInputRef}
+                      onChange={handleNoteImageUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <Button
+                      size="sm"
+                      variant="dark"
+                      className="bg-white/90 hover:bg-white shadow-md"
+                      onClick={() => noteImageInputRef.current?.click()}
+                      disabled={isUploadingNoteImage}
+                    >
+                      {isUploadingNoteImage ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Pencil className="w-3.5 h-3.5 mr-1.5" />
+                          Edit
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Right Column - Note */}

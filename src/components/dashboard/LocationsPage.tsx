@@ -467,3 +467,4 @@ export function LocationsPage() {
     </div>
   );
 }
+export default LocationsPage;
