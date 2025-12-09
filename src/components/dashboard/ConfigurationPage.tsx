@@ -79,85 +79,90 @@ export function ConfigurationPage() {
       const physicianID = new URLSearchParams(window.location.search).get('physicianID');
       const doctorIdparam = new URLSearchParams(window.location.search).get('id');
   
-      if (physicianID === doctorIdparam) {
+      // Only query clinic_physicians if we have a valid physicianID that differs from doctorIdparam
+      if (physicianID && physicianID !== 'null' && physicianID === doctorIdparam) {
         // The user is a physician, so fetch their data from the clinic_physicians table
         const { data: physician, error: physicianError } = await supabase
           .from('clinic_physicians')
           .select('*')
           .eq('id', physicianID)
-          .single();
+          .maybeSingle();
   
-        if (physicianError) throw physicianError;
+        if (physicianError) {
+          console.error('Error fetching physician:', physicianError);
+        }
   
         if (physician) {
           setBusinessInfo({
-            clinic_name: physician.full_name || '',
-            website: physician.website || '',
-            phone: physician.phone || '',
+            clinic_name: physician.first_name + ' ' + physician.last_name || '',
+            website: '',
+            phone: physician.mobile || '',
             owner_name: '',
             owner_mobile: '',
             owner_email: physician.email || '',
-            logo_url: physician.avatar_url || '',
-            avatar_url: physician.avatar_url || ''
+            logo_url: physician.headshot_url || '',
+            avatar_url: physician.headshot_url || ''
           });
+          setLoading(false);
+          return;
         }
-      } else {
-        // The user is a clinic, so fetch their data from the clinic_profiles table
-        const { data: profile, error: profileError } = await supabase
-          .from('doctor_profiles')
-          .select('id, clinic_id, clinic_name, phone, website, logo_url, avatar_url')
-          .eq('user_id', user.id)
-          .single();
-  
-        if (profileError && profileError.code !== 'PGRST116') {
-          throw profileError;
-        }
-  
-        if (profile) {
-          setDoctorProfileId(profile.id);
-          setClinicId(profile.clinic_id);
-  
-          if (profile.clinic_id) {
-            const { data: clinic, error: clinicError } = await supabase
-              .from('clinic_profiles')
-              .select('*')
-              .eq('id', profile.clinic_id)
-              .single();
-  
-            if (!clinicError && clinic) {
-              setBusinessInfo({
-                clinic_name: clinic.clinic_name || '',
-                website: clinic.website || '',
-                phone: clinic.phone || '',
-                owner_name: clinic.owner_name || '',
-                owner_mobile: clinic.owner_mobile || '',
-                owner_email: clinic.owner_email || '',
-                logo_url: clinic.logo_url || '',
-                avatar_url: clinic.avatar_url || ''
-              });
-              setBrandKit({
-                primary_color: clinic.primary_color || '#0063A0',
-                secondary_color: clinic.secondary_color || '#0796CC',
-                accent_color: clinic.accent_color || '#F7904F',
-                background_color: clinic.background_color || '#FFFFFF',
-                heading_font: clinic.heading_font || 'Inter',
-                body_font: clinic.body_font || 'Inter',
-                tagline: clinic.tagline || '',
-                logo_icon_url: clinic.logo_icon_url || ''
-              });
-            }
-          } else {
+      }
+      
+      // Default: fetch clinic data for the logged-in user
+      const { data: profile, error: profileError } = await supabase
+        .from('doctor_profiles')
+        .select('id, clinic_id, clinic_name, phone, website, logo_url, avatar_url')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+
+      if (profile) {
+        setDoctorProfileId(profile.id);
+        setClinicId(profile.clinic_id);
+
+        if (profile.clinic_id) {
+          const { data: clinic, error: clinicError } = await supabase
+            .from('clinic_profiles')
+            .select('*')
+            .eq('id', profile.clinic_id)
+            .maybeSingle();
+
+          if (!clinicError && clinic) {
             setBusinessInfo({
-              clinic_name: profile.clinic_name || '',
-              website: profile.website || '',
-              phone: profile.phone || '',
-              owner_name: '',
-              owner_mobile: '',
-              owner_email: user.email || '',
-              logo_url: profile.logo_url || '',
-              avatar_url: profile.avatar_url || ''
+              clinic_name: clinic.clinic_name || '',
+              website: clinic.website || '',
+              phone: clinic.phone || '',
+              owner_name: clinic.owner_name || '',
+              owner_mobile: clinic.owner_mobile || '',
+              owner_email: clinic.owner_email || '',
+              logo_url: clinic.logo_url || '',
+              avatar_url: clinic.avatar_url || ''
+            });
+            setBrandKit({
+              primary_color: clinic.primary_color || '#0063A0',
+              secondary_color: clinic.secondary_color || '#0796CC',
+              accent_color: clinic.accent_color || '#F7904F',
+              background_color: clinic.background_color || '#FFFFFF',
+              heading_font: clinic.heading_font || 'Inter',
+              body_font: clinic.body_font || 'Inter',
+              tagline: clinic.tagline || '',
+              logo_icon_url: clinic.logo_icon_url || ''
             });
           }
+        } else {
+          setBusinessInfo({
+            clinic_name: profile.clinic_name || '',
+            website: profile.website || '',
+            phone: profile.phone || '',
+            owner_name: '',
+            owner_mobile: '',
+            owner_email: user.email || '',
+            logo_url: profile.logo_url || '',
+            avatar_url: profile.avatar_url || ''
+          });
         }
       }
     } catch (error) {

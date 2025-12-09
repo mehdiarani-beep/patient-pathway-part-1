@@ -415,7 +415,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                     />
                     <Button
                       size="sm"
-                      variant="dark"
+                      variant="secondary"
                       className="bg-white/90 hover:bg-white shadow-md"
                       onClick={() => noteImageInputRef.current?.click()}
                       disabled={isUploadingNoteImage}
