@@ -303,40 +303,32 @@ const generateShortUrlForFormat = async (longUrl: string, key: string) => {
       return longUrl;
     }
 
-    // Resolve physician id: prefer explicit physicianId if it exists in doctor_profiles
-    let physicianToInsert = doctorProfile.id;
-    if (physicianId) {
-      try {
-        const { data: physData, error: physErr } = await supabase
-          .from('doctor_profiles')
-          .select('id')
-          .eq('id', physicianId)
-          .single();
-        if (!physErr && physData?.id) physicianToInsert = physicianId;
-      } catch (e) {
-        console.warn('Error validating physicianId:', e);
-      }
-    }
+    // Resolve physician id: prefer explicit physicianId if it exists
+    const physicianToInsert = physicianId || doctorProfile.id;
 
-    const session = await supabase.auth.getSession();
-    const { data, error } = await supabase.functions.invoke('custom-short-url', {
+    const { data, error } = await supabase.functions.invoke('generate-short-url', {
       body: {
         longUrl,
+        doctorId: doctorProfile.id,
         physicianId: physicianToInsert,
-      },
-      headers: {
-        Authorization: `Bearer ${session?.data.session?.access_token}`,
-      },
+        quizType: customQuizId ? 'custom' : quizId?.toLowerCase(),
+        customQuizId: customQuizId || null,
+        leadSource: key
+      }
     });
 
     if (error) {
       throw error;
     }
 
-    const { shortUrl } = data;
-    setShortUrls(prev => ({ ...prev, [key]: shortUrl }));
-    toast.success('Short URL generated successfully!');
-    return shortUrl;
+    const shortUrl = data?.shortUrl;
+    if (shortUrl) {
+      setShortUrls(prev => ({ ...prev, [key]: shortUrl }));
+      toast.success('Short URL generated successfully!');
+      return shortUrl;
+    } else {
+      throw new Error('No short URL returned');
+    }
   } catch (error) {
     console.error('Error generating short URL:', error);
     toast.error('Failed to generate short URL');
