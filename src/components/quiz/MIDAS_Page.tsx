@@ -371,7 +371,7 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
                     <Button
                       size="sm"
                       variant="secondary"
-                      className="bg-white/90 hover:bg-white shadow-md"
+                      className="bg-black/80 hover:bg-black/60 shadow-xl shadow-gray-300"
                       onClick={() => noteImageInputRef.current?.click()}
                       disabled={isUploadingNoteImage}
                     >
