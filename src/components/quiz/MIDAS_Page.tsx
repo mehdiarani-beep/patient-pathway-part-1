@@ -146,7 +146,7 @@ export const MIDAS = ({ doctorName, doctorImage, doctorId, physicianId }: Templa
     : (physicianData?.credentials?.join(' • ') || 'ENT Specialist');
   const displayBio = isClinicLevel 
     ? 'Many patients live for years with untreated migraines, thinking their headaches are "normal" — when in fact, they\'re not. Dr. Vaughn specializes in comprehensive migraine care, offering solutions from lifestyle changes and supplements to prescription therapy and in-office migraine relief procedures.'
-    : (physicianData?.bio || 'Experienced ENT specialist dedicated to helping patients find migraine relief.');
+    : (physicianData?.short_bio || physicianData?.bio || 'Experienced ENT specialist dedicated to helping patients find migraine relief.');
   const displayHeadshot = isClinicLevel ? drVaughnProfessionalHeadshot : (physicianData?.headshot_url || drVaughnProfessionalHeadshot);
   const displayNoteImage = isClinicLevel ? drVaughnBlack : (physicianData?.headshot_url || drVaughnBlack);
 
