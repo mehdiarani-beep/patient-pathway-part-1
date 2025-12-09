@@ -53,11 +53,16 @@ export function CardQuiz() {
     email: '',
     phone: ''
   });
+  const [physicianLastName, setPhysicianLastName] = useState<string | null>(null);
+  const [clinicName, setClinicName] = useState<string | null>(null);
 
   const doctorId = searchParams.get('doctor');
   const physicianId = searchParams.get('physician');
   const quizType = quizId?.toUpperCase() as QuizType;
   const quiz = quizType ? quizzes[quizType] : null;
+  
+  // Determine if this is a clinic-level quiz
+  const isClinicLevel = !physicianId || physicianId === doctorId;
 
   // Track page view
   usePageTracking({
@@ -88,6 +93,61 @@ export function CardQuiz() {
 
     fetchDoctorProfile();
   }, [doctorId]);
+
+  // Fetch physician last name if physician-level quiz
+  useEffect(() => {
+    const fetchPhysicianLastName = async () => {
+      if (!isClinicLevel && physicianId) {
+        try {
+          const { data, error } = await supabase
+            .from('clinic_physicians')
+            .select('last_name')
+            .eq('id', physicianId)
+            .maybeSingle();
+
+          if (!error && data) {
+            setPhysicianLastName(data.last_name);
+          }
+        } catch (error) {
+          console.error('Error fetching physician:', error);
+        }
+      }
+    };
+
+    fetchPhysicianLastName();
+  }, [physicianId, isClinicLevel]);
+
+  // Fetch clinic name if clinic-level quiz
+  useEffect(() => {
+    const fetchClinicName = async () => {
+      if (isClinicLevel && doctorId) {
+        try {
+          // First get clinic_id from doctor_profiles
+          const { data: profile, error: profileError } = await supabase
+            .from('doctor_profiles')
+            .select('clinic_id')
+            .eq('id', doctorId)
+            .maybeSingle();
+
+          if (!profileError && profile?.clinic_id) {
+            const { data: clinic, error: clinicError } = await supabase
+              .from('clinic_profiles')
+              .select('clinic_name')
+              .eq('id', profile.clinic_id)
+              .maybeSingle();
+
+            if (!clinicError && clinic) {
+              setClinicName(clinic.clinic_name);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching clinic:', error);
+        }
+      }
+    };
+
+    fetchClinicName();
+  }, [doctorId, isClinicLevel]);
 
   // Prevent quiz from restarting randomly by adding guards
   useEffect(() => {
@@ -499,7 +559,9 @@ export function CardQuiz() {
                     <div className="text-center space-y-3 sm:space-y-4 px-2">
                       <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">Thank You!</h3>
                       <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-300">
-                        Your Result has been successfully submitted to Dr. {doctorProfile?.first_name} {doctorProfile?.last_name} 
+                        Your Result has been successfully submitted to {isClinicLevel 
+                          ? (clinicName || 'the healthcare provider')
+                          : (physicianLastName ? `Dr. ${physicianLastName}` : 'the healthcare provider')}
                       </p>
                     </div>
                   )}
