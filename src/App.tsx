@@ -80,6 +80,9 @@ function App() {
               <Route path="/embed/custom/:quizId" element={<Embed />} />
               <Route path="/embed/:quizId" element={<Embed />} />
               
+              {/* Slug-based physician profile - must be last before catch-all */}
+              <Route path="/:slug" element={<PhysicianProfilePage />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>

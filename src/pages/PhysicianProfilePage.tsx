@@ -33,33 +33,57 @@ interface Clinic {
 }
 
 export default function PhysicianProfilePage() {
-  const { physicianId } = useParams<{ physicianId: string }>();
+  const { physicianId, slug } = useParams<{ physicianId?: string; slug?: string }>();
   const [physician, setPhysician] = useState<Physician | null>(null);
   const [clinic, setClinic] = useState<Clinic | null>(null);
   const [doctorId, setDoctorId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [resolvedPhysicianId, setResolvedPhysicianId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (physicianId) {
+    if (physicianId || slug) {
       fetchPhysicianData();
     }
-  }, [physicianId]);
+  }, [physicianId, slug]);
 
   const fetchPhysicianData = async () => {
     try {
-      const { data: physData, error: physError } = await supabase
-        .from('clinic_physicians')
-        .select('*')
-        .eq('id', physicianId)
-        .single();
-
-      if (physError || !physData) {
-        console.error('Error fetching physician:', physError);
+      let physData;
+      
+      // Look up by physicianId or by slug
+      if (physicianId) {
+        const { data, error } = await supabase
+          .from('clinic_physicians')
+          .select('*')
+          .eq('id', physicianId)
+          .single();
+        
+        if (error || !data) {
+          console.error('Error fetching physician by ID:', error);
+          setLoading(false);
+          return;
+        }
+        physData = data;
+      } else if (slug) {
+        const { data, error } = await supabase
+          .from('clinic_physicians')
+          .select('*')
+          .eq('slug', slug)
+          .single();
+        
+        if (error || !data) {
+          console.error('Error fetching physician by slug:', error);
+          setLoading(false);
+          return;
+        }
+        physData = data;
+      } else {
         setLoading(false);
         return;
       }
 
       setPhysician(physData);
+      setResolvedPhysicianId(physData.id);
 
       if (physData.clinic_id) {
         const { data: clinicData } = await supabase
@@ -97,7 +121,7 @@ export default function PhysicianProfilePage() {
     pageType: 'physician_profile',
     pageName: physician ? `Dr. ${physician.first_name} ${physician.last_name}` : 'Physician Profile',
     doctorId: doctorId || undefined,
-    physicianId: physicianId,
+    physicianId: resolvedPhysicianId || physicianId,
     clinicId: clinic?.id,
     physicianName: physician ? `Dr. ${physician.first_name} ${physician.last_name}` : undefined,
     clinicName: clinic?.clinic_name
@@ -138,16 +162,7 @@ export default function PhysicianProfilePage() {
           
           {/* Profile Header Section */}
           <div className="text-center space-y-4">
-            {/* Clinic Logo */}
-            {clinic?.logo_url && (
-              <div className="flex justify-center mb-4">
-                <img 
-                  src={clinic.logo_url} 
-                  alt={clinic.clinic_name} 
-                  className="h-20 w-20 object-contain rounded-full bg-white/10 p-2"
-                />
-              </div>
-            )}
+            {/* Logo removed from header */}
 
             {/* Physician Avatar - Large Circle */}
             <Avatar className="h-32 w-32 mx-auto ring-4 ring-white/30 shadow-xl">
