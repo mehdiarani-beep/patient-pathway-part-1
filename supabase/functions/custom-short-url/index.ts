@@ -4,7 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 // Generate a random short code
@@ -24,121 +24,118 @@ serve(async (req) => {
   }
 
   try {
+    if (req.method !== 'POST') {
+      throw new Error('Method not allowed');
+    }
+
+    const { longUrl, physicianId, doctorId, quizType, customQuizId, leadSource } = await req.json();
+
+    console.log('Received request:', { longUrl, physicianId, doctorId, quizType, customQuizId, leadSource });
+
+    if (!longUrl) {
+      throw new Error('Missing longUrl parameter');
+    }
+
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Handle URL creation
-    if (req.method === 'POST') {
-      const { longUrl, physicianId } = await req.json();
+    // Determine doctor_id - use physicianId as doctorId if not provided
+    const finalDoctorId = doctorId || physicianId;
 
-      if (!longUrl) {
-        throw new Error('Missing longUrl parameter');
-      }
+    if (!finalDoctorId) {
+      throw new Error('Either doctorId or physicianId is required');
+    }
 
-      // Check if URL already exists
-      const { data: existingUrl } = await supabaseAdmin
-        .from('short_urls')
-        .select('short_code')
-        .eq('long_url', longUrl)
-        .single();
+    // Check if URL already exists with same parameters
+    const { data: existingUrl } = await supabaseAdmin
+      .from('link_mappings')
+      .select('short_id')
+      .eq('target_url', longUrl)
+      .eq('doctor_id', finalDoctorId)
+      .maybeSingle();
 
-      if (existingUrl) {
-        const shortUrl = `https://${Deno.env.get('CUSTOM_DOMAIN') || 'yourdomain.com'}/${existingUrl.short_code}`;
-        return new Response(JSON.stringify({ shortUrl }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        });
-      }
-
-      // Generate unique short code
-      let shortCode;
-      let isUnique = false;
-      let attempts = 0;
-      const maxAttempts = 10;
-
-      while (!isUnique && attempts < maxAttempts) {
-        shortCode = generateShortCode();
-        const { data: existing } = await supabaseAdmin
-          .from('short_urls')
-          .select('id')
-          .eq('short_code', shortCode)
-          .single();
-        
-        if (!existing) {
-          isUnique = true;
-        }
-        attempts++;
-      }
-
-      if (!isUnique) {
-        throw new Error('Unable to generate unique short code');
-      }
-
-      // Insert new short URL
-      const { data: newUrl, error } = await supabaseAdmin
-        .from('short_urls')
-        .insert([{
-          short_code: shortCode,
-          long_url: longUrl,
-          created_at: new Date().toISOString(),
-          click_count: 0,
-          physician_id: physicianId
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      const shortUrl = `https://${Deno.env.get('CUSTOM_DOMAIN') || 'yourdomain.com'}/${shortCode}`;
-
+    if (existingUrl) {
+      const appUrl = req.headers.get('origin') || 'https://patient-pathway.lovable.app';
+      const shortUrl = `${appUrl}/s/${existingUrl.short_id}`;
+      console.log('Returning existing short URL:', shortUrl);
       return new Response(JSON.stringify({ shortUrl }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
-    // Handle URL redirection
-    if (req.method === 'GET') {
-      const url = new URL(req.url);
-      const shortCode = url.pathname.split('/').pop();
+    // Generate unique short code
+    let shortCode: string = '';
+    let isUnique = false;
+    let attempts = 0;
+    const maxAttempts = 10;
 
-      if (!shortCode) {
-        return new Response('Not Found', { status: 404 });
+    while (!isUnique && attempts < maxAttempts) {
+      shortCode = generateShortCode();
+      const { data: existing } = await supabaseAdmin
+        .from('link_mappings')
+        .select('id')
+        .eq('short_id', shortCode)
+        .maybeSingle();
+      
+      if (!existing) {
+        isUnique = true;
       }
-
-      // Get the long URL
-      const { data: urlData, error } = await supabaseAdmin
-        .from('short_urls')
-        .select('long_url')
-        .eq('short_code', shortCode)
-        .single();
-
-      if (error || !urlData) {
-        return new Response('Not Found', { status: 404 });
-      }
-
-      // Update click count
-      await supabaseAdmin
-        .from('short_urls')
-        .update({ click_count: supabaseAdmin.rpc('increment', { x: 1 }) })
-        .eq('short_code', shortCode);
-
-      // Redirect to the long URL
-      return new Response(null, {
-        status: 302,
-        headers: {
-          'Location': urlData.long_url,
-          ...corsHeaders
-        }
-      });
+      attempts++;
     }
 
-    throw new Error('Method not allowed');
+    if (!isUnique) {
+      throw new Error('Unable to generate unique short code');
+    }
+
+    // Build insert data
+    const insertData: Record<string, any> = {
+      short_id: shortCode,
+      doctor_id: finalDoctorId,
+      target_url: longUrl,
+      click_count: 0
+    };
+
+    if (physicianId) {
+      insertData.physician_id = physicianId;
+    }
+
+    if (quizType) {
+      insertData.quiz_type = quizType;
+    }
+
+    if (customQuizId) {
+      insertData.custom_quiz_id = customQuizId;
+    }
+
+    if (leadSource) {
+      insertData.lead_source = leadSource;
+    }
+
+    console.log('Inserting link mapping:', insertData);
+
+    // Insert new short URL into link_mappings table
+    const { error: insertError } = await supabaseAdmin
+      .from('link_mappings')
+      .insert(insertData);
+
+    if (insertError) {
+      console.error('Insert error:', insertError);
+      throw insertError;
+    }
+
+    const appUrl = req.headers.get('origin') || 'https://patient-pathway.lovable.app';
+    const shortUrl = `${appUrl}/s/${shortCode}`;
+
+    console.log('Generated new short URL:', shortUrl);
+
+    return new Response(JSON.stringify({ shortUrl, shortId: shortCode }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+
   } catch (error: any) {
     console.error('Error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
