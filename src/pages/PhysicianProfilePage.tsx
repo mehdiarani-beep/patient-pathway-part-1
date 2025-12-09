@@ -71,15 +71,18 @@ export default function PhysicianProfilePage() {
         if (clinicData) {
           setClinic(clinicData);
 
-          const { data: docProfile } = await supabase
-            .from('doctor_profiles')
-            .select('id')
-            .eq('clinic_id', physData.clinic_id)
-            .limit(1)
-            .single();
+          // Use clinic's created_by (owner) as doctorId for proper link attribution
+          if (clinicData.created_by) {
+            const { data: docProfile } = await supabase
+              .from('doctor_profiles')
+              .select('id')
+              .eq('user_id', clinicData.created_by)
+              .limit(1)
+              .single();
 
-          if (docProfile) {
-            setDoctorId(docProfile.id);
+            if (docProfile) {
+              setDoctorId(docProfile.id);
+            }
           }
         }
       }
@@ -173,8 +176,8 @@ export default function PhysicianProfilePage() {
               </p>
             )}
 
-            {/* Social Icons */}
-            <div className="flex justify-center gap-4 pt-2">
+            {/* Social Icons - Hidden for now */}
+            {/* <div className="flex justify-center gap-4 pt-2">
               <a href="https://www.youtube.com/@exhalesinus" target="_blank" rel="noopener noreferrer" 
                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
                 <Youtube className="w-5 h-5 text-white" />
@@ -187,7 +190,7 @@ export default function PhysicianProfilePage() {
                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
                 <FaTiktok className="w-5 h-5 text-white" />
               </a>
-            </div>
+            </div> */}
           </div>
 
           {/* Medical Evals & Symptoms Checker Section */}
