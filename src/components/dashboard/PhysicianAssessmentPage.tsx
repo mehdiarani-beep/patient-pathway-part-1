@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Share2, User, ExternalLink } from 'lucide-react';
+import { Share2, Link, Copy } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { QRCodeSVG } from 'qrcode.react';
 import { useNavigate } from 'react-router-dom';
 import { quizzes } from '@/data/quizzes';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +33,8 @@ export function PhysicianAssessmentPage({ physicianId }: PhysicianAssessmentPage
   const navigate = useNavigate();
   const [physician, setPhysician] = useState<Physician | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showQRDialog, setShowQRDialog] = useState(false);
+  const [profileUrl, setProfileUrl] = useState('');
 
   useEffect(() => {
     fetchPhysician();
@@ -40,18 +45,30 @@ export function PhysicianAssessmentPage({ physicianId }: PhysicianAssessmentPage
       setLoading(true);
       const { data, error } = await supabase
         .from('clinic_physicians')
-        .select('id, first_name, last_name, degree_type, headshot_url, bio, credentials')
+        .select('id, first_name, last_name, degree_type, headshot_url, bio, credentials, slug')
         .eq('id', physicianId)
         .single();
 
       if (!error && data) {
         setPhysician(data);
+        // Generate profile URL using slug if available, otherwise use physicianId
+        const slug = (data as any).slug || physicianId;
+        setProfileUrl(`${window.location.origin}/${slug}`);
       }
     } catch (error) {
       console.error('Error fetching physician:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const copyProfileLink = () => {
+    navigator.clipboard.writeText(profileUrl);
+    toast.success('Profile link copied!');
+  };
+
+  const openShareDialog = () => {
+    setShowQRDialog(true);
   };
 
   const handleShareQuiz = (quizId: string) => {
@@ -116,18 +133,32 @@ export function PhysicianAssessmentPage({ physicianId }: PhysicianAssessmentPage
             Share assessments for this physician
           </p>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => {
-            const profileUrl = `${window.location.origin}/physician/${physicianId}`;
-            navigator.clipboard.writeText(profileUrl);
-            toast.success('Profile link copied!');
-          }}
-        >
-          <ExternalLink className="w-4 h-4 mr-2" />
-          Share Profile
-        </Button>
+        <div className="flex items-center gap-1 ml-auto">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={copyProfileLink}
+              >
+                <Copy className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Copy profile link</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={openShareDialog}
+              >
+                <Share2 className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Share profile with QR code</TooltipContent>
+          </Tooltip>
+        </div>
       </div>
 
       {/* Quiz Categories */}
@@ -179,6 +210,39 @@ export function PhysicianAssessmentPage({ physicianId }: PhysicianAssessmentPage
           </div>
         ))}
       </div>
+      {/* QR Code Dialog */}
+      <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share Physician Profile</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-4">
+            <div className="bg-white p-4 rounded-lg">
+              <QRCodeSVG 
+                value={profileUrl} 
+                size={200}
+                level="H"
+                includeMargin
+              />
+            </div>
+            <p className="text-sm text-muted-foreground text-center">
+              Scan this QR code to visit {physician?.first_name}'s profile
+            </p>
+            <div className="flex items-center gap-2 w-full">
+              <input 
+                type="text" 
+                value={profileUrl} 
+                readOnly 
+                className="flex-1 px-3 py-2 text-sm border rounded-md bg-muted"
+              />
+              <Button size="sm" onClick={copyProfileLink}>
+                <Copy className="w-4 h-4 mr-2" />
+                Copy
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
