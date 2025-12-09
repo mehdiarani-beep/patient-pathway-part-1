@@ -2,12 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { usePageTracking } from '@/hooks/usePageTracking';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Stethoscope, Mail, Phone, Globe, MapPin, ExternalLink } from 'lucide-react';
 import { SEOHead } from '@/components/seo/SEOHead';
+import { Calendar, Youtube, Instagram } from 'lucide-react';
+import { FaTiktok } from 'react-icons/fa';
 
 interface Physician {
   id: string;
@@ -16,6 +14,7 @@ interface Physician {
   degree_type: string | null;
   headshot_url: string | null;
   bio: string | null;
+  short_bio: string | null;
   credentials: string[] | null;
   email: string | null;
   mobile: string | null;
@@ -33,12 +32,6 @@ interface Clinic {
   state: string | null;
 }
 
-const ACTIVE_QUIZZES = [
-  { id: 'NOSE_SNOT', label: 'Nasal Assessment', description: 'Evaluate nasal obstruction & sinus symptoms' },
-  { id: 'EPWORTH', label: 'Sleepiness Scale', description: 'Assess daytime sleepiness levels' },
-  { id: 'MIDAS', label: 'MSQ - Migraine', description: 'Migraine-specific quality of life' }
-];
-
 export default function PhysicianProfilePage() {
   const { physicianId } = useParams<{ physicianId: string }>();
   const [physician, setPhysician] = useState<Physician | null>(null);
@@ -54,7 +47,6 @@ export default function PhysicianProfilePage() {
 
   const fetchPhysicianData = async () => {
     try {
-      // Fetch physician data
       const { data: physData, error: physError } = await supabase
         .from('clinic_physicians')
         .select('*')
@@ -69,7 +61,6 @@ export default function PhysicianProfilePage() {
 
       setPhysician(physData);
 
-      // Fetch clinic data
       if (physData.clinic_id) {
         const { data: clinicData } = await supabase
           .from('clinic_profiles')
@@ -80,7 +71,6 @@ export default function PhysicianProfilePage() {
         if (clinicData) {
           setClinic(clinicData);
 
-          // Get doctor profile for the clinic
           const { data: docProfile } = await supabase
             .from('doctor_profiles')
             .select('id')
@@ -100,7 +90,6 @@ export default function PhysicianProfilePage() {
     }
   };
 
-  // Track page view - must be called unconditionally at top level
   usePageTracking({
     pageType: 'physician_profile',
     pageName: physician ? `Dr. ${physician.first_name} ${physician.last_name}` : 'Physician Profile',
@@ -113,154 +102,230 @@ export default function PhysicianProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#5ba4c9] to-[#1e3a5f]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
       </div>
     );
   }
 
   if (!physician) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted">
-        <Card className="p-8 text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#5ba4c9] to-[#1e3a5f]">
+        <div className="p-8 text-center text-white">
           <h1 className="text-2xl font-bold mb-2">Physician Not Found</h1>
-          <p className="text-muted-foreground">The requested physician profile does not exist.</p>
-        </Card>
+          <p className="opacity-80">The requested physician profile does not exist.</p>
+        </div>
       </div>
     );
   }
 
   const physicianName = `Dr. ${physician.first_name} ${physician.last_name}`;
-  const fullName = `${physicianName}${physician.degree_type ? `, ${physician.degree_type}` : ''}`;
+  const displayBio = physician.short_bio || physician.bio;
 
   return (
     <>
       <SEOHead 
-        title={`${fullName} | ${clinic?.clinic_name || 'Medical Practice'}`}
-        description={physician.bio || `${physicianName} specializes in ENT care. Take a self-assessment quiz and schedule your appointment today.`}
+        title={`${physicianName} | ${clinic?.clinic_name || 'Medical Practice'}`}
+        description={displayBio || `${physicianName} specializes in ENT care. Take a self-assessment quiz and schedule your appointment today.`}
         keywords="ENT doctor, physician, medical practice"
       />
 
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted py-8 px-4">
-        <div className="max-w-md mx-auto space-y-6">
-          {/* Profile Header */}
-          <Card className="p-6 text-center space-y-4">
+      <div className="min-h-screen bg-gradient-to-b from-[#5ba4c9] to-[#1e3a5f] py-8 px-4">
+        <div className="max-w-md mx-auto space-y-8">
+          
+          {/* Profile Header Section */}
+          <div className="text-center space-y-4">
             {/* Clinic Logo */}
             {clinic?.logo_url && (
-              <div className="flex justify-center mb-2">
+              <div className="flex justify-center mb-4">
                 <img 
                   src={clinic.logo_url} 
                   alt={clinic.clinic_name} 
-                  className="h-10 object-contain"
+                  className="h-20 w-20 object-contain rounded-full bg-white/10 p-2"
                 />
               </div>
             )}
 
-            {/* Physician Avatar */}
-            <Avatar className="h-28 w-28 mx-auto ring-4 ring-primary/20">
-              <AvatarImage src={physician.headshot_url || ''} alt={physicianName} />
-              <AvatarFallback className="bg-primary/10 text-primary text-2xl">
+            {/* Physician Avatar - Large Circle */}
+            <Avatar className="h-32 w-32 mx-auto ring-4 ring-white/30 shadow-xl">
+              <AvatarImage src={physician.headshot_url || ''} alt={physicianName} className="object-cover" />
+              <AvatarFallback className="bg-white/20 text-white text-3xl font-bold">
                 {physician.first_name[0]}{physician.last_name[0]}
               </AvatarFallback>
             </Avatar>
 
-            {/* Name & Credentials */}
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">{fullName}</h1>
-              {physician.credentials && physician.credentials.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-1 mt-2">
-                  {physician.credentials.map((cred, idx) => (
-                    <Badge key={idx} variant="secondary" className="text-xs">
-                      {cred}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Physician Name */}
+            <h1 className="text-2xl font-bold text-white">
+              {physicianName}
+            </h1>
 
-            {/* Bio */}
-            {physician.bio && (
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {physician.bio}
+            {/* Short Bio */}
+            {displayBio && (
+              <p className="text-white/90 text-sm leading-relaxed max-w-sm mx-auto">
+                {displayBio}
               </p>
             )}
 
-            {/* Clinic Info */}
+            {/* Clinic Name */}
             {clinic && (
-              <div className="pt-4 border-t space-y-2 text-sm text-muted-foreground">
-                <div className="flex items-center justify-center gap-2">
-                  <Stethoscope className="w-4 h-4" />
-                  <span>{clinic.clinic_name}</span>
-                </div>
-                {clinic.city && clinic.state && (
-                  <div className="flex items-center justify-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    <span>{clinic.city}, {clinic.state}</span>
-                  </div>
-                )}
-              </div>
+              <p className="text-white/70 text-sm font-medium">
+                {clinic.clinic_name}
+              </p>
             )}
-          </Card>
 
-          {/* Assessment Links */}
-          <Card className="p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-center">Take an Assessment</h2>
-            <div className="space-y-3">
-              {ACTIVE_QUIZZES.map((quiz) => (
-                <a
-                  key={quiz.id}
-                  href={`/share/${quiz.id.toLowerCase()}/${doctorId}?physician=${physicianId}`}
-                  className="block"
-                >
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start h-auto py-4 px-4 hover:bg-primary/5 hover:border-primary"
-                  >
-                    <div className="text-left">
-                      <div className="font-semibold">{quiz.label}</div>
-                      <div className="text-xs text-muted-foreground">{quiz.description}</div>
-                    </div>
-                    <ExternalLink className="w-4 h-4 ml-auto opacity-50" />
-                  </Button>
-                </a>
-              ))}
+            {/* Social Icons */}
+            <div className="flex justify-center gap-4 pt-2">
+              <a href="https://www.youtube.com/@exhalesinus" target="_blank" rel="noopener noreferrer" 
+                 className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <Youtube className="w-5 h-5 text-white" />
+              </a>
+              <a href="https://www.instagram.com/exhalesinus/" target="_blank" rel="noopener noreferrer"
+                 className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <Instagram className="w-5 h-5 text-white" />
+              </a>
+              <a href="https://www.tiktok.com/@exhalesinus" target="_blank" rel="noopener noreferrer"
+                 className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <FaTiktok className="w-5 h-5 text-white" />
+              </a>
             </div>
-          </Card>
+          </div>
 
-          {/* Contact Links */}
-          <Card className="p-6 space-y-3">
-            <h2 className="text-lg font-semibold text-center">Get in Touch</h2>
+          {/* Medical Evals & Symptoms Checker Section */}
+          <div className="space-y-4">
+            <h2 className="text-white text-center font-semibold text-lg">
+              Medical Evals & Symptoms Checker
+            </h2>
             
-            {clinic?.website && (
-              <a href={clinic.website} target="_blank" rel="noopener noreferrer">
-                <Button variant="default" className="w-full">
-                  <Globe className="w-4 h-4 mr-2" />
-                  Book an Appointment
-                </Button>
+            <div className="space-y-3">
+              {/* Nasal Assessment Link */}
+              <a
+                href={`/share/nose_snot/${doctorId}?physician=${physicianId}`}
+                className="block"
+              >
+                <div className="flex items-center gap-4 p-4 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-colors">
+                  <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M12 4C10 4 9 6 9 8C9 10 8 12 6 14C4 16 4 18 6 20M12 4C14 4 15 6 15 8C15 10 16 12 18 14C20 16 20 18 18 20" />
+                      <circle cx="12" cy="12" r="2" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 text-center pr-12">
+                    <p className="text-white font-medium text-sm leading-tight">
+                      Trouble Breathing? Blocked nose or sinus issue? Start your test to find out
+                    </p>
+                  </div>
+                </div>
               </a>
-            )}
 
-            {clinic?.phone && (
-              <a href={`tel:${clinic.phone}`}>
-                <Button variant="outline" className="w-full">
-                  <Phone className="w-4 h-4 mr-2" />
-                  Call {clinic.phone}
-                </Button>
+              {/* Epworth Link */}
+              <a
+                href={`/share/epworth/${doctorId}?physician=${physicianId}`}
+                className="block"
+              >
+                <div className="flex items-center gap-4 p-4 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-colors">
+                  <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <circle cx="12" cy="10" r="6" />
+                      <path d="M8 8.5C8.5 9 9 9 9.5 8.5M14.5 8.5C15 9 15.5 9 16 8.5" />
+                      <path d="M9 20h6M12 16v4" />
+                      <path d="M7 3l-2 2M17 3l2 2" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 text-center pr-12">
+                    <p className="text-white font-medium text-sm leading-tight">
+                      Struggling to Stay Awake? Start your test to find out why
+                    </p>
+                  </div>
+                </div>
               </a>
-            )}
 
-            {physician.email && (
-              <a href={`mailto:${physician.email}`}>
-                <Button variant="outline" className="w-full">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Email
-                </Button>
+              {/* MSQ/Migraine Link */}
+              <a
+                href={`/share/midas/${doctorId}?physician=${physicianId}`}
+                className="block"
+              >
+                <div className="flex items-center gap-4 p-4 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-colors">
+                  <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <circle cx="12" cy="10" r="7" />
+                      <path d="M7 7l2 3M17 7l-2 3" />
+                      <path d="M5 4l-1-2M19 4l1-2M3 10l-2 0M21 10l2 0" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 text-center pr-12">
+                    <p className="text-white font-medium text-sm leading-tight">
+                      Is It Just a Headache or Something More? Start your test to find out
+                    </p>
+                  </div>
+                </div>
               </a>
-            )}
-          </Card>
+            </div>
+          </div>
+
+          {/* Symptom and Treatment Resources Section */}
+          <div className="space-y-4">
+            <h2 className="text-white text-center font-semibold text-lg">
+              Symptom and Treatment Resources
+            </h2>
+            
+            <div className="space-y-3">
+              {/* Sleepiness Resources */}
+              <a
+                href={`/embed/EPWORTH/${doctorId}?physician=${physicianId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <div className="p-4 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-colors text-center">
+                  <p className="text-white font-medium text-sm">
+                    Sleepiness Symptoms, Causes and Treatments
+                  </p>
+                </div>
+              </a>
+
+              {/* Nasal & Sinus Resources */}
+              <a
+                href={`/embed/NOSE_SNOT/${doctorId}?physician=${physicianId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <div className="p-4 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-colors text-center">
+                  <p className="text-white font-medium text-sm">
+                    Nasal & Sinus Symptoms, Causes and Treatments
+                  </p>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          {/* Appointment Section */}
+          <div className="space-y-4">
+            <h2 className="text-white text-center font-semibold text-lg">
+              Appointment
+            </h2>
+            
+            <a
+              href="https://www.exhalesinus.com/request-an-appointment"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <div className="flex items-center gap-4 p-4 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-colors">
+                <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <Calendar className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1 text-center pr-12">
+                  <p className="text-white font-medium text-sm">
+                    Request an appointment
+                  </p>
+                </div>
+              </div>
+            </a>
+          </div>
 
           {/* Footer */}
-          <div className="text-center text-xs text-muted-foreground pt-4">
+          <div className="text-center text-xs text-white/50 pt-4 pb-8">
             <p>Powered by PatientPathway.ai</p>
           </div>
         </div>
