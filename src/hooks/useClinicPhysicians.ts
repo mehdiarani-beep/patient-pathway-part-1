@@ -13,6 +13,7 @@ export interface ClinicPhysician {
   mobile: string | null;
   email: string | null;
   bio: string | null;
+  short_bio: string | null;
   headshot_url: string | null;
   note_image_url: string | null;
   is_active: boolean;
@@ -29,6 +30,7 @@ export interface PhysicianFormData {
   mobile: string;
   email: string;
   bio: string;
+  short_bio: string;
   headshot_url: string;
 }
 
@@ -40,6 +42,7 @@ const emptyPhysicianForm: PhysicianFormData = {
   mobile: '',
   email: '',
   bio: '',
+  short_bio: '',
   headshot_url: ''
 };
 
@@ -126,6 +129,7 @@ export function useClinicPhysicians() {
           mobile: formData.mobile.trim() || null,
           email: formData.email.trim() || null,
           bio: formData.bio.trim() || null,
+          short_bio: formData.short_bio.trim() || null,
           headshot_url: formData.headshot_url.trim() || null,
           display_order: physicians.length
         })
@@ -165,6 +169,7 @@ export function useClinicPhysicians() {
           mobile: formData.mobile.trim() || null,
           email: formData.email.trim() || null,
           bio: formData.bio.trim() || null,
+          short_bio: formData.short_bio.trim() || null,
           headshot_url: formData.headshot_url.trim() || null
         })
         .eq('id', id);

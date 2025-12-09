@@ -56,6 +56,7 @@ interface PhysicianData {
   degree_type: string;
   credentials: string[] | null;
   bio: string | null;
+  short_bio: string | null;
   headshot_url: string | null;
   note_image_url: string | null;
   email: string | null;
@@ -148,7 +149,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
         // Always fetch all physicians for the clinic
         const { data: physicians, error: physiciansError } = await supabase
           .from('clinic_physicians')
-          .select('id, first_name, last_name, degree_type, credentials, bio, headshot_url, note_image_url, email, mobile')
+          .select('id, first_name, last_name, degree_type, credentials, bio, short_bio, headshot_url, note_image_url, email, mobile')
           .eq('clinic_id', fetchedClinicId)
           .eq('is_active', true)
           .order('display_order', { ascending: true });
@@ -163,7 +164,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
       if (!isClinic && physicianId) {
         const { data: physician, error: physicianError } = await supabase
           .from('clinic_physicians')
-          .select('id, first_name, last_name, degree_type, credentials, bio, headshot_url, note_image_url, email, mobile')
+          .select('id, first_name, last_name, degree_type, credentials, bio, short_bio, headshot_url, note_image_url, email, mobile')
           .eq('id', physicianId)
           .eq('is_active', true)
           .maybeSingle();
@@ -1428,7 +1429,7 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                             {physician.credentials?.join(' • ') || 'ENT Specialist'}
                           </p>
                           <p className="text-muted-foreground mb-2 sm:mb-3 text-xs sm:text-sm md:text-base">
-                            {physician.bio || 'Experienced ENT specialist dedicated to helping patients breathe better.'}
+                            {physician.short_bio || physician.bio || 'Experienced ENT specialist dedicated to helping patients breathe better.'}
                           </p>
                           <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm">
                             <div className="flex items-center gap-1.5 sm:gap-2">

@@ -36,6 +36,7 @@ export function PhysiciansSection() {
         mobile: physician.mobile || '',
         email: physician.email || '',
         bio: physician.bio || '',
+        short_bio: physician.short_bio || '',
         headshot_url: physician.headshot_url || ''
       });
     } else {
@@ -277,13 +278,29 @@ export function PhysiciansSection() {
             </div>
 
             <div>
-              <Label>Bio</Label>
+              <Label>Short Bio (displayed on landing page cards)</Label>
+              <Textarea
+                value={formData.short_bio}
+                onChange={(e) => setFormData(p => ({ ...p, short_bio: e.target.value }))}
+                placeholder="Board-certified ENT specialist with 20+ years experience..."
+                rows={2}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Brief summary shown on physician cards (recommended: 1-2 sentences)
+              </p>
+            </div>
+
+            <div>
+              <Label>Full Bio</Label>
               <Textarea
                 value={formData.bio}
                 onChange={(e) => setFormData(p => ({ ...p, bio: e.target.value }))}
                 placeholder="Dr. Vaughn specializes in..."
                 rows={4}
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Complete biography shown on physician profile pages
+              </p>
             </div>
           </div>
           <DialogFooter>

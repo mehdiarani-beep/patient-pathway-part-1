@@ -334,6 +334,7 @@ export type Database = {
           last_name: string
           mobile: string | null
           note_image_url: string | null
+          short_bio: string | null
           updated_at: string | null
         }
         Insert: {
@@ -351,6 +352,7 @@ export type Database = {
           last_name: string
           mobile?: string | null
           note_image_url?: string | null
+          short_bio?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -368,6 +370,7 @@ export type Database = {
           last_name?: string
           mobile?: string | null
           note_image_url?: string | null
+          short_bio?: string | null
           updated_at?: string | null
         }
         Relationships: [
