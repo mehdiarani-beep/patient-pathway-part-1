@@ -84,6 +84,14 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId, phys
   const [isTriageStage, setIsTriageStage] = useState(false);
   const [selectedSubQuiz, setSelectedSubQuiz] = useState<'NOSE' | 'SNOT12' | null>(null);
   const [activeQuizType, setActiveQuizType] = useState<QuizType>(quizType);
+  
+  // Add states for physician/clinic info
+  const [physicianLastName, setPhysicianLastName] = useState<string | null>(null);
+  const [clinicName, setClinicName] = useState<string | null>(null);
+  
+  // Determine if this is a clinic-level quiz
+  const doctorIdParam = doctorId || searchParams.get('doctor') || '';
+  const isClinicLevel = !physicianId || physicianId === doctorIdParam;
 
   useEffect(() => {
     const primary = searchParams.get('primary');
@@ -282,6 +290,62 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId, phys
   useEffect(() => {
     fetchDoctorProfile();
   }, [finalDoctorId]);
+
+  // Fetch physician last name if physicianId is provided and different from doctorId
+  useEffect(() => {
+    const fetchPhysicianData = async () => {
+      if (physicianId && physicianId !== doctorIdParam) {
+        try {
+          const { data, error } = await supabase
+            .from('clinic_physicians')
+            .select('last_name')
+            .eq('id', physicianId)
+            .maybeSingle();
+          
+          if (data && !error) {
+            setPhysicianLastName(data.last_name);
+          }
+        } catch (error) {
+          console.error('Error fetching physician data:', error);
+        }
+      }
+    };
+    
+    fetchPhysicianData();
+  }, [physicianId, doctorIdParam]);
+
+  // Fetch clinic name for clinic-level quizzes
+  useEffect(() => {
+    const fetchClinicName = async () => {
+      if (isClinicLevel && doctorIdParam) {
+        try {
+          // First get clinic_id from doctor_profiles
+          const { data: doctorData, error: doctorError } = await supabase
+            .from('doctor_profiles')
+            .select('clinic_id')
+            .eq('id', doctorIdParam)
+            .maybeSingle();
+          
+          if (doctorData?.clinic_id && !doctorError) {
+            // Then get clinic_name from clinic_profiles
+            const { data: clinicData, error: clinicError } = await supabase
+              .from('clinic_profiles')
+              .select('clinic_name')
+              .eq('id', doctorData.clinic_id)
+              .maybeSingle();
+            
+            if (clinicData && !clinicError) {
+              setClinicName(clinicData.clinic_name);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching clinic name:', error);
+        }
+      }
+    };
+    
+    fetchClinicName();
+  }, [isClinicLevel, doctorIdParam]);
 
   const findDoctorByShareKey = async () => {
     try {
@@ -500,12 +564,17 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId, phys
     const quizResult = calculateQuizScore(effectiveQuizType, finalAnswers);
     setResult(quizResult);
 
+    // Determine the reviewer text based on clinic vs physician level
+    const reviewerText = isClinicLevel 
+      ? (clinicName ? `A healthcare provider from ${clinicName}` : 'A healthcare provider')
+      : (physicianLastName ? `Dr. ${physicianLastName}` : 'A healthcare provider');
+
     // Show results first
     setMessages(prev => [
       ...prev,
       {
         role: 'assistant',
-        content: `🎉 Congratulations! You've completed the ${quizData.title}. Thank you!\n\nYour Results:\n\nScore: ${quizResult.score}/${quizData.maxScore}\nSeverity: ${quizResult.severity.charAt(0).toUpperCase() + quizResult.severity.slice(1)}\n\nInterpretation: ${quizResult.interpretation}\n\nA healthcare provider will review your results and may contact you for follow-up care if needed.`
+        content: `🎉 Congratulations! You've completed the ${quizData.title}. Thank you!\n\nYour Results:\n\nScore: ${quizResult.score}/${quizData.maxScore}\nSeverity: ${quizResult.severity.charAt(0).toUpperCase() + quizResult.severity.slice(1)}\n\nInterpretation: ${quizResult.interpretation}\n\n${reviewerText} will review your results and may contact you for follow-up care if needed.`
       }
     ]);
     
@@ -619,7 +688,13 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId, phys
       }
       
       console.log('Lead saved successfully via edge function:', data);
-      toast.success('Results saved successfully! Your information has been sent to the healthcare provider.');
+      
+      // Determine the submission confirmation text
+      const submittedToText = isClinicLevel 
+        ? (clinicName || 'the healthcare provider')
+        : (physicianLastName ? `Dr. ${physicianLastName}` : 'the healthcare provider');
+      
+      toast.success(`Your result has been successfully submitted to ${submittedToText}.`);
       setCollectingInfo(false);
 
     } catch (error) {
