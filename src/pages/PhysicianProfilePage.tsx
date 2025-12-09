@@ -199,7 +199,7 @@ export default function PhysicianProfilePage() {
             <div className="space-y-3">
               {/* Nasal Assessment Link */}
               <a
-                href={`/share/nose_snot/${doctorId}?physician=${physicianId}`}
+                href={`/embed/nose_snot?doctor=${doctorId}?physician=${physicianId}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share`}
                 className="block"
               >
                 <div className="flex items-center gap-4 p-4 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-colors">
@@ -219,7 +219,7 @@ export default function PhysicianProfilePage() {
 
               {/* Epworth Link */}
               <a
-                href={`/share/epworth/${doctorId}?physician=${physicianId}`}
+                href={`/embed/epworth?doctor=${doctorId}?physician=${physicianId}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share`}
                 className="block"
               >
                 <div className="flex items-center gap-4 p-4 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-colors">
@@ -241,7 +241,7 @@ export default function PhysicianProfilePage() {
 
               {/* MSQ/Migraine Link */}
               <a
-                href={`/share/midas/${doctorId}?physician=${physicianId}`}
+                href={`/embed/midas?doctor=${doctorId}?physician=${physicianId}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share`}
                 className="block"
               >
                 <div className="flex items-center gap-4 p-4 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-colors">
@@ -269,9 +269,22 @@ export default function PhysicianProfilePage() {
             </h2>
             
             <div className="space-y-3">
+              {/* Nasal & Sinus Resources */}
+              <a
+                href={`/share/nose_snot?doctor=${doctorId}&physician=${physicianId}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <div className="p-4 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-colors text-center">
+                  <p className="text-white font-medium text-sm">
+                    Nasal & Sinus Symptoms, Causes and Treatments
+                  </p>
+                </div>
+              </a>
               {/* Sleepiness Resources */}
               <a
-                href={`/embed/EPWORTH/${doctorId}?physician=${physicianId}`}
+                href={`/share/epworth?doctor=${doctorId}&physician=${physicianId}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block"
@@ -282,17 +295,16 @@ export default function PhysicianProfilePage() {
                   </p>
                 </div>
               </a>
-
-              {/* Nasal & Sinus Resources */}
+              {/* Migraine Resources */}
               <a
-                href={`/embed/NOSE_SNOT/${doctorId}?physician=${physicianId}`}
+                href={`/share/midas?doctor=${doctorId}&physician=${physicianId}&source=website&utm_source=website&utm_medium=web&utm_campaign=quiz_share`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block"
               >
                 <div className="p-4 rounded-full border-2 border-white/30 bg-white/5 hover:bg-white/10 transition-colors text-center">
                   <p className="text-white font-medium text-sm">
-                    Nasal & Sinus Symptoms, Causes and Treatments
+                    Migraine Symptoms, Causes and Treatments
                   </p>
                 </div>
               </a>
