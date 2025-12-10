@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Share2, Link, Copy } from 'lucide-react';
+import { Share2, Copy, ExternalLink } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { QRCodeSVG } from 'qrcode.react';
@@ -120,10 +120,51 @@ export function PhysicianAssessmentPage({ physicianId }: PhysicianAssessmentPage
             {physician.first_name[0]}{physician.last_name[0]}
           </AvatarFallback>
         </Avatar>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {physicianName}, {physicianDegree}
-          </h1>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-foreground">
+              {physicianName}, {physicianDegree}
+            </h1>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={copyProfileLink}
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Copy profile link</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={openShareDialog}
+                >
+                  <Share2 className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Share profile with QR code</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => window.open(profileUrl, '_blank')}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Open profile in new window</TooltipContent>
+            </Tooltip>
+          </div>
           {physician.credentials && physician.credentials.length > 0 && (
             <p className="text-sm text-muted-foreground">
               {physician.credentials.join(', ')}
@@ -132,32 +173,6 @@ export function PhysicianAssessmentPage({ physicianId }: PhysicianAssessmentPage
           <p className="text-sm text-muted-foreground mt-1">
             Share assessments for this physician
           </p>
-        </div>
-        <div className="flex items-center gap-1 ml-auto">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={copyProfileLink}
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Copy profile link</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={openShareDialog}
-              >
-                <Share2 className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Share profile with QR code</TooltipContent>
-          </Tooltip>
         </div>
       </div>
 
