@@ -28,6 +28,7 @@ import TNSSLandingPage from './pages/share/TNSSLandingPage';
 import NasalAssessmentLandingPage from './pages/share/NasalAssessmentLandingPage';
 import MIDASLandingPage from './pages/share/MIDASLandingPage';
 import EPWORTHLandingPage from './pages/share/EPWORTH_LandingPage.tsx';
+import SLEEPCHECKLandingPage from './pages/share/SLEEPCHECKLandingPage';
 import AdminPortal from './pages/AdminPortal';
 import MasterPortal from './pages/MasterPortal';
 import MasterLoginPage from './pages/MasterLoginPage';
@@ -63,6 +64,7 @@ function App() {
               <Route path="/share/nose_snot/:doctorId?" element={<NasalAssessmentLandingPage/>}/>
               <Route path="/share/midas/:doctorId?" element={<MIDASLandingPage/>}/>
               <Route path="/share/epworth/:doctorId?" element={<EPWORTHLandingPage/>}/>
+              <Route path="/share/sleep_check/:doctorId?" element={<SLEEPCHECKLandingPage/>}/>
               <Route path="/share/:quizType/:doctorId?" element={<ShareQuizPage />} />
               <Route path="/portal/*" element={<PortalPage />} />
               <Route path="/portal/share/:quizId" element={<ShareQuizPage />} />

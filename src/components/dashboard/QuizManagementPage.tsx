@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { GuidedSymptomChecker } from './SymptomChecker';
 
 // Only these quizzes are currently active
-const ACTIVE_QUIZ_IDS = ['NOSE_SNOT', 'EPWORTH', 'MIDAS'];
+const ACTIVE_QUIZ_IDS = ['NOSE_SNOT', 'EPWORTH', 'MIDAS', 'SLEEP_CHECK'];
 
 export function QuizManagementPage() {
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ export function QuizManagementPage() {
   const predefinedQuizzes = Object.values(quizzes).filter(quiz => quiz && quiz.id);
   const categorizedQuizzes = {
     Nasal: ['NOSE', 'TNSS','SNOT12', 'NOSE_SNOT'],
-    Sleep: ['EPWORTH', 'STOP'],
+    Sleep: ['EPWORTH', 'STOP', 'SLEEP_CHECK'],
     'Headache/Migraine': ['MIDAS']
   };
   const categorizedPredefined = Object.entries(categorizedQuizzes).map(([category, ids]) => ({
