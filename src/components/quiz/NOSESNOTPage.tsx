@@ -247,7 +247,7 @@ export function NOSESNOTPage({ doctorId: propDoctorId, physicianId: propPhysicia
         answers: answers,
         lead_status: 'NEW',
         doctor_id: doctorId,
-        physician_id: physicianId || doctorId,
+        physician_id: isClinicQuiz ? null : physicianId,
         share_key: key || null,
         submitted_at: new Date().toISOString()
       };

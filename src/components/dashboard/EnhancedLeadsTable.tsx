@@ -366,7 +366,7 @@ export function EnhancedLeadsTable({ leads, onLeadUpdate }: EnhancedLeadsTablePr
                     )}
                   </div>
                 ) : (
-                  <span className="text-muted-foreground text-sm">—</span>
+                  <Badge variant="outline" className="text-xs">Clinic Assessment</Badge>
                 )}
               </TableCell>
               <TableCell>

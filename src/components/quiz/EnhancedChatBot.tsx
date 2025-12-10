@@ -513,7 +513,7 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId, phys
       try {
         await supabase.from('quiz_leads').insert({
           doctor_id: doctorId,
-          physician_id: physicianId || doctorId,
+          physician_id: isClinicLevel ? null : physicianId,
           quiz_type: activeQuizType || quizType,
           name: 'Partial Submission',
           score: 0,
@@ -667,7 +667,7 @@ export function EnhancedChatBot({ quizType, shareKey, customQuiz, doctorId, phys
         lead_source: searchParams.get('utm_source') || (shareKey ? 'shared_link' : 'chatbot_page'),
         lead_status: 'NEW',
         doctor_id: finalDoctorId,
-        physician_id: physicianId || finalDoctorId,
+        physician_id: isClinicLevel ? null : physicianId,
         share_key: shareKey || null,
         submitted_at: new Date().toISOString()
       };

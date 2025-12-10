@@ -171,7 +171,7 @@ export function CardQuiz() {
       try {
         await supabase.from('quiz_leads').insert({
           doctor_id: doctorId,
-          physician_id: physicianId || doctorId,
+          physician_id: isClinicLevel ? null : physicianId,
           quiz_type: quizType,
           name: 'Partial Submission',
           score: 0,
@@ -252,7 +252,7 @@ export function CardQuiz() {
         lead_source: searchParams.get('utm_source') || 'card_page',
         lead_status: 'NEW',
         doctor_id: doctorId,
-        physician_id: physicianId || doctorId,
+        physician_id: isClinicLevel ? null : physicianId,
         share_key: null,
         submitted_at: new Date().toISOString()
       };

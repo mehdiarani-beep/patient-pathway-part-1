@@ -100,10 +100,12 @@ export function EmbeddedCardQuiz({ quizType, doctorId, physicianId, utm_source, 
     
     // Capture partial submission on first answer
     if (currentQuestion === 0 && answers.length === 0) {
+      // Determine if this is a clinic-level quiz (no specific physician)
+      const isClinicLevel = !physicianId || physicianId === doctorId;
       try {
         await supabase.from('quiz_leads').insert({
           doctor_id: doctorId,
-          physician_id: physicianId || doctorId,
+          physician_id: isClinicLevel ? null : physicianId,
           quiz_type: quizType,
           name: 'Partial Submission',
           score: 0,
@@ -168,6 +170,9 @@ export function EmbeddedCardQuiz({ quizType, doctorId, physicianId, utm_source, 
 
     setSubmittingLead(true);
     try {
+      // Determine if this is a clinic-level quiz (no specific physician)
+      const isClinicLevel = !physicianId || physicianId === doctorId;
+      
       // Submit lead data using the edge function
       const leadDataToSubmit = {
         name: leadData.name,
@@ -179,7 +184,7 @@ export function EmbeddedCardQuiz({ quizType, doctorId, physicianId, utm_source, 
         lead_source: utm_source || 'landing_page',
         lead_status: 'NEW',
         doctor_id: doctorId,
-        physician_id: physicianId || doctorId,
+        physician_id: isClinicLevel ? null : physicianId,
         share_key: null,
         submitted_at: new Date().toISOString()
       };
