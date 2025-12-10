@@ -401,10 +401,12 @@ export function EmbeddedChatBot({ quizType, doctorId, physicianId, customQuiz, q
     
     // Capture partial submission on first answer
     if (currentQuestionIndex === 0 && answers.length === 0) {
+      // Determine if this is a clinic-level quiz (no specific physician)
+      const isClinicLevel = !physicianId || physicianId === doctorId;
       try {
         await supabase.from('quiz_leads').insert({
           doctor_id: doctorId,
-          physician_id: physicianId || doctorId,
+          physician_id: isClinicLevel ? null : physicianId,
           quiz_type: quizType,
           name: 'Partial Submission',
           score: 0,
@@ -639,6 +641,9 @@ export function EmbeddedChatBot({ quizType, doctorId, physicianId, customQuiz, q
     setIsSubmittingLead(true);
     
     try {
+      // Determine if this is a clinic-level quiz (no specific physician)
+      const isClinicLevel = !physicianId || physicianId === (doctorId || finalDoctorId);
+      
       const leadData = {
         name: userInfo.name,
         email: userInfo.email,
@@ -650,7 +655,7 @@ export function EmbeddedChatBot({ quizType, doctorId, physicianId, customQuiz, q
         lead_source: source || 'chatbot_page',
         lead_status: 'NEW',
         doctor_id: finalDoctorId,
-        physician_id: physicianId || finalDoctorId,
+        physician_id: isClinicLevel ? null : physicianId,
         incident_source: 'default',
         submitted_at: new Date().toISOString()
       };
