@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 
 // Only these quizzes are currently active
-const ACTIVE_QUIZ_IDS = ['NOSE_SNOT', 'EPWORTH', 'MIDAS'];
+const ACTIVE_QUIZ_IDS = ['NOSE_SNOT', 'EPWORTH', 'MIDAS', 'SLEEP_CHECK'];
 
 interface PhysicianAssessmentPageProps {
   physicianId: string;
@@ -83,7 +83,7 @@ export function PhysicianAssessmentPage({ physicianId }: PhysicianAssessmentPage
   const predefinedQuizzes = Object.values(quizzes).filter(quiz => quiz && quiz.id);
   const categorizedQuizzes = {
     Nasal: ['NOSE', 'TNSS', 'SNOT12', 'NOSE_SNOT'],
-    Sleep: ['EPWORTH', 'STOP'],
+    Sleep: ['EPWORTH', 'STOP', 'SLEEP_CHECK'],
     'Headache/Migraine': ['MIDAS']
   };
   const categorizedPredefined = Object.entries(categorizedQuizzes).map(([category, ids]) => ({

@@ -257,10 +257,9 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
 
   // SEO
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const seoTitle = isClinicLevel 
-    ? `Sleep Symptoms Self-Check | Free Sleep Quality Assessment`
-    : `Sleep Symptoms Self-Check | Dr. ${displayFullName}, ${displayDegree} | Sleep Specialist`;
-  const seoDescription = `Take the free Sleep Symptoms Self-Check to understand how sleep-related symptoms may be affecting your daily energy. Board-certified ENT Dr. ${displayName} specializes in comprehensive sleep evaluation.`;
+  const clinicName = clinicData?.clinic_name || 'Exhale Sinus, TMJ, Headache & Sleep';
+  const seoTitle = `Sleep Symptoms Self-Check | ${clinicName}`;
+  const seoDescription = `Take our quick 2-minute Sleep Symptoms Self-Check to discover signs of sleep apnea, nasal obstruction, or airway problems. Results reviewed by Dr. ${displayFullName}, board-certified ENT.`;
   
   const structuredData = [
     generateMedicalWebPageSchema({
@@ -272,14 +271,15 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
     }),
     generateMedicalTestSchema({
       name: 'Sleep Symptoms Self-Check',
-      description: 'A screening tool to evaluate sleep-related symptoms including difficulty sleeping, daytime fatigue, snoring, and morning headaches.',
+      description: 'A screening tool to evaluate sleep-related symptoms including snoring, fatigue, and airway obstruction.',
       url: currentUrl,
-      usedToDiagnose: ['Sleep Apnea', 'Insomnia', 'Sleep Disorders', 'Chronic Fatigue'],
+      usedToDiagnose: ['Sleep Apnea', 'Upper Airway Resistance Syndrome', 'Nasal Obstruction', 'Airway Disorders'],
     }),
     generateFAQSchema([
-      { question: 'What is the Sleep Symptoms Self-Check?', answer: 'The Sleep Symptoms Self-Check is a screening tool that evaluates common sleep-related symptoms like trouble falling asleep, nighttime waking, daytime fatigue, and snoring to help identify potential sleep issues.' },
-      { question: 'What does my sleep score mean?', answer: 'Scores range from 0-24. A score of 0-5 indicates low symptom impact, 6-11 is mild, 12-17 is moderate, and 18-24 indicates high symptom impact requiring professional evaluation.' },
-      { question: 'When should I see a doctor for sleep issues?', answer: 'You should consult a doctor if you experience persistent sleep difficulties, loud snoring, gasping during sleep, excessive daytime fatigue, or if sleep issues are affecting your daily functioning.' },
+      { question: "What's the difference between regular snoring and sleep apnea?", answer: "Snoring is noise caused by airway vibration during breathing. Sleep apnea is a sleep disorder where breathing repeatedly stops and starts, often leading to serious health issues if untreated. Our quiz helps identify when snoring may be a sign of deeper issues." },
+      { question: 'Can nasal obstruction really cause sleep problems?', answer: "Yes. Structural issues — such as a deviated septum, enlarged turbinates, or weak nasal valves — can limit airflow at night, leading to mouth breathing, poor oxygenation, and disrupted sleep cycles." },
+      { question: 'Do I need a formal sleep study before treatment?', answer: "The Sleep Symptoms Self-Check serves as an initial screening tool. If the results suggest risk, we may recommend a sleep study or airway evaluation, but not everyone needs formal testing — especially if structural nasal issues are clearly present." },
+      { question: 'What are alternatives to CPAP therapy?', answer: "We offer a full range of non-surgical and surgical options, including oral appliances, nasal airway procedures, and structural correction for patients who cannot tolerate CPAP." },
     ]),
   ];
 
@@ -338,19 +338,18 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
                   Board-Certified ENT | Sleep Medicine Specialist
                 </div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight text-white">
-                  Are sleep issues affecting your daily life?
+                  Stop Snoring, Start Living
                 </h1>
                 <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/95 leading-relaxed max-w-2xl font-medium">
-                  Trouble falling asleep, waking up tired, or feeling fatigued throughout the day? 
-                  These symptoms may indicate an underlying sleep issue. Take our quick self-check 
-                  to understand how sleep-related symptoms may be affecting you.
+                  Tired of waking up exhausted? Take our free 2-minute Sleep Symptoms Self-Check to uncover 
+                  possible causes of your sleep problems like snoring, fatigue, or airway obstruction.
                 </p>
                 <Button 
                   size="lg" 
                   className="text-base md:text-lg px-6 sm:px-8 md:px-10 py-4 sm:py-5 md:py-7 w-full sm:w-auto hidden md:inline-flex shadow-2xl hover:shadow-3xl transition-all" 
                   onClick={() => window.open(`${baseUrl}/embed/sleep_check?${quizParams}`, '_blank')}
                 >
-                  Start the Sleep Self-Check
+                  Take the Sleep Quiz Now →
                 </Button>
               </div>
               <div className="bg-card/50 backdrop-blur-sm rounded-lg border border-border/20 overflow-hidden mt-4 md:mt-0">
@@ -374,7 +373,7 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
             size="lg"
             onClick={() => window.open(`${baseUrl}/embed/sleep_check?${quizParams}`, '_blank')}
           >
-            Start the Sleep Self-Check
+            Take the Sleep Quiz Now →
           </Button>
         </div>
 
@@ -460,270 +459,117 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
           </div>
         </section>
 
-        {/* Educational Section */}
+        {/* Why Sleep Issues Matter Section */}
         <section className="py-8 sm:py-12 md:py-16 bg-muted/30">
           <div className="container mx-auto px-3 sm:px-4 md:px-6">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4">
-              Understanding Sleep Problems
-            </h2>
-            <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 max-w-3xl mx-auto text-sm sm:text-base">
-              Recognizing the signs of sleep issues is the first step toward better rest
-            </p>
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4">
+                Poor Sleep Might Be More Than Just Fatigue
+              </h2>
+              <div className="space-y-4 text-muted-foreground text-sm sm:text-base md:text-lg mb-6 sm:mb-8">
+                <p>
+                  Many adults suffer from undiagnosed sleep-related breathing disorders such as <strong className="text-foreground">Obstructive Sleep Apnea (OSA)</strong>, 
+                  <strong className="text-foreground"> Upper Airway Resistance Syndrome (UARS)</strong>, or <strong className="text-foreground">nighttime airway obstruction</strong>. 
+                  Common causes include <strong className="text-foreground">nasal congestion, structural blockage, or throat-airway narrowing</strong>.
+                </p>
+                <p>
+                  These conditions often go unnoticed — but the impact on daily life can be profound:
+                </p>
+              </div>
 
-            <div className="max-w-4xl mx-auto mb-8 sm:mb-10 md:mb-12">
-              <img 
-                src={sleepTiredCouch}
-                alt="Person experiencing sleep-related fatigue"
-                className="w-full rounded-lg shadow-lg object-cover max-h-[300px] sm:max-h-[400px]"
-                loading="lazy"
-              />
-            </div>
+              <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <img 
+                  src={sleepTiredCouch}
+                  alt="Person experiencing sleep-related fatigue"
+                  className="w-full rounded-lg shadow-lg object-cover h-[200px] sm:h-[250px]"
+                  loading="lazy"
+                />
+                <img 
+                  src={sleepTiredDriver}
+                  alt="Drowsy driving danger"
+                  className="w-full rounded-lg shadow-lg object-cover h-[200px] sm:h-[250px]"
+                  loading="lazy"
+                />
+              </div>
 
-            <div className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-6xl mx-auto">
-              <Card>
-                <CardContent className="p-4 sm:p-6 md:p-8">
-                  <div className="mb-4 sm:mb-6">
-                    <img 
-                      src={sleepTiredOffice}
-                      alt="Daytime fatigue affecting work"
-                      className="w-full rounded-lg object-cover max-h-[200px] sm:max-h-[250px]"
-                      loading="lazy"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Moon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                    </div>
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold">Sleep Quality Issues</h3>
-                  </div>
-                  <div className="space-y-3 sm:space-y-4 text-muted-foreground text-sm sm:text-base">
-                    <p>
-                      Poor sleep quality can significantly impact your daily life, even if you spend 
-                      enough hours in bed.
-                    </p>
-                    <ul className="space-y-2 sm:space-y-3">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span>Difficulty falling or staying asleep</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span>Waking up feeling unrefreshed</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span>Daytime fatigue and low energy</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span>Difficulty concentrating or remembering</span>
-                      </li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
+              <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-sm sm:text-base md:text-lg">Loud snoring or gasping for air at night</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-sm sm:text-base md:text-lg">Dry mouth or sore throat on waking</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-sm sm:text-base md:text-lg">Morning headaches or persistent fatigue</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-sm sm:text-base md:text-lg">Daytime sleepiness, brain fog, or poor concentration</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-sm sm:text-base md:text-lg">Interrupted or restless sleep despite "hours in bed"</span>
+                </li>
+              </ul>
 
-              <Card>
-                <CardContent className="p-4 sm:p-6 md:p-8">
-                  <div className="mb-4 sm:mb-6">
-                    <img 
-                      src={sleepTiredDriver}
-                      alt="Drowsy driving danger"
-                      className="w-full rounded-lg object-cover max-h-[200px] sm:max-h-[250px]"
-                      loading="lazy"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                    </div>
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold">Warning Signs</h3>
-                  </div>
-                  
-                  <div className="space-y-4 sm:space-y-6">
-                    <div>
-                      <h4 className="font-normal text-base sm:text-lg mb-2 sm:mb-3 text-foreground">Common Symptoms:</h4>
-                      <ul className="space-y-1.5 sm:space-y-2 text-muted-foreground text-xs sm:text-sm">
-                        <li className="flex items-start gap-2">
-                          <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0 mt-0.5" />
-                          <span>Loud snoring or gasping during sleep</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0 mt-0.5" />
-                          <span>Morning headaches</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0 mt-0.5" />
-                          <span>Excessive daytime sleepiness</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0 mt-0.5" />
-                          <span>Mood changes and irritability</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary flex-shrink-0 mt-0.5" />
-                          <span>Memory and concentration issues</span>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h4 className="font-normal text-base sm:text-lg mb-2 sm:mb-3 text-foreground">Risk Factors:</h4>
-                      <p className="text-muted-foreground text-xs sm:text-sm">
-                        Obesity, nasal congestion, enlarged tonsils, alcohol use, age, and family history
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="text-center mt-6 sm:mt-8">
-              <Button 
-                size="lg"
-                className="w-full sm:w-auto text-sm sm:text-base"
-                onClick={() => window.open(`${baseUrl}/embed/sleep_check?${quizParams}`, '_blank')}
-              >
-                Start your Sleep Self-Check
-              </Button>
+              <div className="text-center">
+                <Button 
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto text-sm sm:text-base"
+                  onClick={() => window.open(`${baseUrl}/embed/sleep_check?${quizParams}`, '_blank')}
+                >
+                  Start the Sleep Quiz →
+                </Button>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* About the Assessment */}
+        {/* Simple. Fast. Insightful. Section */}
         <section className="py-8 sm:py-10 md:py-12 lg:py-16 xl:py-20">
           <div className="container mx-auto px-3 sm:px-4 md:px-6">
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-center">
-                About the Sleep Symptoms Self-Check
+                Simple. Fast. Insightful.
               </h2>
-              <div className="grid md:grid-cols-2 gap-6 sm:gap-8 items-center mb-8 sm:mb-10">
-                <div>
-                  <div className="bg-primary/5 rounded-2xl p-4 sm:p-6 md:p-8 text-center mb-4 sm:mb-6">
-                    <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-primary mb-1 sm:mb-2">8</div>
-                    <div className="text-base sm:text-lg md:text-2xl font-normal mb-0.5 sm:mb-1">Questions</div>
-                    <div className="h-px bg-border my-3 sm:my-4" />
-                    <div className="text-3xl sm:text-3xl md:text-4xl font-bold text-primary mb-1 sm:mb-2">4</div>
-                    <div className="text-sm sm:text-base md:text-lg font-normal mb-0.5 sm:mb-1">Severity Levels</div>
-                    <div className="text-xs sm:text-sm text-muted-foreground">Low • Mild • Moderate • High Impact</div>
+              <div className="space-y-4 text-muted-foreground text-sm sm:text-base md:text-lg mb-6 sm:mb-8">
+                <p>
+                  The <strong className="text-foreground">Sleep Symptoms Self-Check</strong> is a quick, 8-question tool designed to highlight whether symptoms 
+                  like snoring, fatigue, and poor sleep quality may point to an underlying airway, nasal, or sleep-breathing issue.
+                </p>
+                <p>
+                  In under 2 minutes, you'll receive a score that helps show how disrupted your sleep might be — from low symptom 
+                  burden to high risk. Use your score to guide whether further evaluation may be needed.
+                </p>
+              </div>
+
+              <Card className="mb-6 sm:mb-8">
+                <CardContent className="p-4 sm:p-6 md:p-8">
+                  <h3 className="text-lg sm:text-xl font-bold mb-4 text-center">Score Interpretation</h3>
+                  <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                      <div className="text-2xl sm:text-3xl font-bold text-green-600">0-5</div>
+                      <div className="text-sm sm:text-base">Low symptom burden</div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">
+                      <div className="text-2xl sm:text-3xl font-bold text-yellow-600">6-11</div>
+                      <div className="text-sm sm:text-base">Mild symptoms / poor sleep quality</div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
+                      <div className="text-2xl sm:text-3xl font-bold text-orange-600">12-17</div>
+                      <div className="text-sm sm:text-base">Moderate symptoms — possible airway or sleep-breathing issues</div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg">
+                      <div className="text-2xl sm:text-3xl font-bold text-red-600">18-24</div>
+                      <div className="text-sm sm:text-base">High symptoms — likely significant sleep disruption</div>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-3 sm:space-y-4">
-                  <p className="text-sm sm:text-base md:text-lg">
-                    The Sleep Symptoms Self-Check evaluates common sleep-related symptoms to help identify 
-                    potential issues affecting your rest and daily energy levels.
-                  </p>
-                  <ul className="space-y-2 sm:space-y-3">
-                    <li className="flex items-start">
-                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-muted-foreground text-xs sm:text-sm md:text-base">Assesses difficulty falling and staying asleep</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-muted-foreground text-xs sm:text-sm md:text-base">Evaluates daytime fatigue and energy levels</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-muted-foreground text-xs sm:text-sm md:text-base">Screens for snoring and sleep-disordered breathing symptoms</span>
-                    </li>
-                  </ul>
-                  <Card className="bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900">
-                    <CardContent className="p-3 sm:p-4">
-                      <p className="text-xs sm:text-sm font-medium">
-                        <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline mr-1 text-amber-600" />
-                        <strong>Disclaimer:</strong> This is a screening tool, not a medical diagnosis. Results will be reviewed by Dr. {displayName}'s team.
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Treatment Options */}
-        <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-muted/30">
-          <div className="container mx-auto px-3 sm:px-4 md:px-6">
-            <div className="max-w-5xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4">
-                Sleep Treatment Options
-              </h2>
-              <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 max-w-3xl mx-auto text-sm sm:text-base">
-                We offer comprehensive solutions tailored to your specific sleep issues
-              </p>
-
-              <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-10 md:mb-12">
-                <img 
-                  src={sleepTiredLaptop}
-                  alt="Sleep affecting daily life"
-                  className="w-full rounded-lg shadow-lg object-cover h-[250px] sm:h-[300px]"
-                  loading="lazy"
-                />
-                <img 
-                  src={sleepTiredKitchen}
-                  alt="Morning fatigue"
-                  className="w-full rounded-lg shadow-lg object-cover h-[250px] sm:h-[300px]"
-                  loading="lazy"
-                />
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-10 md:mb-12">
-                <Card>
-                  <CardContent className="p-4 sm:p-6 md:p-8">
-                    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                      <Lightbulb className="h-6 w-6 sm:h-7 sm:h-7 md:h-8 md:w-8 text-primary" />
-                      <h3 className="text-base sm:text-lg md:text-xl font-bold">Lifestyle & Sleep Hygiene</h3>
-                    </div>
-                    <ul className="space-y-2 sm:space-y-3 text-muted-foreground text-xs sm:text-sm md:text-base">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>Sleep schedule:</strong> Consistent bedtime and wake time</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>Environment:</strong> Cool, dark, quiet bedroom</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>Screen time:</strong> Limiting devices before bed</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>Caffeine/alcohol:</strong> Limiting intake, especially evening</span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-4 sm:p-6 md:p-8">
-                    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                      <Brain className="h-6 w-6 sm:h-7 sm:h-7 md:h-8 md:w-8 text-primary" />
-                      <h3 className="text-base sm:text-lg md:text-xl font-bold">Medical Treatments</h3>
-                    </div>
-                    <ul className="space-y-2 sm:space-y-3 text-muted-foreground text-xs sm:text-sm md:text-base">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>Sleep study:</strong> Comprehensive overnight evaluation</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>CPAP therapy:</strong> For obstructive sleep apnea</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>Oral appliances:</strong> Dental devices for mild apnea</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>Surgical options:</strong> For anatomical issues</span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-              </div>
+                </CardContent>
+              </Card>
 
               <div className="text-center">
                 <Button 
@@ -731,8 +577,133 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
                   className="w-full sm:w-auto text-sm sm:text-base"
                   onClick={() => window.open(`${baseUrl}/embed/sleep_check?${quizParams}`, '_blank')}
                 >
-                  Start your Sleep Self-Check
+                  Take the Sleep Quiz Now →
                 </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* What Happens After Quiz Section */}
+        <section className="py-8 sm:py-10 md:py-12 lg:py-16 bg-muted/30">
+          <div className="container mx-auto px-3 sm:px-4 md:px-6">
+            <div className="max-w-4xl mx-auto text-center">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
+                What Happens After You Finish the Quiz
+              </h2>
+              <p className="text-muted-foreground text-sm sm:text-base md:text-lg mb-6 sm:mb-8">
+                If your score is moderate or high, it may indicate a higher likelihood of sleep-related breathing issues, such as 
+                <strong className="text-foreground"> sleep apnea</strong> or <strong className="text-foreground">nasal/airway obstruction</strong>. 
+                Our team at <strong className="text-foreground">{clinicData?.clinic_name || 'Exhale Sinus, TMJ, Headache & Sleep'}</strong> will review 
+                your responses and reach out to discuss the next best steps — whether that's a full evaluation, sleep testing, or airway assessment.
+              </p>
+              {(clinicLocations[0]?.phone || clinicData?.phone) && (
+                <Button 
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto text-sm sm:text-base"
+                  onClick={() => window.location.href = `tel:${clinicLocations[0]?.phone || clinicData?.phone}`}
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  Call Us to Schedule a Follow-Up
+                </Button>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Treatment Pathways Section */}
+        <section className="py-8 sm:py-12 md:py-16 lg:py-20">
+          <div className="container mx-auto px-3 sm:px-4 md:px-6">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4">
+                Treat the Root Cause — Not Just the Snoring
+              </h2>
+              <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 max-w-3xl mx-auto text-sm sm:text-base">
+                We offer comprehensive solutions tailored to your specific sleep and airway needs
+              </p>
+
+              <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+                <Card>
+                  <CardContent className="p-4 sm:p-6 md:p-8">
+                    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                      <Bed className="h-6 w-6 sm:h-7 md:h-8 md:w-8 text-primary" />
+                      <h3 className="text-base sm:text-lg md:text-xl font-bold">Non-Surgical Options</h3>
+                    </div>
+                    <p className="text-muted-foreground text-sm sm:text-base">
+                      Oral appliances, CPAP, simple airway therapy — for mild to moderate sleep apnea or nasal congestion.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 sm:p-6 md:p-8">
+                    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                      <Shield className="h-6 w-6 sm:h-7 md:h-8 md:w-8 text-primary" />
+                      <h3 className="text-base sm:text-lg md:text-xl font-bold">Minimally Invasive Procedures</h3>
+                    </div>
+                    <p className="text-muted-foreground text-sm sm:text-base">
+                      Nasal valve procedures, turbinate reduction — ideal for structural nasal or airway blockage.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 sm:p-6 md:p-8">
+                    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                      <Brain className="h-6 w-6 sm:h-7 md:h-8 md:w-8 text-primary" />
+                      <h3 className="text-base sm:text-lg md:text-xl font-bold">Surgical Solutions</h3>
+                    </div>
+                    <p className="text-muted-foreground text-sm sm:text-base">
+                      Septoplasty, UPPP, or advanced sleep-airway surgeries — for moderate-to-severe sleep apnea or obstructive airway disorders.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 sm:p-6 md:p-8">
+                    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                      <Lightbulb className="h-6 w-6 sm:h-7 md:h-8 md:w-8 text-primary" />
+                      <h3 className="text-base sm:text-lg md:text-xl font-bold">Lifestyle & Supportive Care</h3>
+                    </div>
+                    <p className="text-muted-foreground text-sm sm:text-base">
+                      Weight management, posture and breathing training, sleep hygiene — helpful for long-term maintenance.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Meet the Doctor Section */}
+        <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-muted/30">
+          <div className="container mx-auto px-3 sm:px-4 md:px-6">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-10">
+                Meet Dr. {displayFullName} – ENT Sleep Specialist
+              </h2>
+              
+              <div className="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
+                <div className="order-2 md:order-1">
+                  <img 
+                    src={displayHeadshot}
+                    alt={`Dr. ${displayFullName}, ENT Specialist`}
+                    className="w-full max-w-md mx-auto rounded-lg shadow-xl"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="order-1 md:order-2 space-y-4">
+                  <p className="text-muted-foreground text-sm sm:text-base md:text-lg">
+                    Dr. {displayFullName}, {displayDegree}, is a board-certified <strong className="text-foreground">ENT and Sleep Medicine specialist</strong> at {clinicData?.clinic_name || 'Exhale Sinus, TMJ, Headache & Sleep'}. He brings expert care in <strong className="text-foreground">sinus, nasal obstruction, sleep apnea, and airway disorders</strong> to patients seeking better breathing and better sleep.
+                  </p>
+                  <p className="text-muted-foreground text-sm sm:text-base md:text-lg">
+                    {isClinicLevel 
+                      ? "Dr. Vaughn completed his otolaryngology training at the University of Illinois at Chicago and has extensive experience treating sleep-related breathing conditions, nasal obstruction, and airway disorders. Outside the clinic, he enjoys time with his wife, daughter, and their sheepadoodle, Oscar."
+                      : displayBio
+                    }
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -743,52 +714,49 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
           <div className="container mx-auto px-3 sm:px-4 md:px-6">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-10">
-                Frequently Asked Questions
+                Common Questions About Sleep & Airway Problems
               </h2>
               
               <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
                 <AccordionItem value="item-1" className="border rounded-lg px-4 sm:px-6">
                   <AccordionTrigger className="text-sm sm:text-base md:text-lg font-medium py-3 sm:py-4">
-                    What is the Sleep Symptoms Self-Check?
+                    What's the difference between regular snoring and sleep apnea?
                   </AccordionTrigger>
                   <AccordionContent className="text-xs sm:text-sm md:text-base text-muted-foreground pb-3 sm:pb-4">
-                    The Sleep Symptoms Self-Check is a screening tool that evaluates 8 common sleep-related 
-                    symptoms including difficulty falling asleep, nighttime waking, daytime fatigue, snoring, 
-                    concentration issues, mood changes, and morning headaches. It helps identify potential 
-                    sleep issues that may benefit from professional evaluation.
+                    Snoring is noise caused by airway vibration during breathing. Sleep apnea is a sleep disorder 
+                    where breathing repeatedly stops and starts, often leading to serious health issues if untreated. 
+                    Our quiz helps identify when snoring may be a sign of deeper issues.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-2" className="border rounded-lg px-4 sm:px-6">
                   <AccordionTrigger className="text-sm sm:text-base md:text-lg font-medium py-3 sm:py-4">
-                    What do my results mean?
+                    Can nasal obstruction really cause sleep problems?
                   </AccordionTrigger>
                   <AccordionContent className="text-xs sm:text-sm md:text-base text-muted-foreground pb-3 sm:pb-4">
-                    Scores range from 0-24 based on your responses. A score of 0-5 indicates low symptom impact, 
-                    6-11 suggests mild impact, 12-17 indicates moderate impact, and 18-24 suggests high symptom 
-                    impact that would benefit from a comprehensive sleep evaluation.
+                    Yes. Structural issues — such as a deviated septum, enlarged turbinates, or weak nasal valves — 
+                    can limit airflow at night, leading to mouth breathing, poor oxygenation, and disrupted sleep cycles.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-3" className="border rounded-lg px-4 sm:px-6">
                   <AccordionTrigger className="text-sm sm:text-base md:text-lg font-medium py-3 sm:py-4">
-                    When should I see a doctor about sleep issues?
+                    Do I need a formal sleep study before treatment?
                   </AccordionTrigger>
                   <AccordionContent className="text-xs sm:text-sm md:text-base text-muted-foreground pb-3 sm:pb-4">
-                    You should consult a doctor if you experience persistent difficulty sleeping, loud snoring 
-                    or gasping during sleep, excessive daytime sleepiness despite adequate sleep time, morning 
-                    headaches, or if sleep issues are affecting your daily functioning, work performance, or safety.
+                    The Sleep Symptoms Self-Check serves as an initial screening tool. If the results suggest risk, 
+                    we may recommend a sleep study or airway evaluation, but not everyone needs formal testing — 
+                    especially if structural nasal issues are clearly present.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-4" className="border rounded-lg px-4 sm:px-6">
                   <AccordionTrigger className="text-sm sm:text-base md:text-lg font-medium py-3 sm:py-4">
-                    What happens after I complete the assessment?
+                    What are alternatives to CPAP therapy?
                   </AccordionTrigger>
                   <AccordionContent className="text-xs sm:text-sm md:text-base text-muted-foreground pb-3 sm:pb-4">
-                    After completing the assessment, you'll receive your score and an interpretation of your 
-                    results immediately. Our team will review your submission and may reach out to discuss 
-                    next steps, which could include scheduling a consultation or recommending a sleep study.
+                    We offer a full range of <strong>non-surgical and surgical options</strong>, including oral appliances, 
+                    nasal airway procedures, and structural correction for patients who cannot tolerate CPAP.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -800,20 +768,19 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
         <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-primary text-primary-foreground">
           <div className="container mx-auto px-3 sm:px-4 md:px-6 text-center">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
-              Ready to Get Better Sleep?
+              Take the First Step Toward Better Sleep Tonight
             </h2>
-            <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto opacity-90">
-              Take the first step toward understanding your sleep health. The Sleep Symptoms Self-Check 
-              takes just a few minutes and could be the start of getting the rest you deserve.
-            </p>
             <Button 
               size="lg"
               variant="secondary"
-              className="text-sm sm:text-base md:text-lg px-6 sm:px-8 md:px-10 py-4 sm:py-5 md:py-6"
+              className="text-sm sm:text-base md:text-lg px-6 sm:px-8 md:px-10 py-4 sm:py-5 md:py-6 mb-4"
               onClick={() => window.open(`${baseUrl}/embed/sleep_check?${quizParams}`, '_blank')}
             >
-              Start the Sleep Self-Check Now
+              Start the Sleep Self-Check Quiz →
             </Button>
+            <p className="text-sm sm:text-base opacity-80">
+              Free, quick, and reviewed by a board-certified ENT sleep specialist. No obligation.
+            </p>
           </div>
         </section>
 
