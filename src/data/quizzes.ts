@@ -72,6 +72,69 @@ export const MIDAS_QUIZ: Quiz = {
   ]
 };
 
+export const SLEEP_CHECK_QUIZ: Quiz = {
+  id: 'SLEEP_CHECK',
+  title: 'Sleep Symptoms Self-Check',
+  description: 'This quiz helps you understand whether certain sleep-related symptoms may be affecting your sleep or daytime energy.',
+  maxScore: 24,
+  scoring: {
+    normal: 'Low symptom impact (0-5)',
+    mild: 'Mild symptom impact (6-11)',
+    moderate: 'Moderate symptom impact (12-17)',
+    severe: 'High symptom impact (18-24)'
+  },
+  questions: [
+    {
+      id: 'q1',
+      text: 'Do you have trouble falling asleep at night?',
+      options: ['Never (0)', 'Sometimes (1)', 'Often (2)', 'Almost Always (3)'],
+      type: 'likert_scale'
+    },
+    {
+      id: 'q2',
+      text: 'Do you wake up frequently during the night and have trouble going back to sleep?',
+      options: ['Never (0)', 'Sometimes (1)', 'Often (2)', 'Almost Always (3)'],
+      type: 'likert_scale'
+    },
+    {
+      id: 'q3',
+      text: 'Do you feel excessively sleepy or fatigued during the day, even after a full night\'s rest?',
+      options: ['Never (0)', 'Sometimes (1)', 'Often (2)', 'Almost Always (3)'],
+      type: 'likert_scale'
+    },
+    {
+      id: 'q4',
+      text: 'Do you snore loudly or gasp for air during sleep (or have been told you do)?',
+      options: ['Never (0)', 'Sometimes (1)', 'Often (2)', 'Almost Always (3)'],
+      type: 'likert_scale'
+    },
+    {
+      id: 'q5',
+      text: 'Do you feel tired, sluggish, or lack energy throughout the day?',
+      options: ['Never (0)', 'Sometimes (1)', 'Often (2)', 'Almost Always (3)'],
+      type: 'likert_scale'
+    },
+    {
+      id: 'q6',
+      text: 'Do you have difficulty concentrating, remembering things, or making decisions due to poor sleep?',
+      options: ['Never (0)', 'Sometimes (1)', 'Often (2)', 'Almost Always (3)'],
+      type: 'likert_scale'
+    },
+    {
+      id: 'q7',
+      text: 'Do you feel moody, irritable, or anxious due to lack of quality sleep?',
+      options: ['Never (0)', 'Sometimes (1)', 'Often (2)', 'Almost Always (3)'],
+      type: 'likert_scale'
+    },
+    {
+      id: 'q8',
+      text: 'Do you experience headaches when you wake up in the morning?',
+      options: ['Never (0)', 'Sometimes (1)', 'Often (2)', 'Almost Always (3)'],
+      type: 'likert_scale'
+    }
+  ]
+};
+
 export const quizzes: Record<string, Quiz> = {
   SNOT22: {
     id: 'SNOT22',
@@ -738,5 +801,6 @@ export const quizzes: Record<string, Quiz> = {
     ]
   },
   NOSE_SNOT: NOSE_SNOT_QUIZ,
-  MIDAS: MIDAS_QUIZ
+  MIDAS: MIDAS_QUIZ,
+  SLEEP_CHECK: SLEEP_CHECK_QUIZ
 };

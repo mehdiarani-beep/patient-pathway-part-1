@@ -264,6 +264,32 @@ export function calculateQuizScore(quizType: QuizType, answers: QuizAnswer[] | n
         summary: `MSQ Score: ${msqScore}/28 - ${msqInterpretation}`
       };
 
+    case 'SLEEP_CHECK':
+      // Sleep Symptoms Self-Check scoring: 0-3 scale for 8 questions (max 24)
+      const sleepCheckScore = answerIndices.reduce((sum, answer) => sum + answer, 0);
+      let sleepCheckSeverity: 'normal' | 'mild' | 'moderate' | 'severe' = 'normal';
+      let sleepCheckInterpretation = '';
+
+      if (sleepCheckScore >= 18) {
+        sleepCheckSeverity = 'severe';
+        sleepCheckInterpretation = 'High symptom impact - Your symptoms suggest significant sleep-related issues that may be affecting your daily life. A comprehensive sleep evaluation is strongly recommended.';
+      } else if (sleepCheckScore >= 12) {
+        sleepCheckSeverity = 'moderate';
+        sleepCheckInterpretation = 'Moderate symptom impact - Your symptoms suggest moderate sleep-related concerns that could benefit from medical evaluation. Consider scheduling a consultation.';
+      } else if (sleepCheckScore >= 6) {
+        sleepCheckSeverity = 'mild';
+        sleepCheckInterpretation = 'Mild symptom impact - Your symptoms suggest some mild sleep-related concerns. Improving sleep hygiene may help, but consider medical consultation if symptoms persist.';
+      } else {
+        sleepCheckInterpretation = 'Low symptom impact - Your symptoms suggest minimal sleep-related concerns at this time.';
+      }
+
+      return {
+        score: sleepCheckScore,
+        severity: sleepCheckSeverity,
+        interpretation: sleepCheckInterpretation,
+        summary: `Sleep Symptoms Score: ${sleepCheckScore}/24 - ${sleepCheckSeverity === 'normal' ? 'Low' : sleepCheckSeverity} symptom impact`
+      };
+
     default:
       return {
         score: 0,
