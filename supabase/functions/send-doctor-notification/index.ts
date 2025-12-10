@@ -180,8 +180,21 @@ async function sendDoctorNotificationEmail(lead: any, doctorProfile: any, emailC
   // Use config values from email_notification_configs (Supabase) or defaults
   const toEmails = emailConfig?.internal_to_emails || ['Mehdiarani@gmail.com', 'niki@exhalesinus.com'];
   const fromEmail = emailConfig?.internal_from || 'PatientPathway.ai <office@patientpathway.ai>';
-  const subject = emailConfig?.internal_subject || `New Lead Submitted - ${assessmentName}`;
-  const bodyContent = emailConfig?.internal_body || `A new patient has completed the ${assessmentName} assessment. Please review the submission and follow up accordingly.`;
+  
+  // Create regex pattern to match known quiz names for dynamic replacement
+  const quizNamePattern = /Nasal Assessment|Epworth Sleepiness Scale|Migraine-Specific Quality of Life Questionnaire \(MSQ\)|Sleep Symptoms Self-Check|NOSE Assessment|SNOT-22 Assessment|SNOT-12 Assessment|TNSS Assessment|DHI Assessment|HHIA Assessment|STOP-BANG Assessment|Dizziness Handicap Inventory|Symptom Checker/gi;
+  
+  // Dynamically replace any stored quiz names with the actual assessment name
+  let subject = emailConfig?.internal_subject || `New Lead Submitted - ${assessmentName}`;
+  let bodyContent = emailConfig?.internal_body || `A new patient has completed the ${assessmentName} assessment. Please review the submission and follow up accordingly.`;
+  
+  // Replace stored quiz names with the actual quiz name being submitted
+  if (emailConfig?.internal_subject) {
+    subject = subject.replace(quizNamePattern, assessmentName);
+  }
+  if (emailConfig?.internal_body) {
+    bodyContent = bodyContent.replace(quizNamePattern, assessmentName);
+  }
   
   console.log('Using email config values:', {
     toEmails: Array.isArray(toEmails) ? toEmails : [toEmails],
