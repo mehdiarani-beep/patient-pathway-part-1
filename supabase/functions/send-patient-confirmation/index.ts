@@ -206,7 +206,8 @@ function getQuizTypeLabel(quizType: string): string {
     'STOP': 'STOP-BANG Assessment',
     'HHIA': 'HHIA Assessment',
     'DHI': 'Dizziness Handicap Inventory',
-    'SYMPTOM_CHECKER': 'Symptom Checker'
+    'SYMPTOM_CHECKER': 'Symptom Checker',
+    'SLEEP_CHECK': 'Sleep Symptoms Self-Check'
   };
   return quizLabels[quizType] || quizType;
 }
