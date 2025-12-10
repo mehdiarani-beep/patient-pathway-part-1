@@ -247,10 +247,21 @@ async function sendPatientConfirmationEmail(lead: any, doctorProfile: any, email
   // Data from quiz_leads table (Supabase)
   const assessmentName = getQuizTypeLabel(lead.quiz_type);
   
+  // Create regex pattern to match known quiz names for dynamic replacement
+  const quizNamePattern = /Nasal Assessment|Epworth Sleepiness Scale|Migraine-Specific Quality of Life Questionnaire \(MSQ\)|Sleep Symptoms Self-Check|NOSE Assessment|SNOT-22 Assessment|SNOT-12 Assessment|TNSS Assessment|DHI Assessment|HHIA Assessment|STOP-BANG Assessment|Dizziness Handicap Inventory|Symptom Checker/gi;
+  
   // Email content from email_notification_configs (Supabase) or defaults
-  const subject = emailConfig?.patient_subject || `Your ${assessmentName} Results from Exhale Sinus.`;
+  let subject = emailConfig?.patient_subject || `Your ${assessmentName} Results from Exhale Sinus.`;
   const preheader = emailConfig?.patient_preheader || 'Your medical assessment results is not a diagnosis.';
-  const bodyContent = emailConfig?.patient_body || `Thank you for taking the time to complete your ${assessmentName} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.`;
+  let bodyContent = emailConfig?.patient_body || `Thank you for taking the time to complete your ${assessmentName} assessment. We have received your responses and are currently reviewing them to provide you with the most appropriate care recommendations.`;
+  
+  // Replace stored quiz names with the actual quiz name being submitted
+  if (emailConfig?.patient_subject) {
+    subject = subject.replace(quizNamePattern, assessmentName);
+  }
+  if (emailConfig?.patient_body) {
+    bodyContent = bodyContent.replace(quizNamePattern, assessmentName);
+  }
   
   // Non-editable sections (always use defaults from edge function)
   const highlightBoxTitle = emailConfig?.patient_highlight_box_title || 'What happens next?';
