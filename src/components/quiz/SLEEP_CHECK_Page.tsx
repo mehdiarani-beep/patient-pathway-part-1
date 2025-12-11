@@ -44,6 +44,7 @@ interface PhysicianData {
   bio: string | null;
   short_bio: string | null;
   headshot_url: string | null;
+  full_shot_url: string | null;
 }
 
 interface ClinicData {
@@ -74,6 +75,7 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
   const [clinicData, setClinicData] = useState<ClinicData | null>(null);
   const [clinicLocations, setClinicLocations] = useState<ClinicLocation[]>([]);
   const [isClinicLevel, setIsClinicLevel] = useState<boolean>(true);
+  const [allPhysicians, setAllPhysicians] = useState<PhysicianData[]>([]);
 
   // Build dynamic URLs
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -114,10 +116,24 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
         }
       }
       
+      // Fetch all physicians for clinic-level display
+      if (doctorProfile?.clinic_id) {
+        const { data: physicians, error: physiciansError } = await supabase
+          .from('clinic_physicians')
+          .select('id, first_name, last_name, degree_type, credentials, bio, short_bio, headshot_url, full_shot_url')
+          .eq('clinic_id', doctorProfile.clinic_id)
+          .eq('is_active', true)
+          .order('display_order', { ascending: true });
+        
+        if (!physiciansError && physicians) {
+          setAllPhysicians(physicians as PhysicianData[]);
+        }
+      }
+      
       if (!isClinic && physicianId) {
         const { data: physician, error } = await supabase
           .from('clinic_physicians')
-          .select('id, first_name, last_name, degree_type, credentials, bio, short_bio, headshot_url')
+          .select('id, first_name, last_name, degree_type, credentials, bio, short_bio, headshot_url, full_shot_url')
           .eq('id', physicianId)
           .eq('is_active', true)
           .maybeSingle();
@@ -142,7 +158,10 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
     ? 'Many patients live for years with undiagnosed sleep issues, thinking their fatigue is "normal" — when in fact, it\'s not. Dr. Vaughn specializes in comprehensive sleep evaluation, helping patients identify underlying causes and find effective solutions for better rest.'
     : (physicianData?.short_bio || physicianData?.bio || 'Experienced ENT specialist dedicated to helping patients achieve better sleep.');
   const displayHeadshot = isClinicLevel ? drVaughnProfessionalHeadshot : (physicianData?.headshot_url || drVaughnProfessionalHeadshot);
-  const displayNoteImage = isClinicLevel ? drVaughnBlack : (physicianData?.headshot_url || drVaughnBlack);
+  // For physician LPs, use full_shot_url for the note section
+  const displayNoteImage = isClinicLevel 
+    ? (clinicData?.logo_url || drVaughnBlack)
+    : (physicianData?.full_shot_url || physicianData?.headshot_url || drVaughnBlack);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -349,7 +368,7 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
                   className="text-base md:text-lg px-6 sm:px-8 md:px-10 py-4 sm:py-5 md:py-7 w-full sm:w-auto hidden md:inline-flex shadow-2xl hover:shadow-3xl transition-all" 
                   onClick={() => window.open(`${baseUrl}/embed/sleep_check?${quizParams}`, '_blank')}
                 >
-                  Take the Sleep Quiz Now →
+                  Start your Sleep Self-Check →
                 </Button>
               </div>
               <div className="bg-card/50 backdrop-blur-sm rounded-lg border border-border/20 overflow-hidden mt-4 md:mt-0">
@@ -373,7 +392,7 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
             size="lg"
             onClick={() => window.open(`${baseUrl}/embed/sleep_check?${quizParams}`, '_blank')}
           >
-            Take the Sleep Quiz Now →
+            Start your Sleep Self-Check →
           </Button>
         </div>
 
@@ -676,35 +695,82 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
           </div>
         </section>
 
-        {/* Meet the Doctor Section */}
+        {/* Meet Our Physicians Section */}
         <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-muted/30">
           <div className="container mx-auto px-3 sm:px-4 md:px-6">
             <div className="max-w-5xl mx-auto">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-10">
-                Meet Dr. {displayFullName} – ENT Sleep Specialist
+                {isClinicLevel ? 'Meet Our Sleep Medicine Specialists' : `Meet Dr. ${displayFullName}`}
               </h2>
               
-              <div className="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
-                <div className="order-2 md:order-1">
-                  <img 
-                    src={displayHeadshot}
-                    alt={`Dr. ${displayFullName}, ENT Specialist`}
-                    className="w-full max-w-md mx-auto rounded-lg shadow-xl"
-                    loading="lazy"
-                  />
+              {isClinicLevel ? (
+                // Clinic-level: Show all physicians in cards
+                <div className="space-y-6">
+                  {allPhysicians.map((physician) => (
+                    <Card key={physician.id} className="overflow-hidden">
+                      <CardContent className="p-0">
+                        <div className="flex flex-col md:flex-row">
+                          <div className="md:w-1/3 p-4 sm:p-6 flex items-center justify-center bg-muted/30">
+                            <img 
+                              src={physician.headshot_url || drVaughnProfessionalHeadshot}
+                              alt={`Dr. ${physician.first_name} ${physician.last_name}`}
+                              className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full object-cover shadow-lg"
+                              loading="lazy"
+                            />
+                          </div>
+                          <div className="md:w-2/3 p-4 sm:p-6 md:p-8 flex flex-col justify-center">
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2">
+                              Dr. {physician.first_name} {physician.last_name}, {physician.degree_type}
+                            </h3>
+                            {physician.credentials && physician.credentials.length > 0 && (
+                              <p className="text-xs sm:text-sm text-primary font-medium mb-3">
+                                {physician.credentials.join(' • ')}
+                              </p>
+                            )}
+                            <p className="text-sm sm:text-base text-muted-foreground">
+                              {physician.short_bio || physician.bio || 'Experienced ENT specialist dedicated to helping patients achieve better sleep.'}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {allPhysicians.length === 0 && (
+                    <Card>
+                      <CardContent className="p-6 text-center text-muted-foreground">
+                        Our team of specialists is dedicated to helping you achieve better sleep.
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
-                <div className="order-1 md:order-2 space-y-4">
-                  <p className="text-muted-foreground text-sm sm:text-base md:text-lg">
-                    Dr. {displayFullName}, {displayDegree}, is a board-certified <strong className="text-foreground">ENT and Sleep Medicine specialist</strong> at {clinicData?.clinic_name || 'Exhale Sinus, TMJ, Headache & Sleep'}. He brings expert care in <strong className="text-foreground">sinus, nasal obstruction, sleep apnea, and airway disorders</strong> to patients seeking better breathing and better sleep.
-                  </p>
-                  <p className="text-muted-foreground text-sm sm:text-base md:text-lg">
-                    {isClinicLevel 
-                      ? "Dr. Vaughn completed his otolaryngology training at the University of Illinois at Chicago and has extensive experience treating sleep-related breathing conditions, nasal obstruction, and airway disorders. Outside the clinic, he enjoys time with his wife, daughter, and their sheepadoodle, Oscar."
-                      : displayBio
-                    }
-                  </p>
-                </div>
-              </div>
+              ) : (
+                // Physician-specific: Show single physician card
+                <Card className="overflow-hidden">
+                  <CardContent className="p-0">
+                    <div className="flex flex-col md:flex-row">
+                      <div className="md:w-1/3 p-4 sm:p-6 flex items-center justify-center bg-muted/30">
+                        <img 
+                          src={displayHeadshot}
+                          alt={`Dr. ${displayFullName}, ENT Specialist`}
+                          className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full object-cover shadow-lg"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="md:w-2/3 p-4 sm:p-6 md:p-8 flex flex-col justify-center">
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2">
+                          Dr. {displayFullName}, {displayDegree}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-primary font-medium mb-3">
+                          {displayCredentials}
+                        </p>
+                        <p className="text-sm sm:text-base text-muted-foreground">
+                          {physicianData?.short_bio || physicianData?.bio || displayBio}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </section>
@@ -776,7 +842,7 @@ export const SLEEP_CHECK = ({ doctorName, doctorImage, doctorId, physicianId }: 
               className="text-sm sm:text-base md:text-lg px-6 sm:px-8 md:px-10 py-4 sm:py-5 md:py-6 mb-4"
               onClick={() => window.open(`${baseUrl}/embed/sleep_check?${quizParams}`, '_blank')}
             >
-              Start the Sleep Self-Check Quiz →
+              Take the Sleep Quiz Now →
             </Button>
             <p className="text-sm sm:text-base opacity-80">
               Free, quick, and reviewed by a board-certified ENT sleep specialist. No obligation.

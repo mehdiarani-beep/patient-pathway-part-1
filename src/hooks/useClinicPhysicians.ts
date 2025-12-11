@@ -16,6 +16,7 @@ export interface ClinicPhysician {
   short_bio: string | null;
   headshot_url: string | null;
   note_image_url: string | null;
+  full_shot_url: string | null;
   is_active: boolean;
   display_order: number;
   created_at: string;
@@ -32,6 +33,7 @@ export interface PhysicianFormData {
   bio: string;
   short_bio: string;
   headshot_url: string;
+  full_shot_url: string;
 }
 
 const emptyPhysicianForm: PhysicianFormData = {
@@ -43,7 +45,8 @@ const emptyPhysicianForm: PhysicianFormData = {
   email: '',
   bio: '',
   short_bio: '',
-  headshot_url: ''
+  headshot_url: '',
+  full_shot_url: ''
 };
 
 export function useClinicPhysicians() {
@@ -131,6 +134,7 @@ export function useClinicPhysicians() {
           bio: formData.bio.trim() || null,
           short_bio: formData.short_bio.trim() || null,
           headshot_url: formData.headshot_url.trim() || null,
+          full_shot_url: formData.full_shot_url.trim() || null,
           display_order: physicians.length
         })
         .select()
@@ -170,7 +174,8 @@ export function useClinicPhysicians() {
           email: formData.email.trim() || null,
           bio: formData.bio.trim() || null,
           short_bio: formData.short_bio.trim() || null,
-          headshot_url: formData.headshot_url.trim() || null
+          headshot_url: formData.headshot_url.trim() || null,
+          full_shot_url: formData.full_shot_url.trim() || null
         })
         .eq('id', id);
 

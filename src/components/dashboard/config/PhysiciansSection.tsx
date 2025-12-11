@@ -37,7 +37,8 @@ export function PhysiciansSection() {
         email: physician.email || '',
         bio: physician.bio || '',
         short_bio: physician.short_bio || '',
-        headshot_url: physician.headshot_url || ''
+        headshot_url: physician.headshot_url || '',
+        full_shot_url: physician.full_shot_url || ''
       });
     } else {
       setEditingPhysician(null);
@@ -207,9 +208,22 @@ export function PhysiciansSection() {
                   placeholder="https://example.com/headshot.jpg"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Upload images in the Assets Library and paste the URL here
+                  Square/circular headshot for profile cards. Upload in Assets Library.
                 </p>
               </div>
+            </div>
+
+            {/* Full Shot Image */}
+            <div>
+              <Label>Full Shot Image URL</Label>
+              <Input
+                value={formData.full_shot_url}
+                onChange={(e) => setFormData(p => ({ ...p, full_shot_url: e.target.value }))}
+                placeholder="https://example.com/full-shot.jpg"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Full body/standing image used in the "A Note from Dr." section on landing pages
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
