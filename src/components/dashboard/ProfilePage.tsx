@@ -154,7 +154,8 @@ export function ProfilePage() {
                 email: physicianData.email || '',
                 bio: physicianData.bio || '',
                 short_bio: physicianData.short_bio || '',
-                headshot_url: physicianData.headshot_url || ''
+                headshot_url: physicianData.headshot_url || '',
+                full_shot_url: physicianData.full_shot_url || ''
               });
             }
           }

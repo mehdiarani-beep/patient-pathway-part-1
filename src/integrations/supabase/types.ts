@@ -328,6 +328,7 @@ export type Database = {
           display_order: number | null
           email: string | null
           first_name: string
+          full_shot_url: string | null
           headshot_url: string | null
           id: string
           is_active: boolean | null
@@ -347,6 +348,7 @@ export type Database = {
           display_order?: number | null
           email?: string | null
           first_name: string
+          full_shot_url?: string | null
           headshot_url?: string | null
           id?: string
           is_active?: boolean | null
@@ -366,6 +368,7 @@ export type Database = {
           display_order?: number | null
           email?: string | null
           first_name?: string
+          full_shot_url?: string | null
           headshot_url?: string | null
           id?: string
           is_active?: boolean | null
