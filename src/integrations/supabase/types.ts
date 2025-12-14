@@ -414,6 +414,7 @@ export type Database = {
           phone: string | null
           primary_color: string | null
           secondary_color: string | null
+          seo_competitor_urls: string | null
           state: string | null
           tagline: string | null
           updated_at: string
@@ -444,6 +445,7 @@ export type Database = {
           phone?: string | null
           primary_color?: string | null
           secondary_color?: string | null
+          seo_competitor_urls?: string | null
           state?: string | null
           tagline?: string | null
           updated_at?: string
@@ -474,6 +476,7 @@ export type Database = {
           phone?: string | null
           primary_color?: string | null
           secondary_color?: string | null
+          seo_competitor_urls?: string | null
           state?: string | null
           tagline?: string | null
           updated_at?: string
