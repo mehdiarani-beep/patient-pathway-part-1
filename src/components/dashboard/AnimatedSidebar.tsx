@@ -25,6 +25,7 @@ import {
   Mail,
   Share2,
   Stethoscope,
+  Search,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -77,6 +78,12 @@ const mainMenuItems = [
     label: 'Manage Emails',
     icon: <Mail size={22} />,
     description: 'Configure email settings'
+  },
+  {
+    id: 'seo-analyzer',
+    label: 'SEO Audit',
+    icon: <Search size={22} />,
+    description: 'Website SEO analysis'
   },
 ];
 

@@ -15,6 +15,7 @@ import { SocialMediaManager } from '@/components/dashboard/SocialMediaManager';
 import { AutomationPage } from '@/components/dashboard/AutomationPage';
 import { SymptomChecker } from '@/components/dashboard/SymptomChecker';
 import { EmailConfigurationPage } from '@/components/dashboard/EmailConfigurationPage';
+import { SEOAnalyzerPage } from '@/components/dashboard/SEOAnalyzerPage';
 import { toast } from 'sonner';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { PageLoader } from '@/components/ui/PageLoader';
@@ -215,6 +216,8 @@ export default function PortalPage() {
         return <AutomationPage />;
       case 'email-config':
         return <EmailConfigurationPage />;
+      case 'seo-analyzer':
+        return <SEOAnalyzerPage />;
       case 'profile':
         return <ProfilePage />;
       case 'configuration':
@@ -261,6 +264,7 @@ export default function PortalPage() {
                     {currentPage === 'schedule' && 'Schedule'}
                     {currentPage === 'social' && 'Social Integrations'}
                     {currentPage === 'social-media' && 'Social Media Manager'}
+                    {currentPage === 'seo-analyzer' && 'SEO Audit'}
                     {currentPage === 'automation' && 'Automation'}
                     {currentPage === 'marketing' && 'Marketing Recommendations'}
                     {currentPage === 'symptom-checker' && 'Symptom Checker'}
@@ -279,6 +283,7 @@ export default function PortalPage() {
                     {currentPage === 'schedule' && 'View and manage your appointments'}
                     {currentPage === 'social' && 'Connect and manage your social media accounts'}
                     {currentPage === 'social-media' && 'Create, schedule, and manage your social media posts'}
+                    {currentPage === 'seo-analyzer' && 'Analyze website SEO health with AI-powered recommendations'}
                     {currentPage === 'automation' && 'Create and manage automated communications'}
                     {currentPage === 'marketing' && 'Daily content ideas and marketing strategies'}
                     {currentPage === 'symptom-checker' && 'Conversational assessment tool'}
