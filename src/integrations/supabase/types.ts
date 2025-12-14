@@ -1627,6 +1627,141 @@ export type Database = {
           },
         ]
       }
+      seo_analyses: {
+        Row: {
+          ai_recommendations: Json | null
+          analysis_data: Json
+          clinic_id: string | null
+          content_score: number | null
+          created_at: string | null
+          id: string
+          local_seo_score: number | null
+          overall_score: number | null
+          speed_score: number | null
+          technical_score: number | null
+          url: string
+        }
+        Insert: {
+          ai_recommendations?: Json | null
+          analysis_data?: Json
+          clinic_id?: string | null
+          content_score?: number | null
+          created_at?: string | null
+          id?: string
+          local_seo_score?: number | null
+          overall_score?: number | null
+          speed_score?: number | null
+          technical_score?: number | null
+          url: string
+        }
+        Update: {
+          ai_recommendations?: Json | null
+          analysis_data?: Json
+          clinic_id?: string | null
+          content_score?: number | null
+          created_at?: string | null
+          id?: string
+          local_seo_score?: number | null
+          overall_score?: number | null
+          speed_score?: number | null
+          technical_score?: number | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_analyses_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_competitor_analyses: {
+        Row: {
+          clinic_id: string | null
+          comparison_data: Json | null
+          created_at: string | null
+          id: string
+          name: string
+          urls: Json
+        }
+        Insert: {
+          clinic_id?: string | null
+          comparison_data?: Json | null
+          created_at?: string | null
+          id?: string
+          name: string
+          urls?: Json
+        }
+        Update: {
+          clinic_id?: string | null
+          comparison_data?: Json | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          urls?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_competitor_analyses_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_monitoring_schedules: {
+        Row: {
+          alert_threshold: number | null
+          clinic_id: string | null
+          created_at: string | null
+          email_alerts: boolean | null
+          frequency: string | null
+          id: string
+          is_active: boolean | null
+          last_run_at: string | null
+          next_run_at: string | null
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          alert_threshold?: number | null
+          clinic_id?: string | null
+          created_at?: string | null
+          email_alerts?: boolean | null
+          frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_run_at?: string | null
+          next_run_at?: string | null
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          alert_threshold?: number | null
+          clinic_id?: string | null
+          created_at?: string | null
+          email_alerts?: boolean | null
+          frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_run_at?: string | null
+          next_run_at?: string | null
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_monitoring_schedules_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_accounts: {
         Row: {
           access_token: string | null
