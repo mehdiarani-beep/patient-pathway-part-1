@@ -12,8 +12,10 @@ import { SEOScoreGauge } from './seo/SEOScoreGauge';
 import { TechnicalSEOCard } from './seo/TechnicalSEOCard';
 import { ContentAnalysisCard } from './seo/ContentAnalysisCard';
 import { AIRecommendationsCard } from './seo/AIRecommendationsCard';
-import type { SEOAnalysisResult, AIRecommendation } from '@/types/seo';
-
+import { CoreWebVitalsCard } from './seo/CoreWebVitalsCard';
+import { LocalSEOCard } from './seo/LocalSEOCard';
+import { CompetitorComparison } from './seo/CompetitorComparison';
+import type { SEOAnalysisResult, AIRecommendation, SpeedMetrics, LocalSEOData } from '@/types/seo';
 export function SEOAnalyzerPage() {
   const { user } = useAuth();
   const [url, setUrl] = useState('');
@@ -25,6 +27,12 @@ export function SEOAnalyzerPage() {
   const [clinicId, setClinicId] = useState<string | null>(null);
   const [clinicWebsite, setClinicWebsite] = useState<string>('');
   const [recentAnalyses, setRecentAnalyses] = useState<any[]>([]);
+  const [speedMetrics, setSpeedMetrics] = useState<SpeedMetrics | null>(null);
+  const [localSeoData, setLocalSeoData] = useState<LocalSEOData | null>(null);
+  const [competitorUrls, setCompetitorUrls] = useState<string[]>([]);
+  const [clinicData, setClinicData] = useState<any>(null);
+  const [isLoadingSpeed, setIsLoadingSpeed] = useState(false);
+  const [isLoadingLocalSeo, setIsLoadingLocalSeo] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -46,18 +54,30 @@ export function SEOAnalyzerPage() {
     if (profile?.clinic_id) {
       setClinicId(profile.clinic_id);
       
-      // Fetch clinic profile to get website
+      // Fetch clinic profile to get website and competitor URLs
       const { data: clinic } = await supabase
         .from('clinic_profiles')
-        .select('website')
+        .select('website, clinic_name, address, city, state, phone, seo_competitor_urls')
         .eq('id', profile.clinic_id)
         .maybeSingle();
       
-      if (clinic?.website) {
-        setClinicWebsite(clinic.website);
-        // Auto-populate the URL field if empty
-        if (!url) {
-          setUrl(clinic.website);
+      if (clinic) {
+        setClinicData(clinic);
+        if (clinic.website) {
+          setClinicWebsite(clinic.website);
+          // Auto-populate the URL field if empty
+          if (!url) {
+            setUrl(clinic.website);
+          }
+        }
+        
+        // Parse competitor URLs
+        if (clinic.seo_competitor_urls) {
+          const urls = clinic.seo_competitor_urls
+            .split(/[,\n]/)
+            .map((u: string) => u.trim())
+            .filter((u: string) => u.length > 0);
+          setCompetitorUrls(urls);
         }
       }
     }
@@ -119,6 +139,14 @@ export function SEOAnalyzerPage() {
 
       // Generate AI recommendations
       generateAIRecommendations(data);
+      
+      // Fetch speed metrics
+      fetchSpeedMetrics(targetUrl);
+      
+      // Fetch local SEO data if clinic data available
+      if (clinicData) {
+        fetchLocalSeoData();
+      }
 
     } catch (err: any) {
       console.error('Analysis error:', err);
@@ -126,6 +154,54 @@ export function SEOAnalyzerPage() {
       toast.error('Analysis failed. Please try again.');
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+  
+  const fetchSpeedMetrics = async (targetUrl: string) => {
+    setIsLoadingSpeed(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('pagespeed-analyzer', {
+        body: { url: targetUrl }
+      });
+
+      if (fnError) throw fnError;
+      if (data.error) throw new Error(data.error);
+
+      setSpeedMetrics(data.data);
+      if (data.simulated) {
+        console.log('Using simulated PageSpeed data (no API key configured)');
+      }
+    } catch (err: any) {
+      console.error('PageSpeed error:', err);
+    } finally {
+      setIsLoadingSpeed(false);
+    }
+  };
+  
+  const fetchLocalSeoData = async () => {
+    if (!clinicData) return;
+    
+    setIsLoadingLocalSeo(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('local-seo-analyzer', {
+        body: {
+          clinicName: clinicData.clinic_name,
+          address: clinicData.address,
+          city: clinicData.city,
+          state: clinicData.state,
+          phone: clinicData.phone,
+          website: clinicData.website,
+        }
+      });
+
+      if (fnError) throw fnError;
+      if (data.error) throw new Error(data.error);
+
+      setLocalSeoData(data);
+    } catch (err: any) {
+      console.error('Local SEO error:', err);
+    } finally {
+      setIsLoadingLocalSeo(false);
     }
   };
 
@@ -326,10 +402,13 @@ export function SEOAnalyzerPage() {
 
           {/* Detailed Analysis Tabs */}
           <Tabs defaultValue="recommendations" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="recommendations">AI Recommendations</TabsTrigger>
-              <TabsTrigger value="technical">Technical SEO</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+              <TabsTrigger value="recommendations">AI</TabsTrigger>
+              <TabsTrigger value="technical">Technical</TabsTrigger>
               <TabsTrigger value="content">Content</TabsTrigger>
+              <TabsTrigger value="speed">Speed</TabsTrigger>
+              <TabsTrigger value="local">Local SEO</TabsTrigger>
+              <TabsTrigger value="competitors">Competitors</TabsTrigger>
             </TabsList>
 
             <TabsContent value="recommendations" className="mt-4">
@@ -345,6 +424,18 @@ export function SEOAnalyzerPage() {
 
             <TabsContent value="content" className="mt-4">
               <ContentAnalysisCard data={analysisResult.keywords} />
+            </TabsContent>
+
+            <TabsContent value="speed" className="mt-4">
+              <CoreWebVitalsCard data={speedMetrics} loading={isLoadingSpeed} />
+            </TabsContent>
+
+            <TabsContent value="local" className="mt-4">
+              <LocalSEOCard data={localSeoData} loading={isLoadingLocalSeo} />
+            </TabsContent>
+
+            <TabsContent value="competitors" className="mt-4">
+              <CompetitorComparison yourUrl={url} competitorUrls={competitorUrls} />
             </TabsContent>
           </Tabs>
         </>
