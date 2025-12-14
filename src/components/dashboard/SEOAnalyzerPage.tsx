@@ -23,25 +23,43 @@ export function SEOAnalyzerPage() {
   const [aiRecommendations, setAiRecommendations] = useState<AIRecommendation[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [clinicId, setClinicId] = useState<string | null>(null);
+  const [clinicWebsite, setClinicWebsite] = useState<string>('');
   const [recentAnalyses, setRecentAnalyses] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
-      fetchClinicId();
+      fetchClinicData();
       fetchRecentAnalyses();
     }
   }, [user]);
 
-  const fetchClinicId = async () => {
+  const fetchClinicData = async () => {
     if (!user) return;
-    const { data } = await supabase
+    
+    // First get the clinic_id from doctor_profiles
+    const { data: profile } = await supabase
       .from('doctor_profiles')
       .select('clinic_id')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
     
-    if (data?.clinic_id) {
-      setClinicId(data.clinic_id);
+    if (profile?.clinic_id) {
+      setClinicId(profile.clinic_id);
+      
+      // Fetch clinic profile to get website
+      const { data: clinic } = await supabase
+        .from('clinic_profiles')
+        .select('website')
+        .eq('id', profile.clinic_id)
+        .maybeSingle();
+      
+      if (clinic?.website) {
+        setClinicWebsite(clinic.website);
+        // Auto-populate the URL field if empty
+        if (!url) {
+          setUrl(clinic.website);
+        }
+      }
     }
   };
 
@@ -195,15 +213,24 @@ export function SEOAnalyzerPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1">
+            <div className="flex-1 flex gap-2">
               <Input
                 type="url"
                 placeholder="Enter website URL (e.g., https://example.com)"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
-                className="w-full"
+                className="flex-1"
               />
+              {clinicWebsite && url !== clinicWebsite && (
+                <Button
+                  variant="outline"
+                  onClick={() => setUrl(clinicWebsite)}
+                  className="whitespace-nowrap"
+                >
+                  Use My Website
+                </Button>
+              )}
             </div>
             <Button 
               onClick={handleAnalyze} 

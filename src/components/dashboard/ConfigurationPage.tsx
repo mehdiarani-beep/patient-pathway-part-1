@@ -21,6 +21,7 @@ interface BusinessInfo {
   owner_email: string;
   logo_url: string;
   avatar_url: string;
+  seo_competitor_urls: string;
 }
 
 interface BrandKitInfo {
@@ -51,7 +52,8 @@ export function ConfigurationPage() {
     owner_mobile: '',
     owner_email: '',
     logo_url: '',
-    avatar_url: ''
+    avatar_url: '',
+    seo_competitor_urls: ''
   });
 
   const [brandKit, setBrandKit] = useState<BrandKitInfo>({
@@ -101,7 +103,8 @@ export function ConfigurationPage() {
             owner_mobile: '',
             owner_email: physician.email || '',
             logo_url: physician.headshot_url || '',
-            avatar_url: physician.headshot_url || ''
+            avatar_url: physician.headshot_url || '',
+            seo_competitor_urls: ''
           });
           setLoading(false);
           return;
@@ -139,7 +142,8 @@ export function ConfigurationPage() {
               owner_mobile: clinic.owner_mobile || '',
               owner_email: clinic.owner_email || '',
               logo_url: clinic.logo_url || '',
-              avatar_url: clinic.avatar_url || ''
+              avatar_url: clinic.avatar_url || '',
+              seo_competitor_urls: clinic.seo_competitor_urls || ''
             });
             setBrandKit({
               primary_color: clinic.primary_color || '#0063A0',
@@ -161,7 +165,8 @@ export function ConfigurationPage() {
             owner_mobile: '',
             owner_email: user.email || '',
             logo_url: profile.logo_url || '',
-            avatar_url: profile.avatar_url || ''
+            avatar_url: profile.avatar_url || '',
+            seo_competitor_urls: ''
           });
         }
       }
@@ -260,6 +265,7 @@ export function ConfigurationPage() {
             owner_email: businessInfo.owner_email.trim() || null,
             logo_url: businessInfo.logo_url.trim() || null,
             avatar_url: businessInfo.avatar_url.trim() || null,
+            seo_competitor_urls: businessInfo.seo_competitor_urls.trim() || null,
             primary_color: brandKit.primary_color || null,
             secondary_color: brandKit.secondary_color || null,
             accent_color: brandKit.accent_color || null,

@@ -2,7 +2,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building, Globe, Phone, User, Image } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Building, Globe, Phone, User, Image, Target } from 'lucide-react';
 
 interface BusinessInfo {
   clinic_name: string;
@@ -13,6 +14,7 @@ interface BusinessInfo {
   owner_email: string;
   logo_url: string;
   avatar_url: string;
+  seo_competitor_urls: string;
 }
 
 interface BusinessInfoSectionProps {
@@ -215,6 +217,28 @@ export function BusinessInfoSection({
                 placeholder="owner@clinic.com"
               />
             </div>
+          </div>
+        </div>
+
+        {/* SEO Competitor Tracking */}
+        <div className="pt-4 border-t">
+          <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+            <Target className="w-4 h-4" />
+            SEO Competitor Tracking
+          </h4>
+          <div className="space-y-2">
+            <Label htmlFor="seo_competitor_urls">Competitor Website URLs</Label>
+            <Textarea
+              id="seo_competitor_urls"
+              value={data.seo_competitor_urls}
+              onChange={(e) => onChange('seo_competitor_urls', e.target.value)}
+              placeholder="https://competitor1.com&#10;https://competitor2.com&#10;https://competitor3.com"
+              rows={4}
+              className="font-mono text-sm"
+            />
+            <p className="text-xs text-muted-foreground">
+              Enter up to 10 competitor website URLs, one per line. Used for SEO comparison analysis.
+            </p>
           </div>
         </div>
       </CardContent>
