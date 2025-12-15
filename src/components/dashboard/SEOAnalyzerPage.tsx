@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Search, Globe, Loader2, RefreshCw, Save, History, AlertCircle } from 'lucide-react';
+import { Globe, Loader2, RefreshCw, Save, Settings, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { SEOScoreGauge } from './seo/SEOScoreGauge';
+import { Link } from 'react-router-dom';
+import { SEODashboardOverview } from './seo/SEODashboardOverview';
+import { SEOIssuesList } from './seo/SEOIssuesList';
 import { TechnicalSEOCard } from './seo/TechnicalSEOCard';
 import { ContentAnalysisCard } from './seo/ContentAnalysisCard';
 import { AIRecommendationsCard } from './seo/AIRecommendationsCard';
@@ -16,9 +17,9 @@ import { CoreWebVitalsCard } from './seo/CoreWebVitalsCard';
 import { LocalSEOCard } from './seo/LocalSEOCard';
 import { CompetitorComparison } from './seo/CompetitorComparison';
 import type { SEOAnalysisResult, AIRecommendation, SpeedMetrics, LocalSEOData } from '@/types/seo';
+
 export function SEOAnalyzerPage() {
   const { user } = useAuth();
-  const [url, setUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<SEOAnalysisResult | null>(null);
@@ -26,25 +27,24 @@ export function SEOAnalyzerPage() {
   const [error, setError] = useState<string | null>(null);
   const [clinicId, setClinicId] = useState<string | null>(null);
   const [clinicWebsite, setClinicWebsite] = useState<string>('');
-  const [recentAnalyses, setRecentAnalyses] = useState<any[]>([]);
+  const [previousScore, setPreviousScore] = useState<number | undefined>();
   const [speedMetrics, setSpeedMetrics] = useState<SpeedMetrics | null>(null);
   const [localSeoData, setLocalSeoData] = useState<LocalSEOData | null>(null);
   const [competitorUrls, setCompetitorUrls] = useState<string[]>([]);
   const [clinicData, setClinicData] = useState<any>(null);
   const [isLoadingSpeed, setIsLoadingSpeed] = useState(false);
   const [isLoadingLocalSeo, setIsLoadingLocalSeo] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (user && !hasLoaded) {
       fetchClinicData();
-      fetchRecentAnalyses();
     }
-  }, [user]);
+  }, [user, hasLoaded]);
 
   const fetchClinicData = async () => {
     if (!user) return;
     
-    // First get the clinic_id from doctor_profiles
     const { data: profile } = await supabase
       .from('doctor_profiles')
       .select('clinic_id')
@@ -54,7 +54,6 @@ export function SEOAnalyzerPage() {
     if (profile?.clinic_id) {
       setClinicId(profile.clinic_id);
       
-      // Fetch clinic profile to get website and competitor URLs
       const { data: clinic } = await supabase
         .from('clinic_profiles')
         .select('website, clinic_name, address, city, state, phone, seo_competitor_urls')
@@ -65,13 +64,8 @@ export function SEOAnalyzerPage() {
         setClinicData(clinic);
         if (clinic.website) {
           setClinicWebsite(clinic.website);
-          // Auto-populate the URL field if empty
-          if (!url) {
-            setUrl(clinic.website);
-          }
         }
         
-        // Parse competitor URLs
         if (clinic.seo_competitor_urls) {
           const urls = clinic.seo_competitor_urls
             .split(/[,\n]/)
@@ -80,55 +74,52 @@ export function SEOAnalyzerPage() {
           setCompetitorUrls(urls);
         }
       }
+      
+      // Fetch previous analysis for trend comparison
+      const { data: prevAnalysis } = await supabase
+        .from('seo_analyses')
+        .select('overall_score')
+        .eq('clinic_id', profile.clinic_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (prevAnalysis) {
+        setPreviousScore(prevAnalysis.overall_score);
+      }
+      
+      // Auto-analyze if website is configured
+      if (clinic?.website) {
+        setHasLoaded(true);
+        handleAnalyze(clinic.website, clinic);
+      } else {
+        setHasLoaded(true);
+      }
+    } else {
+      setHasLoaded(true);
     }
   };
 
-  const fetchRecentAnalyses = async () => {
-    if (!user) return;
+  const handleAnalyze = async (targetUrl?: string, clinicInfo?: any) => {
+    const url = targetUrl || clinicWebsite;
+    const clinic = clinicInfo || clinicData;
     
-    const { data } = await supabase
-      .from('seo_analyses')
-      .select('id, url, overall_score, created_at')
-      .order('created_at', { ascending: false })
-      .limit(5);
-    
-    if (data) {
-      setRecentAnalyses(data);
-    }
-  };
-
-  const isValidUrl = (string: string) => {
-    try {
-      const url = new URL(string);
-      return url.protocol === 'http:' || url.protocol === 'https:';
-    } catch {
-      return false;
-    }
-  };
-
-  const handleAnalyze = async () => {
-    let targetUrl = url.trim();
-    
-    // Add https:// if no protocol specified
-    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-      targetUrl = 'https://' + targetUrl;
-      setUrl(targetUrl);
-    }
-
-    if (!isValidUrl(targetUrl)) {
-      setError('Please enter a valid URL');
+    if (!url) {
+      setError('No website configured');
       return;
+    }
+    
+    let normalizedUrl = url.trim();
+    if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+      normalizedUrl = 'https://' + normalizedUrl;
     }
 
     setIsAnalyzing(true);
     setError(null);
-    setAnalysisResult(null);
-    setAiRecommendations([]);
 
     try {
-      // Call the SEO analyzer edge function
       const { data, error: fnError } = await supabase.functions.invoke('seo-analyzer', {
-        body: { url: targetUrl }
+        body: { url: normalizedUrl }
       });
 
       if (fnError) throw fnError;
@@ -137,20 +128,16 @@ export function SEOAnalyzerPage() {
       setAnalysisResult(data);
       toast.success('SEO analysis complete!');
 
-      // Generate AI recommendations
       generateAIRecommendations(data);
+      fetchSpeedMetrics(normalizedUrl);
       
-      // Fetch speed metrics
-      fetchSpeedMetrics(targetUrl);
-      
-      // Fetch local SEO data if clinic data available
-      if (clinicData) {
-        fetchLocalSeoData();
+      if (clinic) {
+        fetchLocalSeoData(clinic);
       }
 
     } catch (err: any) {
       console.error('Analysis error:', err);
-      setError(err.message || 'Failed to analyze URL');
+      setError(err.message || 'Failed to analyze website');
       toast.error('Analysis failed. Please try again.');
     } finally {
       setIsAnalyzing(false);
@@ -168,9 +155,6 @@ export function SEOAnalyzerPage() {
       if (data.error) throw new Error(data.error);
 
       setSpeedMetrics(data.data);
-      if (data.simulated) {
-        console.log('Using simulated PageSpeed data (no API key configured)');
-      }
     } catch (err: any) {
       console.error('PageSpeed error:', err);
     } finally {
@@ -178,19 +162,19 @@ export function SEOAnalyzerPage() {
     }
   };
   
-  const fetchLocalSeoData = async () => {
-    if (!clinicData) return;
+  const fetchLocalSeoData = async (clinic: any) => {
+    if (!clinic) return;
     
     setIsLoadingLocalSeo(true);
     try {
       const { data, error: fnError } = await supabase.functions.invoke('local-seo-analyzer', {
         body: {
-          clinicName: clinicData.clinic_name,
-          address: clinicData.address,
-          city: clinicData.city,
-          state: clinicData.state,
-          phone: clinicData.phone,
-          website: clinicData.website,
+          clinicName: clinic.clinic_name,
+          address: clinic.address,
+          city: clinic.city,
+          state: clinic.state,
+          phone: clinic.phone,
+          website: clinic.website,
         }
       });
 
@@ -220,7 +204,6 @@ export function SEOAnalyzerPage() {
       
     } catch (err: any) {
       console.error('AI recommendations error:', err);
-      // Don't show error toast - AI recommendations are supplementary
     } finally {
       setIsGeneratingAI(false);
     }
@@ -247,175 +230,115 @@ export function SEOAnalyzerPage() {
 
       if (error) throw error;
 
-      toast.success('Analysis saved successfully!');
-      fetchRecentAnalyses();
+      toast.success('Analysis saved!');
+      setPreviousScore(analysisResult.overallScore);
     } catch (err: any) {
       console.error('Save error:', err);
       toast.error('Failed to save analysis');
     }
   };
 
-  const loadRecentAnalysis = async (analysisId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('seo_analyses')
-        .select('*')
-        .eq('id', analysisId)
-        .single();
+  // No website configured state
+  if (hasLoaded && !clinicWebsite) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="py-12">
+            <div className="flex flex-col items-center justify-center gap-4 text-center">
+              <Globe className="h-16 w-16 text-muted-foreground/50" />
+              <div>
+                <h2 className="text-xl font-semibold mb-2">No Website Configured</h2>
+                <p className="text-muted-foreground max-w-md">
+                  Add your clinic's website URL in Configuration → Business Info to enable SEO analysis.
+                </p>
+              </div>
+              <Button asChild className="mt-4">
+                <Link to="/portal/configuration">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Go to Configuration
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-      if (error) throw error;
-
-      if (data) {
-        setUrl(data.url);
-        setAnalysisResult(data.analysis_data as unknown as SEOAnalysisResult);
-        setAiRecommendations((data.ai_recommendations as unknown as AIRecommendation[]) || []);
-        toast.success('Loaded previous analysis');
-      }
-    } catch (err) {
-      console.error('Load error:', err);
-      toast.error('Failed to load analysis');
-    }
-  };
+  // Loading state
+  if (!hasLoaded || (isAnalyzing && !analysisResult)) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="py-12">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              <div className="text-center">
+                <p className="font-medium">Analyzing your website...</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {clinicWebsite && new URL(clinicWebsite.startsWith('http') ? clinicWebsite : `https://${clinicWebsite}`).hostname}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* URL Input Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5 text-primary" />
-            SEO Analyzer
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 flex gap-2">
-              <Input
-                type="url"
-                placeholder="Enter website URL (e.g., https://example.com)"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
-                className="flex-1"
-              />
-              {clinicWebsite && url !== clinicWebsite && (
-                <Button
-                  variant="outline"
-                  onClick={() => setUrl(clinicWebsite)}
-                  className="whitespace-nowrap"
-                >
-                  Use My Website
-                </Button>
-              )}
-            </div>
-            <Button 
-              onClick={handleAnalyze} 
-              disabled={isAnalyzing || !url.trim()}
-              className="min-w-[140px]"
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <Search className="mr-2 h-4 w-4" />
-                  Analyze
-                </>
-              )}
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">SEO Analysis</h1>
+          <p className="text-sm text-muted-foreground">
+            {clinicWebsite && (
+              <>Analyzing <span className="font-medium">{new URL(clinicWebsite.startsWith('http') ? clinicWebsite : `https://${clinicWebsite}`).hostname}</span></>
+            )}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => handleAnalyze()} disabled={isAnalyzing}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
+            Re-analyze
+          </Button>
+          {analysisResult && (
+            <Button onClick={handleSaveAnalysis}>
+              <Save className="mr-2 h-4 w-4" />
+              Save
             </Button>
-          </div>
-
-          {error && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
           )}
+        </div>
+      </div>
 
-          {/* Recent Analyses */}
-          {recentAnalyses.length > 0 && !analysisResult && (
-            <div className="mt-4">
-              <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
-                <History className="h-4 w-4" />
-                Recent Analyses
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {recentAnalyses.map((analysis) => (
-                  <Button
-                    key={analysis.id}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => loadRecentAnalysis(analysis.id)}
-                    className="text-xs"
-                  >
-                    <span className="truncate max-w-[150px]">
-                      {new URL(analysis.url).hostname}
-                    </span>
-                    <span className="ml-2 text-muted-foreground">
-                      ({analysis.overall_score})
-                    </span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-      {/* Results Section */}
+      {/* Results */}
       {analysisResult && (
         <>
-          {/* Score Overview */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Analysis Results</CardTitle>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handleAnalyze}>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Re-analyze
-                </Button>
-                <Button size="sm" onClick={handleSaveAnalysis}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap justify-center gap-8 py-4">
-                <SEOScoreGauge score={analysisResult.overallScore} label="Overall" size="lg" />
-                <SEOScoreGauge score={analysisResult.technicalScore} label="Technical" size="md" />
-                <SEOScoreGauge score={analysisResult.contentScore} label="Content" size="md" />
-                <SEOScoreGauge score={analysisResult.speedScore || 0} label="Speed" size="md" />
-              </div>
-              <div className="text-center mt-2">
-                <p className="text-sm text-muted-foreground">
-                  Analyzed: {new URL(analysisResult.url).hostname}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(analysisResult.analyzedAt).toLocaleString()}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Overview Dashboard */}
+          <SEODashboardOverview result={analysisResult} previousScore={previousScore} />
 
           {/* Detailed Analysis Tabs */}
-          <Tabs defaultValue="recommendations" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
-              <TabsTrigger value="recommendations">AI</TabsTrigger>
+          <Tabs defaultValue="issues" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
+              <TabsTrigger value="issues">Issues</TabsTrigger>
               <TabsTrigger value="technical">Technical</TabsTrigger>
               <TabsTrigger value="content">Content</TabsTrigger>
               <TabsTrigger value="speed">Speed</TabsTrigger>
               <TabsTrigger value="local">Local SEO</TabsTrigger>
               <TabsTrigger value="competitors">Competitors</TabsTrigger>
+              <TabsTrigger value="ai">AI Insights</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="recommendations" className="mt-4">
-              <AIRecommendationsCard 
-                recommendations={aiRecommendations} 
-                loading={isGeneratingAI}
-              />
+            <TabsContent value="issues" className="mt-4">
+              <SEOIssuesList result={analysisResult} />
             </TabsContent>
 
             <TabsContent value="technical" className="mt-4">
@@ -435,27 +358,17 @@ export function SEOAnalyzerPage() {
             </TabsContent>
 
             <TabsContent value="competitors" className="mt-4">
-              <CompetitorComparison yourUrl={url} competitorUrls={competitorUrls} />
+              <CompetitorComparison yourUrl={clinicWebsite} competitorUrls={competitorUrls} />
+            </TabsContent>
+
+            <TabsContent value="ai" className="mt-4">
+              <AIRecommendationsCard 
+                recommendations={aiRecommendations} 
+                loading={isGeneratingAI}
+              />
             </TabsContent>
           </Tabs>
         </>
-      )}
-
-      {/* Loading State */}
-      {isAnalyzing && (
-        <Card>
-          <CardContent className="py-12">
-            <div className="flex flex-col items-center justify-center gap-4">
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
-              <div className="text-center">
-                <p className="font-medium">Analyzing website...</p>
-                <p className="text-sm text-muted-foreground">
-                  This may take a few seconds
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       )}
     </div>
   );

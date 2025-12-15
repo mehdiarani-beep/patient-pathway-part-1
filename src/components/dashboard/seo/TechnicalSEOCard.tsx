@@ -16,13 +16,13 @@ function StatusIcon({ status }: { status: 'good' | 'warning' | 'error' }) {
 
 function StatusBadge({ status, label }: { status: 'good' | 'warning' | 'error'; label: string }) {
   const classes = {
-    good: 'bg-green-100 text-green-700 border-green-200',
-    warning: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-    error: 'bg-red-100 text-red-700 border-red-200',
+    good: 'bg-green-100 text-green-800 border-green-300',
+    warning: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+    error: 'bg-red-100 text-red-800 border-red-300',
   };
 
   return (
-    <Badge variant="outline" className={cn('text-xs', classes[status])}>
+    <Badge variant="outline" className={cn('text-xs font-medium', classes[status])}>
       {label}
     </Badge>
   );
@@ -39,11 +39,14 @@ export function TechnicalSEOCard({ data }: TechnicalSEOCardProps) {
   const descStatus = getMetaStatus(data.metaTags.description.value, 120, 160);
   const h1Status = data.headings.h1Count === 1 ? 'good' : data.headings.h1Count === 0 ? 'error' : 'warning';
   const altStatus = data.images.withoutAlt === 0 ? 'good' : data.images.withoutAlt <= 2 ? 'warning' : 'error';
+  const viewportStatus = data.metaTags.viewport?.exists ? 'good' : 'error';
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Technical SEO Analysis</CardTitle>
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg flex items-center gap-2">
+          Technical SEO Analysis
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Meta Tags Section */}
@@ -158,6 +161,33 @@ export function TechnicalSEOCard({ data }: TechnicalSEOCardProps) {
             <div className="p-3 rounded-lg text-center bg-muted/50">
               <p className="text-2xl font-bold text-gray-600">{data.links.nofollow}</p>
               <p className="text-xs text-muted-foreground">Nofollow</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile & Accessibility */}
+        <div>
+          <h4 className="font-medium mb-3 text-sm text-muted-foreground uppercase tracking-wide">Mobile Friendliness</h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <StatusIcon status={data.metaTags.viewport.exists ? 'good' : 'error'} />
+                <span className="text-sm">Viewport Meta Tag</span>
+              </div>
+              <StatusBadge 
+                status={data.metaTags.viewport.exists ? 'good' : 'error'} 
+                label={data.metaTags.viewport.exists ? 'Set' : 'Missing'} 
+              />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <StatusIcon status={data.metaTags.robots.isIndexable ? 'good' : 'warning'} />
+                <span className="text-sm">Indexable</span>
+              </div>
+              <StatusBadge 
+                status={data.metaTags.robots.isIndexable ? 'good' : 'warning'} 
+                label={data.metaTags.robots.isIndexable ? 'Yes' : 'No'} 
+              />
             </div>
           </div>
         </div>
