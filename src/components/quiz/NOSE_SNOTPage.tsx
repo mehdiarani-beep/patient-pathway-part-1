@@ -642,22 +642,18 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                     <ul className="space-y-1.5 sm:space-y-2 text-muted-foreground text-sm sm:text-base">
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>Septoplasty:</strong> Straighten deviated septum (5-7 days congestion, 1-2 weeks full recovery)</span>
+                        <span><strong>Septoplasty:</strong> Straighten deviated septum</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>Turbinate Reduction:</strong> Radiofrequency or in-office procedure to shrink enlarged turbinates</span>
+                        <span><strong>Turbinate Reduction:</strong> Shrink enlarged turbinates</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>VivAer®:</strong> In-office radiofrequency treatment (~20 min) to stiffen nasal valve</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>LATERA®:</strong> Absorbable nasal implant placed in-office to support lateral wall</span>
-                      </li>
-                    </ul>
-                  </div>
+                        <span><strong>Nasal Valve Repair:</strong> Strengthen weak valves</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -727,22 +723,18 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                     <ul className="space-y-1.5 sm:space-y-2 text-muted-foreground text-sm sm:text-base">
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>Medical Therapy:</strong> Saline irrigation, intranasal steroids, antibiotics for bacterial flares</span>
+                        <span><strong>Medical Therapy:</strong> Antibiotics, steroids, rinses</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>Balloon Sinuplasty:</strong> In-office procedure, return to normal in 24-48 hours</span>
+                        <span><strong>Balloon Sinuplasty:</strong> Open blocked sinuses</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>FESS (Endoscopic Surgery):</strong> 5-7 days to work, 4-6 weeks full healing</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span><strong>Biologics (Dupixent®):</strong> For chronic sinusitis with nasal polyps</span>
-                      </li>
-                    </ul>
-                  </div>
+                        <span><strong>Endoscopic Surgery:</strong> Remove polyps & diseased tissue</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -1018,28 +1010,14 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
               <Card>
                 <CardContent className="p-4 sm:p-6 md:p-8">
                   <h4 className="text-base sm:text-lg md:text-xl font-semibold mb-3 sm:mb-4 text-foreground">
-                    VivAer® Nasal Valve Treatment
+                    Nasal Valve Repair
                   </h4>
                   <p className="text-muted-foreground mb-3 sm:mb-4 text-xs sm:text-sm md:text-base">
-                    In-office radiofrequency procedure (~20 minutes) that stiffens nasal valve tissue without implants. 
-                    No external incisions, performed under local anesthesia.
+                    Strengthens the internal or external nasal valve to prevent collapse during breathing. 
+                    Can be combined with septoplasty for comprehensive correction.
                   </p>
                   <p className="text-xs sm:text-sm text-muted-foreground italic">
-                    Many patients breathe better within days; ideal for nasal valve collapse.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4 sm:p-6 md:p-8">
-                  <h4 className="text-base sm:text-lg md:text-xl font-semibold mb-3 sm:mb-4 text-foreground">
-                    LATERA® Nasal Implant
-                  </h4>
-                  <p className="text-muted-foreground mb-3 sm:mb-4 text-xs sm:text-sm md:text-base">
-                    FDA-cleared absorbable implant placed in-office to support the lateral nasal wall and prevent collapse during breathing.
-                  </p>
-                  <p className="text-xs sm:text-sm text-muted-foreground italic">
-                    Dissolves over 18 months while providing lasting structural support.
+                    Addresses weakness in nasal sidewalls; improves airflow during exercise.
                   </p>
                 </CardContent>
               </Card>
@@ -1116,11 +1094,11 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                     Balloon Sinuplasty
                   </h4>
                   <p className="text-muted-foreground mb-3 sm:mb-4 text-xs sm:text-sm md:text-base">
-                    A small, flexible balloon catheter gently opens narrowed sinus drainage pathways without removing tissue. 
-                    Can be performed in-office under local anesthesia.
+                    A small balloon gently opens narrowed sinus drainage pathways. Most people resume normal 
+                    activities within about 1–3 days.
                   </p>
                   <p className="text-xs sm:text-sm text-muted-foreground italic">
-                    Most patients return to normal activities within 24-48 hours.
+                    In-office procedure with minimal downtime.
                   </p>
                 </CardContent>
               </Card>
@@ -1131,11 +1109,11 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
                     Endoscopic Sinus Surgery (FESS)
                   </h4>
                   <p className="text-muted-foreground mb-3 sm:mb-4 text-xs sm:text-sm md:text-base">
-                    Functional Endoscopic Sinus Surgery uses a thin endoscope and specialized instruments to remove blockages 
-                    and diseased tissue. No external incisions, preserves healthy tissue.
+                    Outpatient surgery to open blocked sinus pathways, remove polyps, and improve drainage when 
+                    medical care isn't enough.
                   </p>
                   <p className="text-xs sm:text-sm text-muted-foreground italic">
-                    Return to work in 5-7 days; full healing 4-6 weeks. Nasal rinses important during recovery.
+                    Comprehensive solution for refractory cases.
                   </p>
                 </CardContent>
               </Card>
@@ -1518,132 +1496,200 @@ export const NOSE_SNOT = ({ doctorName, doctorImage, doctorIdparam, physicianId 
         </div>
       </section>
 
-      {/* FAQ Section - Two Condition-Based Columns */}
+      {/* FAQ and References */}
       <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-background">
         <div className="container mx-auto px-3 sm:px-4 md:px-6 max-w-6xl">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 sm:mb-10 md:mb-12 text-center text-foreground">
-            Frequently Asked Questions
-          </h2>
-          
-          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-10">
-            {/* Chronic Sinusitis FAQ Column */}
-            <div className="bg-card border rounded-xl p-4 sm:p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-xl">🩺</span>
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-foreground">Chronic Sinusitis</h3>
-              </div>
-              
-              <Accordion type="single" collapsible className="space-y-2">
-                <div className="mb-4">
-                  <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">Understanding the Condition</p>
-                  <AccordionItem value="cs-1" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">What is the difference between a cold, allergies, and a sinus infection?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">A cold is a viral infection that typically resolves in 7-10 days. Allergies cause sneezing and clear drainage triggered by environmental factors. A sinus infection causes facial pressure, thick discolored drainage, and symptoms lasting longer than 10 days.</AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="cs-2" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">What defines "chronic" sinusitis?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Sinus inflammation lasting 12 weeks or longer. Requires comprehensive evaluation including CT imaging and nasal endoscopy to determine the underlying cause.</AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="cs-3" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">Can sinusitis cause bad breath or tooth pain?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Yes. Infected mucus causes halitosis. Upper tooth pain is common because molar roots are close to maxillary sinuses—inflammation mimics a toothache.</AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="cs-4" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">How does an ENT diagnose chronic sinusitis?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Medical history, nasal endoscopy (thin camera to visualize sinuses), and CT scan imaging. Allergy testing may identify contributing factors.</AccordionContent>
-                  </AccordionItem>
-                </div>
-                <div className="mb-4">
-                  <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">Treatment Options</p>
-                  <AccordionItem value="cs-5" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">Do antibiotics work for chronic sinusitis?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Not always. Most is inflammatory, not bacterial. First-line: saline irrigation, intranasal corticosteroids, and addressing allergies.</AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="cs-6" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">What is Balloon Sinuplasty?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Minimally invasive procedure using a balloon catheter to open blocked sinus passages. Return to normal in 24-48 hours. Can be done in-office.</AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="cs-7" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">What is FESS and recovery time?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Functional Endoscopic Sinus Surgery removes blockages with no external incisions. Return to work in 5-7 days, full healing 4-6 weeks.</AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="cs-8" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">What are biologics for sinusitis?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Dupixent® targets inflammatory pathways in chronic sinusitis with nasal polyps. Can significantly reduce polyp size and symptoms.</AccordionContent>
-                  </AccordionItem>
-                </div>
+          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
+            {/* FAQ Column */}
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-foreground">
+                Frequently Asked Questions
+              </h2>
+              <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
+                <AccordionItem value="item-1" className="border rounded-lg px-3 sm:px-4 md:px-6 bg-card">
+                  <AccordionTrigger className="text-left hover:no-underline text-sm sm:text-base py-3 sm:py-4">
+                    Is this test a medical diagnosis?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
+                    No. The NOSE and SNOT-12 assessments are screening tools that help quantify your symptoms. 
+                    They are widely used in clinical practice but do not replace a thorough evaluation by 
+                    {isClinicLevel ? ' our specialists' : ` Dr. ${displayName}`}. Your test results will guide the consultation and help determine if 
+                    further imaging or examination is needed.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-2" className="border rounded-lg px-3 sm:px-4 md:px-6 bg-card">
+                  <AccordionTrigger className="text-left hover:no-underline text-sm sm:text-base py-3 sm:py-4">
+                    What's the difference between acute and chronic sinusitis?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
+                    Acute sinusitis typically lasts less than 4 weeks and often resolves with treatment. 
+                    Chronic rhinosinusitis persists for 12 weeks or longer, often requiring more comprehensive 
+                    evaluation and treatment approaches.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-3" className="border rounded-lg px-3 sm:px-4 md:px-6 bg-card">
+                  <AccordionTrigger className="text-left hover:no-underline text-sm sm:text-base py-3 sm:py-4">
+                    How do I know if my problem is nasal obstruction or sinus-related?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
+                    Nasal obstruction typically involves difficulty breathing through the nose, often worse when lying down or during exercise. 
+                    Sinus problems usually include facial pressure, thick discharge, smell loss, and recurring infections. However, many patients 
+                    have both issues. Our assessment helps identify which is the primary concern, and an in-person exam confirms the diagnosis.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-4" className="border rounded-lg px-3 sm:px-4 md:px-6 bg-card">
+                  <AccordionTrigger className="text-left hover:no-underline text-sm sm:text-base py-3 sm:py-4">
+                    Do I always need antibiotics for sinus infections?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
+                    Not always. Most chronic sinusitis is inflammatory, not bacterial. We reserve antibiotics 
+                    for clear acute bacterial flares. First-line treatment focuses on saline irrigation and 
+                    intranasal steroids.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-5" className="border rounded-lg px-3 sm:px-4 md:px-6 bg-card">
+                  <AccordionTrigger className="text-left hover:no-underline text-sm sm:text-base py-3 sm:py-4">
+                    Can allergies cause my nasal or sinus problems?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
+                    Yes. Allergies can contribute to both nasal inflammation and chronic sinus inflammation that blocks drainage. 
+                    When allergies are a factor, allergy-directed care (testing, avoidance, medications, or immunotherapy) 
+                    can significantly reduce symptoms and reinfection risk.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-6" className="border rounded-lg px-3 sm:px-4 md:px-6 bg-card">
+                  <AccordionTrigger className="text-left hover:no-underline text-sm sm:text-base py-3 sm:py-4">
+                    What treatments are available?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
+                    Treatment depends on your specific condition. For nasal obstruction, options include 
+                    septoplasty, turbinate reduction, and nasal valve repair. For sinus problems, we offer 
+                    medical therapy, balloon sinuplasty, and endoscopic sinus surgery. Many procedures can 
+                    be done in-office with minimal downtime.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-7" className="border rounded-lg px-3 sm:px-4 md:px-6 bg-card">
+                  <AccordionTrigger className="text-left hover:no-underline text-sm sm:text-base py-3 sm:py-4">
+                    When is surgery necessary?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
+                    Surgery is typically considered when medical therapy doesn't provide adequate relief, or when there are 
+                    structural issues (like severe deviated septum, nasal valve collapse, or polyps). Many procedures today 
+                    are minimally invasive and can be done in-office with quick recovery.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-8" className="border rounded-lg px-3 sm:px-4 md:px-6 bg-card">
+                  <AccordionTrigger className="text-left hover:no-underline text-sm sm:text-base py-3 sm:py-4">
+                    How long is recovery from nasal or sinus procedures?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
+                    It depends on the procedure. In-office treatments like VivAer® or balloon sinuplasty typically require 
+                    1–3 days. Septoplasty or endoscopic sinus surgery usually needs about 1–2 weeks of social downtime, 
+                    with full healing over several weeks. We'll discuss specific recovery expectations based on your treatment plan.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-9" className="border rounded-lg px-3 sm:px-4 md:px-6 bg-card">
+                  <AccordionTrigger className="text-left hover:no-underline text-sm sm:text-base py-3 sm:py-4">
+                    Will my insurance cover these treatments?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
+                    Most insurance plans cover medically necessary nasal and sinus treatments. We accept most major insurance 
+                    and will work with your provider to verify coverage. No referral is typically required.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-10" className="border rounded-lg px-3 sm:px-4 md:px-6 bg-card">
+                  <AccordionTrigger className="text-left hover:no-underline text-sm sm:text-base py-3 sm:py-4">
+                    What if I have both nasal and sinus symptoms?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-xs sm:text-sm md:text-base pb-3 sm:pb-4">
+                    This is very common! Many patients have both structural nasal issues and chronic sinusitis. 
+                    Dr. {displayName} will perform a comprehensive evaluation to identify all contributing factors 
+                    and may recommend combined treatments to address multiple issues simultaneously.
+                  </AccordionContent>
+                </AccordionItem>
               </Accordion>
             </div>
 
-            {/* Nasal Obstruction FAQ Column */}
-            <div className="bg-card border rounded-xl p-4 sm:p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
-                  <span className="text-xl">👃</span>
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-foreground">Nasal Obstruction</h3>
+            {/* References Column */}
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-foreground">
+                References
+              </h2>
+              <div className="space-y-3 sm:space-y-4 text-muted-foreground text-xs sm:text-sm md:text-base">
+                <p>
+                  1. <strong className="text-foreground">Exhale Sinus & Facial Pain Center</strong> — practice information:{" "}
+                  <a 
+                    href="https://www.exhalesinus.com/" 
+                    className="text-accent hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    https://www.exhalesinus.com/
+                  </a>
+                </p>
+                <p>
+                  2. <strong className="text-foreground">Mayo Clinic</strong> — Deviated septum & septoplasty:{" "}
+                  <a 
+                    href="https://www.mayoclinic.org/tests-procedures/septoplasty" 
+                    className="text-accent hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    https://www.mayoclinic.org/tests-procedures/septoplasty
+                  </a>
+                </p>
+                <p>
+                  3. <strong className="text-foreground">Aerin Medical</strong> — VivAer information:{" "}
+                  <a 
+                    href="https://www.aerinmedical.com/vivaer/" 
+                    className="text-accent hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    https://www.aerinmedical.com/vivaer/
+                  </a>
+                </p>
+                <p>
+                  4. <strong className="text-foreground">Stryker ENT</strong> — Balloon sinuplasty and sinus procedures:{" "}
+                  <a 
+                    href="https://ent.stryker.com/" 
+                    className="text-accent hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    https://ent.stryker.com/
+                  </a>
+                </p>
+                <p>
+                  5. <strong className="text-foreground">FDA label: SINUVA® (mometasone) implant</strong> — Adults with nasal 
+                  polyps after prior ethmoid surgery.
+                </p>
+                <p>
+                  6. <strong className="text-foreground">FDA/Label: Dupilumab (Dupixent®)</strong> — Add-on maintenance for 
+                  inadequately controlled CRSwNP (adults and adolescents ≥12 years).
+                </p>
+                <p>
+                  7. <strong className="text-foreground">American Academy of Otolaryngology</strong> — Patient education:{" "}
+                  <a 
+                    href="https://www.enthealth.org" 
+                    className="text-accent hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    https://www.enthealth.org
+                  </a>
+                </p>
               </div>
-              
-              <Accordion type="single" collapsible className="space-y-2">
-                <div className="mb-4">
-                  <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-2">Identifying the Cause</p>
-                  <AccordionItem value="no-1" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">Why is only one side of my nose blocked?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Often caused by a deviated septum. Other causes include enlarged turbinates or nasal polyps. Persistent one-sided blockage warrants ENT evaluation.</AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="no-2" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">What are the main causes?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3"><strong>Deviated Septum</strong> (crooked cartilage/bone), <strong>Turbinate Hypertrophy</strong> (enlarged nasal tissues), and <strong>Nasal Valve Collapse</strong> (weak sidewall). Many patients have a combination.</AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="no-3" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">What is Nasal Valve Collapse?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Nose sidewall caves inward during inhalation. Symptoms: difficulty breathing during exercise, nostril "pinching" sensation, improvement with nasal strips. Highly treatable.</AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="no-4" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">Can mouth breathing cause health problems?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Yes. Poor sleep, snoring, dry mouth, dental problems, facial development issues in children, and fatigue from non-restorative sleep.</AccordionContent>
-                  </AccordionItem>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-2">Surgical Options</p>
-                  <AccordionItem value="no-5" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">What is Septoplasty?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Straightens deviated septum through nostrils. Recovery: 5-7 days congestion, 1-2 weeks full activity. Most notice improvement within 2-4 weeks.</AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="no-6" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">What is Turbinate Reduction?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Shrinks enlarged turbinates. Radiofrequency reduction is in-office with minimal downtime. Often combined with septoplasty.</AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="no-7" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">What options exist for Nasal Valve Collapse?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3"><strong>VivAer®:</strong> In-office radiofrequency (~20 min). <strong>LATERA®:</strong> Absorbable implant for lateral wall support. Both highly effective.</AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="no-8" className="border rounded-lg px-3 sm:px-4 bg-background/50">
-                    <AccordionTrigger className="text-left hover:no-underline text-sm py-3">How long until I breathe normally after surgery?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-xs sm:text-sm pb-3">Most notice improvement in 1-2 weeks. Full results over 4-12 weeks. In-office procedures like VivAer® often show faster recovery.</AccordionContent>
-                  </AccordionItem>
-                </div>
-              </Accordion>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* References Section */}
-      <section className="py-8 sm:py-12 bg-muted/30">
-        <div className="container mx-auto px-3 sm:px-4 md:px-6 max-w-4xl">
-          <h2 className="text-xl sm:text-2xl font-bold mb-6 text-center text-foreground">References</h2>
-          <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 text-muted-foreground text-xs sm:text-sm">
-            <p>1. <strong className="text-foreground">Exhale Sinus</strong> — <a href="https://www.exhalesinus.com/" className="text-accent hover:underline" target="_blank" rel="noopener noreferrer">exhalesinus.com</a></p>
-            <p>2. <strong className="text-foreground">Mayo Clinic</strong> — <a href="https://www.mayoclinic.org/tests-procedures/septoplasty" className="text-accent hover:underline" target="_blank" rel="noopener noreferrer">Septoplasty</a></p>
-            <p>3. <strong className="text-foreground">Aerin Medical</strong> — <a href="https://www.aerinmedical.com/vivaer/" className="text-accent hover:underline" target="_blank" rel="noopener noreferrer">VivAer®</a></p>
-            <p>4. <strong className="text-foreground">Stryker ENT</strong> — <a href="https://ent.stryker.com/" className="text-accent hover:underline" target="_blank" rel="noopener noreferrer">Balloon Sinuplasty</a></p>
-            <p>5. <strong className="text-foreground">SINUVA®</strong> — FDA-approved implant</p>
-            <p>6. <strong className="text-foreground">Dupixent®</strong> — FDA add-on for CRSwNP</p>
-            <p>7. <strong className="text-foreground">AAO</strong> — <a href="https://www.enthealth.org" className="text-accent hover:underline" target="_blank" rel="noopener noreferrer">enthealth.org</a></p>
-            <p>8. <strong className="text-foreground">LATERA®</strong> — FDA-cleared nasal implant</p>
           </div>
         </div>
       </section>
