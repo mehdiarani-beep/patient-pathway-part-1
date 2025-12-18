@@ -1,5 +1,15 @@
 project_id = "drvitjhhggcywuepyncx"
 
+[auth]
+# Disable email confirmation for local testing
+enable_confirmations = false
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = false
+enable_confirmations = false
+
 [functions.submit-lead]
 verify_jwt = false
 
