@@ -1,11 +1,7 @@
 project_id = "drvitjhhggcywuepyncx"
 
-[auth]
-# Disable email confirmation for local testing
-enable_confirmations = false
-enable_signup = true
-
 [auth.email]
+# Disable email confirmation for local testing
 enable_signup = true
 double_confirm_changes = false
 enable_confirmations = false
