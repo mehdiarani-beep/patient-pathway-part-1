@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { LoginForm } from './LoginForm';
+import { SignUpForm } from './SignUpForm';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -10,6 +11,7 @@ export function AuthPage() {
   const [invitationToken, setInvitationToken] = useState<string | null>(null);
   const [invitationInfo, setInvitationInfo] = useState<any>(null);
   const [loadingInvitation, setLoadingInvitation] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   // Check for invitation token in URL
   useEffect(() => {
@@ -101,9 +103,18 @@ export function AuthPage() {
           </div>
         )}
 
-        <LoginForm 
-          invitationToken={invitationToken} 
-        />
+        {isSignUp ? (
+          <SignUpForm 
+            onToggleMode={() => setIsSignUp(false)}
+            invitationToken={invitationToken}
+            invitationInfo={invitationInfo}
+          />
+        ) : (
+          <LoginForm 
+            invitationToken={invitationToken}
+            onToggleMode={() => setIsSignUp(true)}
+          />
+        )}
       </div>
     </div>
   );

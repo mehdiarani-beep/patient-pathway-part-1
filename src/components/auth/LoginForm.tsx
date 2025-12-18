@@ -9,10 +9,11 @@ import { toast } from 'sonner';
 
 interface LoginFormProps {
   invitationToken?: string | null;
+  onToggleMode?: () => void;
 }
 
 export function LoginForm(props: LoginFormProps) {
-  const { invitationToken } = props;
+  const { invitationToken, onToggleMode } = props;
   // Login form for existing users only
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -303,7 +304,7 @@ export function LoginForm(props: LoginFormProps) {
             {loading ? 'Signing in...' : 'Sign in'}
           </Button>
           
-          <div className="text-center">
+          <div className="text-center space-y-2">
             <button
               type="button"
               onClick={() => setForgotPasswordMode(true)}
@@ -311,6 +312,18 @@ export function LoginForm(props: LoginFormProps) {
             >
               Forgot your password?
             </button>
+            {onToggleMode && (
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <button
+                  type="button"
+                  onClick={onToggleMode}
+                  className="text-[#0E7C9D] hover:underline font-medium"
+                >
+                  Sign up
+                </button>
+              </p>
+            )}
           </div>
         </form>
         </>
